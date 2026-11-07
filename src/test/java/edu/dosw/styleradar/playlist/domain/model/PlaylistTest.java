@@ -27,8 +27,18 @@ class PlaylistTest {
     }
 
     @Test
+    void constructorPorDefecto() {
+        Playlist p = new Playlist();
+        assertThat(p.getVisibilidad()).isEqualTo(VisibilidadPlaylist.PUBLICA);
+        assertThat(p.getEstilo()).isEqualTo(Estilo.URBANO);
+        assertThat(p.isDestacada()).isFalse();
+    }
+
+    @Test
     void crearPlaylistUsuarioInvalidoLanzaExcepcion() {
         assertThatThrownBy(() -> Playlist.crear(null, "Test", null, VisibilidadPlaylist.PUBLICA, Estilo.CASUAL))
+                .isInstanceOf(DomainException.class);
+        assertThatThrownBy(() -> Playlist.crear(0L, "Test", null, VisibilidadPlaylist.PUBLICA, Estilo.CASUAL))
                 .isInstanceOf(DomainException.class);
     }
 
@@ -64,6 +74,13 @@ class PlaylistTest {
     }
 
     @Test
+    void agregarPrendaNulaLanzaExcepcion() {
+        Playlist p = Playlist.crear(10L, "Colección", null, VisibilidadPlaylist.PUBLICA, Estilo.CASUAL);
+        assertThatThrownBy(() -> p.agregarPrenda(null))
+                .isInstanceOf(DomainException.class);
+    }
+
+    @Test
     void agregarPrendaDuplicadaLanzaExcepcion() {
         Playlist p = Playlist.crear(10L, "Colección", null, VisibilidadPlaylist.PUBLICA, Estilo.CASUAL);
         p.agregarPrenda(new PrendaSnapshot(1L, "Chaqueta", Instant.now()));
@@ -95,6 +112,7 @@ class PlaylistTest {
 
         boolean segunda = p.desvincularPrendaSilencioso(50L);
         assertThat(segunda).isFalse();
+        assertThat(p.desvincularPrendaSilencioso(null)).isFalse();
     }
 
     @Test
@@ -110,6 +128,9 @@ class PlaylistTest {
         assertThat(p.getGuardadosCount()).isEqualTo(1);
         p.alternarGuardado(200L);
         assertThat(p.getGuardadosCount()).isZero();
+
+        assertThatThrownBy(() -> p.alternarLike(null)).isInstanceOf(DomainException.class);
+        assertThatThrownBy(() -> p.alternarGuardado(null)).isInstanceOf(DomainException.class);
     }
 
     @Test
@@ -125,9 +146,43 @@ class PlaylistTest {
     void validarAccesoLecturaPrivada() {
         Playlist p = Playlist.crear(10L, "Colección Privada", null, VisibilidadPlaylist.PRIVADA, Estilo.FORMAL);
 
-        p.validarAccesoLectura(10L); // Creador puede
-        assertThatThrownBy(() -> p.validarAccesoLectura(99L)) // Otro usuario falla
+        p.validarAccesoLectura(10L);
+        assertThatThrownBy(() -> p.validarAccesoLectura(99L))
                 .isInstanceOf(AccesoDenegadoPlaylistException.class);
+    }
+
+    @Test
+    void validarAccesoLecturaPublica() {
+        Playlist p = Playlist.crear(10L, "Colección Pública", null, VisibilidadPlaylist.PUBLICA, Estilo.FORMAL);
+        p.validarAccesoLectura(null);
+        p.validarAccesoLectura(99L);
+        assertThat(p.getNombre()).isEqualTo("Colección Pública");
+    }
+
+    @Test
+    void editarLookbookExitoso() {
+        Playlist p = Playlist.crear(10L, "Original", null, VisibilidadPlaylist.PUBLICA, Estilo.URBANO);
+        p.editar(10L, "Modificado", "Desc", VisibilidadPlaylist.PRIVADA, Estilo.FORMAL);
+
+        assertThat(p.getNombre()).isEqualTo("Modificado");
+        assertThat(p.getVisibilidad()).isEqualTo(VisibilidadPlaylist.PRIVADA);
+        assertThat(p.getEstilo()).isEqualTo(Estilo.FORMAL);
+    }
+
+    @Test
+    void editarLookbookUsuarioAjenoLanzaExcepcion() {
+        Playlist p = Playlist.crear(10L, "Original", null, VisibilidadPlaylist.PUBLICA, Estilo.URBANO);
+        assertThatThrownBy(() -> p.editar(99L, "Modificado", null, null, null))
+                .isInstanceOf(AccesoDenegadoPlaylistException.class);
+    }
+
+    @Test
+    void retirarPrendaInvalidaLanzaExcepciones() {
+        Playlist p = Playlist.crear(10L, "Original", null, VisibilidadPlaylist.PUBLICA, Estilo.URBANO);
+        assertThatThrownBy(() -> p.retirarPrenda(1L, 99L))
+                .isInstanceOf(AccesoDenegadoPlaylistException.class);
+        assertThatThrownBy(() -> p.retirarPrenda(null, 10L))
+                .isInstanceOf(DomainException.class);
     }
 
     @Test
@@ -143,5 +198,22 @@ class PlaylistTest {
         assertThat(p.getTotalPrendas()).isEqualTo(1);
         assertThat(p.getLikesCount()).isEqualTo(1);
         assertThat(p.getGuardadosCount()).isEqualTo(1);
+    }
+
+    @Test
+    void settersYGetters() {
+        Playlist p = new Playlist();
+        p.setId(2L);
+        p.setUsuarioId(5L);
+        p.setVisibilidad(VisibilidadPlaylist.PRIVADA);
+        p.setEstilo(Estilo.FORMAL);
+        p.setDestacada(true);
+        p.setFechaActualizacion(Instant.now());
+
+        assertThat(p.getId()).isEqualTo(2L);
+        assertThat(p.getUsuarioId()).isEqualTo(5L);
+        assertThat(p.getVisibilidad()).isEqualTo(VisibilidadPlaylist.PRIVADA);
+        assertThat(p.getEstilo()).isEqualTo(Estilo.FORMAL);
+        assertThat(p.isDestacada()).isTrue();
     }
 }

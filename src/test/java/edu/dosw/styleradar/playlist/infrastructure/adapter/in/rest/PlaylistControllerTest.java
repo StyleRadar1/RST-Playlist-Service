@@ -60,6 +60,15 @@ class PlaylistControllerTest {
     }
 
     @Test
+    void obtenerPublicasYPopulares() {
+        when(playlistUseCase.obtenerPublicas()).thenReturn(List.of(sampleResponse));
+        when(playlistUseCase.obtenerPopulares(0, 20)).thenReturn(new PageResponse<>(List.of(sampleResponse), 0, 20, 1L, 1, true, true));
+
+        assertThat(controller.obtenerPublicas().getBody()).hasSize(1);
+        assertThat(controller.obtenerPopulares(0, 20).getBody().content()).hasSize(1);
+    }
+
+    @Test
     void obtenerDestacadasRetornaLista() {
         when(playlistUseCase.obtenerDestacadas()).thenReturn(List.of(sampleResponse));
 
@@ -69,12 +78,39 @@ class PlaylistControllerTest {
     }
 
     @Test
-    void agregarPrendaRetorna200() {
-        when(playlistUseCase.agregarPrenda(eq(10L), eq(1L), any())).thenReturn(sampleResponse);
+    void editarPlaylistRetorna200() {
+        when(playlistUseCase.editar(eq(10L), eq(1L), any())).thenReturn(sampleResponse);
 
-        ResponseEntity<PlaylistResponse> response = controller.agregarPrenda(10L, 1L, new AgregarPrendaRequest(5L, "Gorra"));
+        ResponseEntity<PlaylistResponse> response = controller.editar(10L, 1L, new EditarPlaylistRequest("Nuevo", "Desc", VisibilidadPlaylist.PUBLICA, Estilo.CASUAL));
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
+    void destacarYQuitarDestacado() {
+        when(playlistUseCase.destacar(10L, 1L)).thenReturn(sampleResponse);
+        when(playlistUseCase.quitarDestacado(10L, 1L)).thenReturn(sampleResponse);
+
+        assertThat(controller.destacar(10L, 1L).getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(controller.quitarDestacado(10L, 1L).getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
+    void agregarYRetirarPrenda() {
+        when(playlistUseCase.agregarPrenda(eq(10L), eq(1L), any())).thenReturn(sampleResponse);
+        when(playlistUseCase.retirarPrenda(10L, 1L, 5L)).thenReturn(sampleResponse);
+
+        assertThat(controller.agregarPrenda(10L, 1L, new AgregarPrendaRequest(5L, "Gorra")).getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(controller.retirarPrenda(10L, 1L, 5L).getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
+    void alternarLikeYGuardado() {
+        when(playlistUseCase.alternarLike(10L, 1L)).thenReturn(sampleResponse);
+        when(playlistUseCase.alternarGuardado(10L, 1L)).thenReturn(sampleResponse);
+
+        assertThat(controller.alternarLike(10L, 1L).getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(controller.alternarGuardado(10L, 1L).getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
     @Test
@@ -83,5 +119,14 @@ class PlaylistControllerTest {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
         verify(playlistUseCase).eliminar(10L, 1L);
+    }
+
+    @Test
+    void misPlaylistsYMisGuardadas() {
+        when(playlistUseCase.obtenerPorUsuario(10L)).thenReturn(List.of(sampleResponse));
+        when(playlistUseCase.obtenerGuardadas(10L)).thenReturn(List.of(sampleResponse));
+
+        assertThat(controller.misPlaylists(10L).getBody()).hasSize(1);
+        assertThat(controller.misGuardadas(10L).getBody()).hasSize(1);
     }
 }

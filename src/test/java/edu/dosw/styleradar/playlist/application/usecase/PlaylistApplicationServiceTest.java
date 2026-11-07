@@ -74,6 +74,46 @@ class PlaylistApplicationServiceTest {
     }
 
     @Test
+    void obtenerPublicasYPorUsuario() {
+        Playlist p = Playlist.crear(10L, "Nombre", "Desc", VisibilidadPlaylist.PUBLICA, Estilo.CASUAL);
+        p.setId(1L);
+        when(repository.findAllPublicas()).thenReturn(List.of(p));
+        when(repository.findByUsuarioId(10L)).thenReturn(List.of(p));
+        when(repository.findByGuardadosUsuarioId(10L)).thenReturn(List.of(p));
+        when(repository.findDestacadas()).thenReturn(List.of(p));
+
+        assertThat(service.obtenerPublicas()).hasSize(1);
+        assertThat(service.obtenerPorUsuario(10L)).hasSize(1);
+        assertThat(service.obtenerGuardadas(10L)).hasSize(1);
+        assertThat(service.obtenerDestacadas()).hasSize(1);
+    }
+
+    @Test
+    void obtenerPopularesPaginadas() {
+        Playlist p = Playlist.crear(10L, "Popular", null, VisibilidadPlaylist.PUBLICA, Estilo.URBANO);
+        p.setId(1L);
+        when(repository.findPopulares(0, 10)).thenReturn(List.of(p));
+        when(repository.countPublicas()).thenReturn(1L);
+
+        PageResponse<PlaylistResponse> page = service.obtenerPopulares(0, 10);
+
+        assertThat(page.content()).hasSize(1);
+        assertThat(page.totalElements()).isEqualTo(1L);
+    }
+
+    @Test
+    void editarPlaylistExitoso() {
+        Playlist p = Playlist.crear(10L, "Original", null, VisibilidadPlaylist.PUBLICA, Estilo.CASUAL);
+        p.setId(1L);
+        when(repository.findById(1L)).thenReturn(Optional.of(p));
+        when(repository.save(any())).thenReturn(p);
+
+        PlaylistResponse res = service.editar(10L, 1L, new EditarPlaylistRequest("Nuevo", "Desc", VisibilidadPlaylist.PRIVADA, Estilo.FORMAL));
+
+        assertThat(res.nombre()).isEqualTo("Nuevo");
+    }
+
+    @Test
     void destacarValidaMaximo3Playlists() {
         Playlist p = Playlist.crear(10L, "Nombre", null, VisibilidadPlaylist.PUBLICA, Estilo.URBANO);
         p.setId(1L);
@@ -96,6 +136,10 @@ class PlaylistApplicationServiceTest {
 
         assertThat(res.destacada()).isTrue();
         verify(eventPublisher).publicarPlaylistDestacadaActualizada(1L, true);
+
+        // Si ya es destacada, no vuelve a guardar
+        PlaylistResponse res2 = service.destacar(10L, 1L);
+        assertThat(res2.destacada()).isTrue();
     }
 
     @Test
@@ -110,6 +154,10 @@ class PlaylistApplicationServiceTest {
 
         assertThat(res.destacada()).isFalse();
         verify(eventPublisher).publicarPlaylistDestacadaActualizada(1L, false);
+
+        // Si ya no es destacada, no vuelve a guardar
+        PlaylistResponse res2 = service.quitarDestacado(10L, 1L);
+        assertThat(res2.destacada()).isFalse();
     }
 
     @Test
@@ -149,6 +197,17 @@ class PlaylistApplicationServiceTest {
         service.alternarGuardado(10L, 1L);
 
         verify(repository, times(2)).save(p);
+    }
+
+    @Test
+    void eliminarExitoso() {
+        Playlist p = Playlist.crear(10L, "A Borrar", null, VisibilidadPlaylist.PUBLICA, Estilo.CASUAL);
+        p.setId(1L);
+        when(repository.findById(1L)).thenReturn(Optional.of(p));
+
+        service.eliminar(10L, 1L);
+
+        verify(repository).delete(1L);
     }
 
     @Test
