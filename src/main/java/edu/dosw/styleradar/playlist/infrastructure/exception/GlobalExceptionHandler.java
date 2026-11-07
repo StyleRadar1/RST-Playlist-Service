@@ -1,6 +1,8 @@
 package edu.dosw.styleradar.playlist.infrastructure.exception;
 
+import edu.dosw.styleradar.playlist.domain.exception.AccesoDenegadoPlaylistException;
 import edu.dosw.styleradar.playlist.domain.exception.DomainException;
+import edu.dosw.styleradar.playlist.domain.exception.LimiteDestacadasSuperadoException;
 import edu.dosw.styleradar.playlist.domain.exception.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -17,6 +19,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ResourceNotFoundException.class)
     public ProblemDetail handleNotFound(ResourceNotFoundException ex) {
         return problem(HttpStatus.NOT_FOUND, "Recurso no encontrado", ex.getMessage());
+    }
+
+    @ExceptionHandler(LimiteDestacadasSuperadoException.class)
+    public ProblemDetail handleLimiteDestacadas(LimiteDestacadasSuperadoException ex) {
+        return problem(HttpStatus.CONFLICT, "Límite de destacadas superado", ex.getMessage());
+    }
+
+    @ExceptionHandler(AccesoDenegadoPlaylistException.class)
+    public ProblemDetail handleAccesoDenegado(AccesoDenegadoPlaylistException ex) {
+        return problem(HttpStatus.FORBIDDEN, "Acceso denegado", ex.getMessage());
     }
 
     @ExceptionHandler(DomainException.class)

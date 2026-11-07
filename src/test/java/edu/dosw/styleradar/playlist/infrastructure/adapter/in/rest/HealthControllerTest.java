@@ -12,17 +12,13 @@ class HealthControllerTest {
 
     @Test
     void healthReturnsServiceUp() {
-        // Arrange
         HealthController controller = new HealthController();
-
-        // Act
         ResponseEntity<Map<String, Object>> response = controller.health();
 
-        // Assert
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody())
                 .containsEntry("status", "UP")
                 .containsEntry("service", "ms-playlist")
-                .containsEntry("port", 8087);
+                .containsEntry("port", 8260);
     }
 }
