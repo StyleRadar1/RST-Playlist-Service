@@ -8,7 +8,7 @@
 
   <p align="center">
     <img src="https://img.shields.io/badge/BOUNDED_CONTEXT-Playlists_de_estilo-12063A?style=for-the-badge" alt="Context" />
-    <img src="https://img.shields.io/badge/PUERTO_OFICIAL-8087-5600EF?style=for-the-badge" alt="Port" />
+    <img src="https://img.shields.io/badge/PUERTO_OFICIAL-8260-5600EF?style=for-the-badge" alt="Port" />
     <img src="https://img.shields.io/badge/ARQUITECTURA-HEXAGONAL-16A34A?style=for-the-badge" alt="Hexagonal" />
   </p>
 
@@ -63,7 +63,7 @@
 
 * **Identificador de Servicio:** `ms-playlist`
 * **Paquete Arquitectónico:** `Paquete 2: Catálogo`
-* **Puerto de Escucha Oficial:** `8087`
+* **Puerto de Escucha Oficial:** `8260`
 * **Base de Datos Asignada:** `PostgreSQL 15.8` (`styleradar_playlist`), aislada bajo el patrón *Database-per-Service*.
 * **Bounded Context:** `Playlists de estilo`
 
@@ -74,8 +74,8 @@ Este microservicio encapsula exclusivamente la lógica de negocio de las playlis
 | Qué HACE este Microservicio (Alcance) | Qué NO HACE este Microservicio (Límites) |
 | :--- | :--- |
 | • Crea y configura playlists públicas o privadas. | • NO autentica usuarios. |
-| • Agrega y retira prendas de una playlist. | • NO publica ni edita prendas (delegado a `ms-item-catalogo` en `:8085`). |
-| • Registra los Me gusta y las playlists guardadas. | • NO gestiona el inventario por talla (delegado a `ms-inventario` en `:8084`). |
+| • Agrega y retira prendas de una playlist. | • NO publica ni edita prendas (delegado a `ms-item-catalogo` en `:8220`). |
+| • Registra los Me gusta y las playlists guardadas. | • NO gestiona el inventario por talla (delegado a `ms-inventario` en `:8200`). |
 | • Destaca las playlists con mayor interacción. | • NO accede directamente a bases de datos de otros microservicios. |
 
 ### Arquetipos de Moda y Personajes de StyleRadar
@@ -175,11 +175,15 @@ flowchart TD
           <img src="https://img.shields.io/badge/DIAGRAMA-COMPONENTES-12063A?style=for-the-badge" alt="Diagrama de componentes" /><br />
           <strong><font color="#5600EF" size="3">DIAGRAMA DE COMPONENTES ESPECÍFICO (HEXAGONAL)</font></strong>
         </p>
-        <p><em>Diagrama pendiente.</em></p>
+        <p>
+          <img src="docs/evidencias/StyleRadar-ComponentesPlayList.png" width="100%" alt="Diagrama de componentes" /><br />
+        </p>
       </td>
     </tr>
   </table>
 </div>
+
+El diagrama muestra el servicio en arquitectura hexagonal. Las peticiones llegan desde el API Gateway al controller REST de playlists y los eventos del catálogo llegan por RabbitMQ a `CatalogoEventsConsumer` (adaptadores de entrada), que solo conocen el caso de uso (puerto de entrada). La lógica de aplicación usa los puertos de salida para guardar las playlists en PostgreSQL (`PlaylistRepositoryPort`), publicar sus eventos en RabbitMQ (`PlaylistEventPublisherPort`) y mantener en Redis las playlists destacadas (`PlaylistCachePort`). Las dependencias apuntan hacia adentro, por lo que el dominio no conoce Spring, JPA ni HTTP.
 
 ### Diagrama de Clases
 
@@ -191,11 +195,15 @@ flowchart TD
           <img src="https://img.shields.io/badge/DIAGRAMA-CLASES-12063A?style=for-the-badge" alt="Diagrama de clases" /><br />
           <strong><font color="#5600EF" size="3">DIAGRAMA DE CLASES DEL DOMINIO</font></strong>
         </p>
-        <p><em>Diagrama pendiente.</em></p>
+        <p>
+          <img src="docs/evidencias/StyleRadar-DiagramadeClasesPlaylist.drawio.png" width="100%" alt="Diagrama de clases" /><br />
+        </p>
       </td>
     </tr>
   </table>
 </div>
+
+El agregado principal es `Playlist`, que guarda el nombre, la descripción, la `VisibilidadPlaylist` (pública o privada), el `EstiloMusical` y las prendas asociadas como `PrendaSnapshot`, una copia del nombre de la prenda tomada del catálogo. Los métodos del agregado cubren crear, destacar y quitar de destacadas (SR-RF-72), asociar y retirar prendas (SR-RF-70), y alternar el me gusta y el guardado de cada usuario (SR-RF-71). Antes de modificar o mostrar una playlist se valida que el usuario sea su dueño o que la playlist sea pública.
 
 ### Diagrama de Base de Datos
 
@@ -207,11 +215,15 @@ flowchart TD
           <img src="https://img.shields.io/badge/DIAGRAMA-BASE_DE_DATOS-12063A?style=for-the-badge" alt="Diagrama de base de datos" /><br />
           <strong><font color="#5600EF" size="3">MODELO DE DATOS (POSTGRESQL)</font></strong>
         </p>
-        <p><em>Diagrama pendiente.</em></p>
+        <p>
+          <img src="docs/evidencias/StyleRadar-DiagramaEventoRelacionPlaylist.drawio.png" width="100%" alt="Diagrama de base de datos" /><br />
+        </p>
       </td>
     </tr>
   </table>
 </div>
+
+Se usa PostgreSQL porque las playlists, sus prendas y las interacciones de los usuarios tienen relaciones fijas. La tabla `playlist` guarda los datos de cada playlist y si está destacada; `playlist_prendas` guarda las prendas asociadas, y `playlist_likes` y `playlist_guardados` registran qué usuarios dieron me gusta o guardaron cada playlist, todas en relación uno a muchos con `playlist`. Las prendas y los usuarios se guardan solo por su identificador, ya que pertenecen a otros servicios (*Database-per-Service*).
 
 ### Estructura Oficial de Paquetes en `src/main/java/`
 
@@ -264,9 +276,9 @@ src/main/java/edu/dosw/styleradar/playlist/
 | :--- | :---: | :--- | :--- | :--- | :--- |
 | **Producción (PROD)** | Próximo Sprint | Despliegue productivo de StyleRadar | Próximo Sprint | Próximo Sprint | Próximo Sprint |
 | **Calidad / Pruebas (QA)** | Próximo Sprint | Pruebas integradas del Sprint | Próximo Sprint | Próximo Sprint | Próximo Sprint |
-| **Desarrollo Local (DEV)** | Local | Entorno de desarrollo local | `http://localhost:8087/api/v1` | [Swagger UI Local](http://localhost:8087/api/v1/swagger-ui.html) | [`/health`](http://localhost:8087/api/v1/health) |
+| **Desarrollo Local (DEV)** | Local | Entorno de desarrollo local | `http://localhost:8260/api/v1` | [Swagger UI Local](http://localhost:8260/api/v1/swagger-ui.html) | [`/health`](http://localhost:8260/api/v1/health) |
 
-* **Especificación OpenAPI:** `http://localhost:8087/api/v1/v3/api-docs`
+* **Especificación OpenAPI:** `http://localhost:8260/api/v1/v3/api-docs`
 
 <div align="center">
   <table width="100%" style="margin: 18px 0; border: 2px dashed #5600EF; border-radius: 8px; background-color: #FBFBFE;">
@@ -286,9 +298,24 @@ src/main/java/edu/dosw/styleradar/playlist/
 
 ### Tabla de Endpoints Expuestos
 
-|  Método  | Endpoint          | Descripción         | Rol Requerido | Códigos HTTP |
-| :------: | :---------------- | :------------------ | :------------ | :----------: |
-|  `GET`   | `/api/v1/health`  | Estado del servicio | Público       |    `200`     |
+| Método | Endpoint | Descripción | Rol Requerido | Códigos HTTP |
+| :---: | :--- | :--- | :--- | :---: |
+| `POST` | `/api/v1/playlists` | Crear una playlist | Autenticado | `201`, `400` |
+| `GET` | `/api/v1/playlists` | Consultar las playlists públicas | Público | `200` |
+| `GET` | `/api/v1/playlists/{id}` | Consultar el detalle de una playlist | Público / Autenticado | `200`, `403`, `404` |
+| `GET` | `/api/v1/playlists/destacadas` | Consultar las playlists destacadas (SR-RF-72) | Público | `200` |
+| `GET` | `/api/v1/playlists/populares` | Consultar las playlists más populares, paginadas | Público | `200` |
+| `GET` | `/api/v1/playlists/me` | Consultar las playlists creadas por el usuario | Autenticado | `200` |
+| `GET` | `/api/v1/playlists/me/guardadas` | Consultar las playlists guardadas por el usuario | Autenticado | `200` |
+| `PUT` | `/api/v1/playlists/{id}` | Editar una playlist propia (SR-RF-69) | Dueño | `200`, `400`, `403` |
+| `DELETE` | `/api/v1/playlists/{id}` | Eliminar una playlist propia | Dueño | `204`, `403`, `404` |
+| `PUT` | `/api/v1/playlists/{id}/destacar` | Destacar una playlist (SR-RF-72) | `ADMIN` | `200`, `409` |
+| `DELETE` | `/api/v1/playlists/{id}/destacar` | Quitar una playlist de destacadas | `ADMIN` | `200` |
+| `POST` | `/api/v1/playlists/{id}/prendas` | Agregar una prenda a la playlist (SR-RF-70) | Dueño | `200`, `404`, `422` |
+| `DELETE` | `/api/v1/playlists/{id}/prendas/{prendaId}` | Retirar una prenda de la playlist (SR-RF-70) | Dueño | `200`, `404` |
+| `POST` | `/api/v1/playlists/{id}/like` | Dar o quitar me gusta (SR-RF-71) | Autenticado | `200`, `404` |
+| `POST` | `/api/v1/playlists/{id}/guardar` | Guardar o quitar de guardadas (SR-RF-71) | Autenticado | `200`, `404` |
+| `GET` | `/api/v1/health` | Estado del servicio | Público | `200` |
 
 ---
 
@@ -357,7 +384,7 @@ docker compose up -d --build
 ### Comprobación de Salud (Health Check)
 
 ```bash
-curl http://localhost:8087/api/v1/health
+curl http://localhost:8260/api/v1/health
 ```
 
 <div align="center">
@@ -386,7 +413,7 @@ Las variables se definen en `.env`, que no se versiona. La plantilla `.env.examp
 
 | Variable | Descripción | Valor por Defecto |
 | :--- | :--- | :--- |
-| `SERVER_PORT` | Puerto del servicio | `8087` |
+| `SERVER_PORT` | Puerto del servicio | `8260` |
 | `DB_HOST` | Host de PostgreSQL | `localhost` |
 | `DB_PORT` | Puerto de PostgreSQL | `5432` |
 | `DB_NAME` | Nombre de la base de datos | `styleradar_playlist` |
@@ -530,6 +557,7 @@ Los tipos más usados son `feat`, `fix`, `test`, `docs`, `refactor` y `chore`.
 
 * **Épica del Microservicio:** [RES-4 · ms-playlist](https://mail-team-nyjtgqcj.atlassian.net/browse/RES-4)
 * **Tablero del Equipo:** [Restrepo-StyleRadar (RES)](https://mail-team-nyjtgqcj.atlassian.net/jira/software/projects/RES/boards/76)
+* **Documento Técnico del Servicio:** [Documento técnico de ms-playlist](docs/DocumentoTecnicoPlaylist.html)
 
 <div align="center">
   <table width="100%" style="margin: 18px 0; border: 2px dashed #5600EF; border-radius: 8px; background-color: #FBFBFE;">
