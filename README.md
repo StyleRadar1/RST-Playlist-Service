@@ -7,31 +7,28 @@
   <h1>STYLE<font color="#5600EF">RADAR</font> &nbsp;·&nbsp; <code>ms-playlist</code></h1>
 
   <p align="center">
-    <img src="https://img.shields.io/badge/BOUNDED_CONTEXT-Playlists%20de%20Estilo-12063A?style=for-the-badge" alt="Context" />
+    <img src="https://img.shields.io/badge/BOUNDED_CONTEXT-Playlists_de_estilo-12063A?style=for-the-badge" alt="Context" />
     <img src="https://img.shields.io/badge/PUERTO_OFICIAL-8260-5600EF?style=for-the-badge" alt="Port" />
     <img src="https://img.shields.io/badge/ARQUITECTURA-HEXAGONAL-16A34A?style=for-the-badge" alt="Hexagonal" />
   </p>
 
   <p align="center">
     <strong><font color="#5600EF">Descubre tu estilo. En tu ciudad.</font></strong><br />
-    <em>Curaduría de estilo y cultura urbana vinculando prendas locales a colecciones temáticas y lookbooks de arquetipo.</em>
+    <em>Plataforma de moda local con inventario multi-sede geolocalizado en tiempo real y probador virtual para Bogotá.</em>
   </p>
 
   <p align="center">
-    <a href="https://styleradar-backend-prod.azurewebsites.net/swagger-ui/index.html">
-      <img src="https://img.shields.io/badge/PROD-Active-16A34A?style=for-the-badge&logo=azure-app-services&logoColor=white" alt="PROD Deployment" />
+    <a href="https://github.com/StyleRadar1/RST-Playlist-Service/actions/workflows/ci.yml">
+      <img src="https://github.com/StyleRadar1/RST-Playlist-Service/actions/workflows/ci.yml/badge.svg?branch=develop" alt="CI" />
     </a>
-    <a href="https://styleradar-backend-qa.azurewebsites.net/swagger-ui/index.html">
-      <img src="https://img.shields.io/badge/QA-Active-5600EF?style=for-the-badge&logo=azure-app-services&logoColor=white" alt="QA Deployment" />
-    </a>
-    <a href="target/site/jacoco/index.html">
+    <a href="#9-pruebas-y-cobertura">
       <img src="https://img.shields.io/badge/JaCoCo_Coverage-%E2%89%A5_85%25-16A34A?style=for-the-badge&logo=codecov&logoColor=white" alt="Coverage" />
     </a>
     <a href="#6-tecnologías-y-dependencias">
       <img src="https://img.shields.io/badge/Java-21_LTS-12063A?style=for-the-badge&logo=openjdk&logoColor=C4B5FD" alt="Java 21" />
     </a>
     <a href="#6-tecnologías-y-dependencias">
-      <img src="https://img.shields.io/badge/Spring_Boot-3.3.x-12063A?style=for-the-badge&logo=spring&logoColor=C4B5FD" alt="Spring Boot 3.3" />
+      <img src="https://img.shields.io/badge/Spring_Boot-3.3.4-12063A?style=for-the-badge&logo=spring&logoColor=C4B5FD" alt="Spring Boot 3.3.4" />
     </a>
     <a href="#7-cómo-ejecutar-local-y-con-docker">
       <img src="https://img.shields.io/badge/Docker-OCI_Container-12063A?style=for-the-badge&logo=docker&logoColor=C4B5FD" alt="Docker OCI" />
@@ -39,6 +36,7 @@
   </p>
 
 </div>
+
 
 ---
 
@@ -63,22 +61,22 @@
 
 ## <img src="https://img.shields.io/badge/01-5600EF?style=for-the-badge" height="20" align="absmiddle" /> 1. NOMBRE DEL SERVICIO Y SU BOUNDED CONTEXT
 
-* **Identificador de Servicio:** `ms-playlist` (`RST-Playlist-Service`)
-* **Paquete Arquitectónico:** `Paquete 2: Catálogo y Experiencia de Usuario`
+* **Identificador de Servicio:** `ms-playlist`
+* **Paquete Arquitectónico:** `Paquete 2: Catálogo`
 * **Puerto de Escucha Oficial:** `8260`
-* **Base de Datos Asignada:** `PostgreSQL 16` (`playlist_db`), aislada bajo el patrón *Database-per-Service*.
-* **Bounded Context:** `Playlists de Estilo y Curaduría de Moda (Lookbooks)`
+* **Base de Datos Asignada:** `PostgreSQL 15.8` (`styleradar_playlist`), aislada bajo el patrón *Database-per-Service*.
+* **Bounded Context:** `Playlists de estilo`
 
 ### Responsabilidades del Dominio
 
-Este microservicio encapsula exclusivamente la lógica de negocio correspondiente a la curaduría de estilo, colecciones temáticas de ropa (Lookbooks) y outfits asociados a arquetipos de moda (representado por Mateo - Calle).
+Este microservicio encapsula exclusivamente la lógica de negocio de las playlists de estilo creadas por los usuarios compradores de StyleRadar.
 
 | Qué HACE este Microservicio (Alcance) | Qué NO HACE este Microservicio (Límites) |
 | :--- | :--- |
-| • Creación, edición y publicación de playlists de estilo / lookbooks de prendas. | • NO reproduce ni almacena archivos de audio ni canciones mp3 (es 100% moda). |
-| • Asociación de hasta 15 prendas de vestir activas por colección (`RNF-12`). | • NO gestiona stock ni existencias físicas de prendas (delegado a `ms-inventario` en `:8200`). |
-| • Gestión del carrusel de hasta 3 playlists destacadas para el Home (`SR-RF-72`). | • NO procesa transacciones de pago ni suscripciones (delegado a `ms-pagos-suscripciones`). |
-| • Almacenamiento en caché de alta velocidad (Redis L2) para las 3 destacadas. | • NO autentica usuarios (validación centralizada delegada al API Gateway / `ms-auth`). |
+| • Crea y configura playlists públicas o privadas. | • NO autentica usuarios. |
+| • Agrega y retira prendas de una playlist. | • NO publica ni edita prendas (delegado a `ms-item-catalogo` en `:8220`). |
+| • Registra los Me gusta y las playlists guardadas. | • NO gestiona el inventario por talla (delegado a `ms-inventario` en `:8200`). |
+| • Destaca las playlists con mayor interacción. | • NO accede directamente a bases de datos de otros microservicios. |
 
 ### Arquetipos de Moda y Personajes de StyleRadar
 
@@ -86,7 +84,7 @@ Este microservicio encapsula exclusivamente la lógica de negocio correspondient
 
 | Antonia (Sastre) | Mateo (Calle) | Aura (Futuro) | Nora (Rebelde) | Tomás (Esencial) |
 | :---: | :---: | :---: | :---: | :---: |
-| <img src="https://raw.githubusercontent.com/JUANNICOLASA/Frontend-Style-Radar/main/styleradar-frontend-v3/assets/mascota/antonia.jpg" width="110" style="border-radius:8px;" alt="Antonia" /><br>**Sastre**<br><sub>Tiendas & Descubrimiento</sub> | <img src="https://raw.githubusercontent.com/JUANNICOLASA/Frontend-Style-Radar/main/styleradar-frontend-v3/assets/mascota/mateo.jpg" width="110" style="border-radius:8px;" alt="Mateo" /><br>**Calle**<br><sub>Lookbooks & Cultura Urbana</sub> | <img src="https://raw.githubusercontent.com/JUANNICOLASA/Frontend-Style-Radar/main/styleradar-frontend-v3/assets/mascota/aura.jpg" width="110" style="border-radius:8px;" alt="Aura" /><br>**Futuro**<br><sub>Probador Virtual AI</sub> | <img src="https://raw.githubusercontent.com/JUANNICOLASA/Frontend-Style-Radar/main/styleradar-frontend-v3/assets/mascota/nora.jpg" width="110" style="border-radius:8px;" alt="Nora" /><br>**Rebelde**<br><sub>Segunda Vida & Vintage</sub> | <img src="https://raw.githubusercontent.com/JUANNICOLASA/Frontend-Style-Radar/main/styleradar-frontend-v3/assets/mascota/tomas.jpg" width="110" style="border-radius:8px;" alt="Tomás" /><br>**Esencial**<br><sub>Fundaciones & Donaciones</sub> |
+| <img src="https://raw.githubusercontent.com/JUANNICOLASA/Frontend-Style-Radar/main/styleradar-frontend-v3/assets/mascota/antonia.jpg" width="110" style="border-radius:8px;" alt="Antonia" /><br>**Sastre**<br><sub>Tiendas & Descubrimiento</sub> | <img src="https://raw.githubusercontent.com/JUANNICOLASA/Frontend-Style-Radar/main/styleradar-frontend-v3/assets/mascota/mateo.jpg" width="110" style="border-radius:8px;" alt="Mateo" /><br>**Calle**<br><sub>Playlists & Cultura Urbana</sub> | <img src="https://raw.githubusercontent.com/JUANNICOLASA/Frontend-Style-Radar/main/styleradar-frontend-v3/assets/mascota/aura.jpg" width="110" style="border-radius:8px;" alt="Aura" /><br>**Futuro**<br><sub>Probador Virtual AI</sub> | <img src="https://raw.githubusercontent.com/JUANNICOLASA/Frontend-Style-Radar/main/styleradar-frontend-v3/assets/mascota/nora.jpg" width="110" style="border-radius:8px;" alt="Nora" /><br>**Rebelde**<br><sub>Segunda Vida & Vintage</sub> | <img src="https://raw.githubusercontent.com/JUANNICOLASA/Frontend-Style-Radar/main/styleradar-frontend-v3/assets/mascota/tomas.jpg" width="110" style="border-radius:8px;" alt="Tomás" /><br>**Esencial**<br><sub>Fundaciones & Donaciones</sub> |
 
 </div>
 
@@ -96,15 +94,14 @@ Este microservicio encapsula exclusivamente la lógica de negocio correspondient
 
 ## <img src="https://img.shields.io/badge/02-5600EF?style=for-the-badge" height="20" align="absmiddle" /> 2. EQUIPO Y RESPONSABLES
 
-Desarrollado y mantenido por el **Squad Estación RESTrepo** para la asignatura DOSW 2026.
+Desarrollado y mantenido por el **Equipo `Restrepo`** (prefijo `RST`) para la asignatura DOSW 2026.
 
 <div align="center">
 
 | Rol | Nombre Completo | Usuario GitHub |
 | :---: | :---: | :---: |
-| **Product Owner / Líder** | Nicolás Álvarez | `[@JUANNICOLASA](https://github.com/JUANNICOLASA)` |
-| **Tech Lead / Arquitecto** | Daniel Mosquera | `[@DanielMosquera](https://github.com)` |
-| **Backend Developer** | Sebastián Camilo Granados | `[@sebas-granados](https://github.com)` |
+| **Líder y apoyo** | `Juan Nicolás Álvarez Muñoz` | [@JUANNICOLASA](https://github.com/JUANNICOLASA) |
+| **Backend Developer** | `Daniel Mosquera` | [@Danielmmartinez](https://github.com/Danielmmartinez) |
 
 </div>
 
@@ -114,50 +111,157 @@ Desarrollado y mantenido por el **Squad Estación RESTrepo** para la asignatura 
 
 ## <img src="https://img.shields.io/badge/03-5600EF?style=for-the-badge" height="20" align="absmiddle" /> 3. ARQUITECTURA HEXAGONAL CON SU DIAGRAMA
 
-El microservicio implementa **Arquitectura Hexagonal (Puertos y Adaptadores)** combinada con **Domain-Driven Design (DDD)**. El núcleo de negocio permanece 100% puro en Java 21 y aislado de frameworks, bases de datos o brokers de mensajería.
+El servicio sigue la arquitectura hexagonal acordada por el curso. Las reglas del negocio se mantienen aisladas de las herramientas externas, como la base de datos, el broker de mensajería o la API REST, de modo que estas pueden cambiar sin afectar la lógica principal.
 
+### Diagrama Interactivo de Capas (Mermaid)
 
+```mermaid
+flowchart TD
+    GW["API Gateway"]
+    BRK["RabbitMQ"]
 
----
+    subgraph INFRA_IN["Infraestructura de Entrada (Driving Adapters)"]
+        REST["Adaptador REST"]
+        AMQP_IN["Adaptador de eventos"]
+    end
 
-### Evidencias de Arquitectura y Diseño (RES-81)
+    subgraph APP["Capa de Aplicación"]
+        IN_PORT["Puertos de entrada"]
+        USE_CASES["Casos de uso"]
+        OUT_PORT["Puertos de salida"]
+    end
 
-#### 1. Diagrama de Componentes (Arquitectura Hexagonal)
-![Diagrama de Componentes](docs/evidencias/StyleRadar-ComponentesPlayList.png)
+    subgraph DOMAIN["Núcleo de Dominio"]
+        ENTITIES["Modelo de dominio"]
+        EVENTS["Eventos de dominio"]
+        EXCEPTIONS["Excepciones de dominio"]
+    end
 
-#### 2. Diagrama de Clases (Dominio Puro DDD)
-![Diagrama de Clases](docs/evidencias/StyleRadar-DiagramadeClasesPlaylist.drawio.png)
+    subgraph INFRA_OUT["Infraestructura de Salida (Driven Adapters)"]
+        JPA_REPO["Adaptador de persistencia"]
+        RABBIT_PUB["Adaptador de mensajería"]
+    end
 
-#### 3. Diagrama Entidad-Relación (Base de Datos Relacional)
-![Diagrama Entidad-Relación](docs/evidencias/StyleRadar-DiagramaEventoRelacionPlaylist.drawio.png)
+    DB[("PostgreSQL")]
 
----
+    GW --> REST
+    BRK --> AMQP_IN
+    REST --> IN_PORT
+    AMQP_IN --> IN_PORT
+    IN_PORT --> USE_CASES
+    USE_CASES --> DOMAIN
+    USE_CASES --> OUT_PORT
+    OUT_PORT --> JPA_REPO
+    OUT_PORT --> RABBIT_PUB
+    JPA_REPO --> DB
+    RABBIT_PUB --> BRK
+
+    classDef domain fill:#EDE7FF,stroke:#5600EF,stroke-width:2px,color:#0C0C12;
+    classDef app fill:#F8FAFC,stroke:#C4B5FD,stroke-width:2px,color:#0C0C12;
+    classDef infra fill:#12063A,stroke:#5600EF,stroke-width:1.5px,color:#FFFFFF;
+
+    class DOMAIN,ENTITIES,EVENTS,EXCEPTIONS domain;
+    class APP,IN_PORT,USE_CASES,OUT_PORT app;
+    class INFRA_IN,INFRA_OUT,REST,AMQP_IN,JPA_REPO,RABBIT_PUB infra;
+```
+
+### Diagrama de Componentes Específico
+
+<div align="center">
+  <table width="100%" style="margin: 18px 0; border: 2px dashed #C4B5FD; border-radius: 8px; background-color: #FBFBFE;">
+    <tr>
+      <td align="center" style="padding: 20px;">
+        <p>
+          <img src="https://img.shields.io/badge/DIAGRAMA-COMPONENTES-12063A?style=for-the-badge" alt="Diagrama de componentes" /><br />
+          <strong><font color="#5600EF" size="3">DIAGRAMA DE COMPONENTES ESPECÍFICO (HEXAGONAL)</font></strong>
+        </p>
+        <p>
+          <img src="docs/evidencias/StyleRadar-ComponentesPlayList.png" width="100%" alt="Diagrama de componentes" /><br />
+        </p>
+      </td>
+    </tr>
+  </table>
+</div>
+
+El diagrama muestra el servicio en arquitectura hexagonal. Las peticiones llegan desde el API Gateway al controller REST de playlists y los eventos del catálogo llegan por RabbitMQ a `CatalogoEventsConsumer` (adaptadores de entrada), que solo conocen el caso de uso (puerto de entrada). La lógica de aplicación usa los puertos de salida para guardar las playlists en PostgreSQL (`PlaylistRepositoryPort`), publicar sus eventos en RabbitMQ (`PlaylistEventPublisherPort`) y mantener en Redis las playlists destacadas (`PlaylistCachePort`). Las dependencias apuntan hacia adentro, por lo que el dominio no conoce Spring, JPA ni HTTP.
+
+### Diagrama de Clases
+
+<div align="center">
+  <table width="100%" style="margin: 18px 0; border: 2px dashed #C4B5FD; border-radius: 8px; background-color: #FBFBFE;">
+    <tr>
+      <td align="center" style="padding: 20px;">
+        <p>
+          <img src="https://img.shields.io/badge/DIAGRAMA-CLASES-12063A?style=for-the-badge" alt="Diagrama de clases" /><br />
+          <strong><font color="#5600EF" size="3">DIAGRAMA DE CLASES DEL DOMINIO</font></strong>
+        </p>
+        <p>
+          <img src="docs/evidencias/StyleRadar-DiagramadeClasesPlaylist.drawio.png" width="100%" alt="Diagrama de clases" /><br />
+        </p>
+      </td>
+    </tr>
+  </table>
+</div>
+
+El agregado principal es `Playlist`, que guarda el nombre, la descripción, la `VisibilidadPlaylist` (pública o privada), el `EstiloMusical` y las prendas asociadas como `PrendaSnapshot`, una copia del nombre de la prenda tomada del catálogo. Los métodos del agregado cubren crear, destacar y quitar de destacadas (SR-RF-72), asociar y retirar prendas (SR-RF-70), y alternar el me gusta y el guardado de cada usuario (SR-RF-71). Antes de modificar o mostrar una playlist se valida que el usuario sea su dueño o que la playlist sea pública.
+
+### Diagrama de Base de Datos
+
+<div align="center">
+  <table width="100%" style="margin: 18px 0; border: 2px dashed #C4B5FD; border-radius: 8px; background-color: #FBFBFE;">
+    <tr>
+      <td align="center" style="padding: 20px;">
+        <p>
+          <img src="https://img.shields.io/badge/DIAGRAMA-BASE_DE_DATOS-12063A?style=for-the-badge" alt="Diagrama de base de datos" /><br />
+          <strong><font color="#5600EF" size="3">MODELO DE DATOS (POSTGRESQL)</font></strong>
+        </p>
+        <p>
+          <img src="docs/evidencias/StyleRadar-DiagramaEventoRelacionPlaylist.drawio.png" width="100%" alt="Diagrama de base de datos" /><br />
+        </p>
+      </td>
+    </tr>
+  </table>
+</div>
+
+Se usa PostgreSQL porque las playlists, sus prendas y las interacciones de los usuarios tienen relaciones fijas. La tabla `playlist` guarda los datos de cada playlist y si está destacada; `playlist_prendas` guarda las prendas asociadas, y `playlist_likes` y `playlist_guardados` registran qué usuarios dieron me gusta o guardaron cada playlist, todas en relación uno a muchos con `playlist`. Las prendas y los usuarios se guardan solo por su identificador, ya que pertenecen a otros servicios (*Database-per-Service*).
 
 ### Estructura Oficial de Paquetes en `src/main/java/`
 
 ```text
 src/main/java/edu/dosw/styleradar/playlist/
-├── domain/                                  <-- NÚCLEO DE DOMINIO (Cero dependencias externas)
-│   ├── model/                               <-- Agregado Playlist, entidad PrendaSnapshot
-│   ├── valueobject/                         <-- Estilo, VisibilidadPlaylist
-│   ├── event/                               <-- Eventos de Dominio (PlaylistDestacadaEvent, PrendaVinculadaEvent)
-│   └── exception/                           <-- Excepciones de negocio (LimiteDestacadasSuperadoException, etc.)
-├── application/                             <-- CAPA DE APLICACIÓN (Casos de Uso)
-│   ├── port/
-│   │   ├── in/                              <-- Input Ports (Interfaces para casos de uso)
-│   │   └── out/                             <-- Output Ports (Interfaces para persistencia, caché y mensajería)
-│   ├── usecase/                             <-- Implementación de servicios de aplicación
-│   └── dto/                                 <-- DTOs de entrada y salida (Java Records)
-└── infrastructure/                          <-- CAPA DE INFRAESTRUCTURA (Adaptadores)
+├── domain/
+│   ├── model/                       <-- Entidades y agregados
+│   ├── event/                       <-- Eventos de dominio
+│   ├── exception/                   <-- Excepciones de negocio
+│   └── port/
+│       ├── in/                      <-- Puertos de entrada (casos de uso)
+│       └── out/                     <-- Puertos de salida (repositorios, publicadores)
+├── application/
+│   ├── usecase/                     <-- Implementación de casos de uso (Impl)
+│   ├── service/                     <-- Servicios de aplicación
+│   │   └── impl/
+│   ├── dto/
+│   │   ├── request/
+│   │   ├── response/
+│   │   └── event/
+│   └── mapper/
+│       ├── in/
+│       └── out/
+└── infrastructure/
     ├── adapter/
     │   ├── in/
-    │   │   ├── rest/                        <-- Spring REST Controllers y OpenAPI Spec
-    │   │   └── amqp/                        <-- Consumidor RabbitMQ catalogo.prenda.eliminada
+    │   │   ├── rest/                <-- Controllers REST
+    │   │   │   └── doc/             <-- Interfaces de documentación OpenAPI
+    │   │   └── amqp/                <-- Consumidores RabbitMQ
     │   └── out/
-    │       ├── persistence/                 <-- Spring Data JPA Repositories y Entidades SQL
-    │       ├── messaging/                   <-- Productor RabbitMQ (AmqpTemplate)
-    │       └── cache/                       <-- Adaptador Redis (RedisTemplate L2)
-    └── config/                              <-- Configuración Spring (Security, Cache, OpenApi)
+    │       ├── persistence/         <-- Entidades JPA y repositorios
+    │       │   ├── entity/
+    │       │   └── repository/
+    │       ├── messaging/           <-- Publicadores RabbitMQ
+    │       ├── external/            <-- Clientes de otros servicios
+    │       └── security/
+    ├── config/                      <-- Configuración Spring y OpenAPI
+    └── exception/                   <-- Manejo global de errores (RFC 7807)
 ```
 
 ---
@@ -170,62 +274,48 @@ src/main/java/edu/dosw/styleradar/playlist/
 
 | Entorno | Estado | Propósito | URL Base del Servicio | Swagger OpenAPI UI | Health Check |
 | :--- | :---: | :--- | :--- | :--- | :--- |
-| **Producción (PROD)** | Active | Despliegue productivo de StyleRadar | `https://styleradar-backend-prod.azurewebsites.net` | [Swagger UI PROD](https://styleradar-backend-prod.azurewebsites.net/swagger-ui/index.html) | [`/actuator/health`](https://styleradar-backend-prod.azurewebsites.net/actuator/health) |
-| **Calidad / Pruebas (QA)** | Active | Pruebas integradas de Sprint y QA | `https://styleradar-backend-qa.azurewebsites.net` | [Swagger UI QA](https://styleradar-backend-qa.azurewebsites.net/swagger-ui/index.html) | [`/actuator/health`](https://styleradar-backend-qa.azurewebsites.net/actuator/health) |
-| **Desarrollo Local (DEV)** | Local | Entorno de desarrollo local en máquina | `http://localhost:8260` | [Swagger UI Local](http://localhost:8260/swagger-ui.html) | [`/actuator/health`](http://localhost:8260/actuator/health) |
+| **Producción (PROD)** | Próximo Sprint | Despliegue productivo de StyleRadar | Próximo Sprint | Próximo Sprint | Próximo Sprint |
+| **Calidad / Pruebas (QA)** | Próximo Sprint | Pruebas integradas del Sprint | Próximo Sprint | Próximo Sprint | Próximo Sprint |
+| **Desarrollo Local (DEV)** | Local | Entorno de desarrollo local | `http://localhost:8260/api/v1` | [Swagger UI Local](http://localhost:8260/api/v1/swagger-ui.html) | [`/health`](http://localhost:8260/api/v1/health) |
 
-* **Especificación OpenAPI (Contrato JSON Schema):** `http://localhost:8260/v3/api-docs`
+* **Especificación OpenAPI:** `http://localhost:8260/api/v1/v3/api-docs`
+
+<div align="center">
+  <table width="100%" style="margin: 18px 0; border: 2px dashed #5600EF; border-radius: 8px; background-color: #FBFBFE;">
+    <tr>
+      <td align="center" style="padding: 22px;">
+        <p>
+          <img src="https://img.shields.io/badge/ESPACIO_DE_CAPTURA-EVIDENCIA_01-5600EF?style=for-the-badge" alt="Evidencia 01" /><br />
+          <strong><font color="#5600EF" size="3">DOCUMENTACIÓN SWAGGER OPENAPI UI ACTIVA</font></strong>
+        </p>
+        <p>
+<em>Evidencia pendiente.</em>
+        </p>
+      </td>
+    </tr>
+  </table>
+</div>
 
 ### Tabla de Endpoints Expuestos
 
 | Método | Endpoint | Descripción | Rol Requerido | Códigos HTTP |
 | :---: | :--- | :--- | :--- | :---: |
-| `GET` | `/api/v1/playlists/health` | Health Check y estado del microservicio | Público | `200` |
-| `GET` | `/api/v1/playlists/destacadas` | Lista hasta 3 playlists destacadas para el Home (Redis L2) | Público | `200` |
-| `GET` | `/api/v1/playlists/populares` | Playlists públicas paginadas ordenadas por ranking de likes | Público | `200` |
-| `GET` | `/api/v1/playlists/{id}` | Detalle de lookbook con prendas asociadas | Público / Autenticado | `200`, `404` |
-| `POST` | `/api/v1/playlists` | Crear nuevo lookbook vinculado a un estilo | `COMPRADOR`, `ADMIN` | `201`, `400` |
-| `PUT` | `/api/v1/playlists/{id}/destacar` | Fija una playlist como destacada (máx 3 · SR-RF-72) | `ADMIN` | `200`, `409` |
-| `POST` | `/api/v1/playlists/{id}/prendas` | Asociar una prenda de vestir al lookbook (máx 15 · RNF-12) | Dueño de playlist | `200`, `404`, `422` |
-| `POST` | `/api/v1/playlists/{id}/like` | Alternar Me Gusta en la playlist | `COMPRADOR` | `200`, `404` |
-
-<details>
-<summary><b>Click para ver Ejemplos Interactivos de Request y Response JSON (Payloads)</b></summary>
-
-<br>
-
-#### Ejemplo Request (`POST /api/v1/playlists`)
-
-```bash
-curl -X POST "http://localhost:8260/api/v1/playlists" \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer <JWT_TOKEN>" \
-  -d '{
-    "nombre": "Vibra Urbana Bogotá",
-    "descripcion": "Selección de prendas streetwear y hoodies oversize locales",
-    "estilo": "URBANO",
-    "visibilidad": "PUBLICA"
-  }'
-```
-
-#### Ejemplo Response Exitoso (`201 Created`)
-
-```json
-{
-  "id": 105,
-  "usuarioId": 42,
-  "nombre": "Vibra Urbana Bogotá",
-  "descripcion": "Selección de prendas streetwear y hoodies oversize locales",
-  "estilo": "URBANO",
-  "visibilidad": "PUBLICA",
-  "destacada": false,
-  "totalPrendas": 0,
-  "likes": 0,
-  "fechaCreacion": "2026-11-04T15:00:00Z"
-}
-```
-
-</details>
+| `POST` | `/api/v1/playlists` | Crear una playlist | Autenticado | `201`, `400` |
+| `GET` | `/api/v1/playlists` | Consultar las playlists públicas | Público | `200` |
+| `GET` | `/api/v1/playlists/{id}` | Consultar el detalle de una playlist | Público / Autenticado | `200`, `403`, `404` |
+| `GET` | `/api/v1/playlists/destacadas` | Consultar las playlists destacadas (SR-RF-72) | Público | `200` |
+| `GET` | `/api/v1/playlists/populares` | Consultar las playlists más populares, paginadas | Público | `200` |
+| `GET` | `/api/v1/playlists/me` | Consultar las playlists creadas por el usuario | Autenticado | `200` |
+| `GET` | `/api/v1/playlists/me/guardadas` | Consultar las playlists guardadas por el usuario | Autenticado | `200` |
+| `PUT` | `/api/v1/playlists/{id}` | Editar una playlist propia (SR-RF-69) | Dueño | `200`, `400`, `403` |
+| `DELETE` | `/api/v1/playlists/{id}` | Eliminar una playlist propia | Dueño | `204`, `403`, `404` |
+| `PUT` | `/api/v1/playlists/{id}/destacar` | Destacar una playlist (SR-RF-72) | `ADMIN` | `200`, `409` |
+| `DELETE` | `/api/v1/playlists/{id}/destacar` | Quitar una playlist de destacadas | `ADMIN` | `200` |
+| `POST` | `/api/v1/playlists/{id}/prendas` | Agregar una prenda a la playlist (SR-RF-70) | Dueño | `200`, `404`, `422` |
+| `DELETE` | `/api/v1/playlists/{id}/prendas/{prendaId}` | Retirar una prenda de la playlist (SR-RF-70) | Dueño | `200`, `404` |
+| `POST` | `/api/v1/playlists/{id}/like` | Dar o quitar me gusta (SR-RF-71) | Autenticado | `200`, `404` |
+| `POST` | `/api/v1/playlists/{id}/guardar` | Guardar o quitar de guardadas (SR-RF-71) | Autenticado | `200`, `404` |
+| `GET` | `/api/v1/health` | Estado del servicio | Público | `200` |
 
 ---
 
@@ -233,18 +323,14 @@ curl -X POST "http://localhost:8260/api/v1/playlists" \
 
 ## <img src="https://img.shields.io/badge/05-5600EF?style=for-the-badge" height="20" align="absmiddle" /> 5. EVENTOS QUE PUBLICA Y CONSUME
 
-La comunicación asíncrona entre microservicios se orquesta a través de **RabbitMQ 3.12** utilizando Topic Exchanges durables.
-
-* **Exchange Principal de Dominio:** `styleradar.events` (`topic`, durable)
-* **Dead Letter Exchange (DLX):** `styleradar.dlx`
+La comunicación asíncrona entre microservicios se realiza a través de **RabbitMQ 3.13.7**.
 
 ### Matriz de Eventos AMQP
 
-| Tipo | Routing Key | Cola (Queue) | Microservicio Emisor / Receptor | Cuándo se Dispara / Acción |
-| :---: | :--- | :--- | :--- | :--- |
-| **PUBLICA** | `playlist.destacada.actualizada` | N/A (Exchange) | `ms-playlist` | Invalida la caché Redis del carrusel principal en la app móvil y web. |
-| **PUBLICA** | `playlist.prenda.asociada` | N/A (Exchange) | `ms-playlist` | Notifica eventos de curaduría para métricas en `ms-estadisticas`. |
-| **CONSUME** | `catalogo.prenda.eliminada` | `q.playlist.prenda-eliminada` | `ms-item-catalogo` &rarr; `ms-playlist` | Desvincula automáticamente prendas retiradas del catálogo de las listas activas. |
+| Tipo | Evento | Emisor / Receptor | Propósito |
+| :---: | :--- | :--- | :--- |
+| **CONSUME** | `StockChangedEvent` | `ms-inventario` &rarr; `ms-playlist` | Actualiza la disponibilidad de las prendas de la playlist. |
+| **CONSUME** | `PrendaAgotadaEvent` | `ms-inventario` &rarr; `ms-playlist` | Marca la prenda como agotada sin retirarla de la playlist. |
 
 ---
 
@@ -252,18 +338,18 @@ La comunicación asíncrona entre microservicios se orquesta a través de **Rabb
 
 ## <img src="https://img.shields.io/badge/06-5600EF?style=for-the-badge" height="20" align="absmiddle" /> 6. TECNOLOGÍAS Y DEPENDENCIAS
 
-| Capa / Componente | Tecnología | Versión | Justificación Técnica |
-| :--- | :--- | :--- | :--- |
-| **Lenguaje Core** | Java LTS | `21` | Inmutabilidad de Value Objects y Records para colecciones seguras de prendas. |
-| **Framework Empresarial** | Spring Boot | `3.3.x` | Gestión declarativa de configuración, Spring Data JPA y endpoints REST. |
-| **Base de Datos** | PostgreSQL | `16` | Persistencia relacional de playlists y tablas asociativas desacopladas. |
-| **Migraciones de BD** | Flyway | `10.x` | Control de versiones reproducible de scripts SQL (`V1__init.sql`) en arranque. |
-| **Broker de Mensajería** | RabbitMQ | `3.12+` | Desacoplamiento temporal de eventos de catálogo hacia las listas de curaduría. |
-| **Caché en Memoria** | Redis | `7.x` | Almacenamiento L2 de las 3 playlists destacadas del Home para latencia < 5ms. |
-| **Mapeo de DTOs** | MapStruct | `1.5.x` | Mapeo compilado libre de reflection entre agregados y DTOs de salida. |
-| **Testing Core** | JUnit 5 + Mockito | `5.10.x` | Pruebas unitarias sobre las reglas de negocio del agregado de playlists. |
-| **Testing Integración** | Testcontainers | `1.19.x` | Instanciación automática de PostgreSQL y RabbitMQ durante `mvn verify`. |
-| **Métricas de Cobertura** | JaCoCo Plugin | `0.8.12` | Verificación estricta de cobertura mínima (≥ 85%) como regla de fallo en el build. |
+| Capa / Componente | Tecnología | Versión |
+| :--- | :--- | :--- |
+| **Lenguaje Core** | Java | `21` |
+| **Framework** | Spring Boot | `3.3.4` |
+| **Base de Datos** | PostgreSQL | `15.8` |
+| **Migraciones de BD** | Flyway | Gestionada por Spring Boot |
+| **Broker de Mensajería** | RabbitMQ | `3.13.7` |
+| **Mapeo de DTOs** | MapStruct | `1.5.5.Final` |
+| **Documentación API** | springdoc-openapi | `2.6.0` |
+| **Testing Integración** | Testcontainers | Gestionada por Spring Boot |
+| **Métricas de Cobertura** | JaCoCo | `0.8.12` |
+| **Análisis Estático** | SpotBugs | `4.8.6.4` |
 
 ---
 
@@ -273,73 +359,49 @@ La comunicación asíncrona entre microservicios se orquesta a través de **Rabb
 
 ### Prerrequisitos de Entorno
 
-* **Java Development Kit (JDK):** Versión 21 LTS instalada (`java -version`).
-* **Apache Maven:** Versión 3.9+ instalada (`mvn -version`).
-* **Docker Engine & Docker Compose:** Versión 24+ en ejecución (`docker --version`).
-
-### Despliegue de Infraestructura Local (`docker-compose.yml`)
-
-El microservicio incluye un archivo de infraestructura para levantar PostgreSQL, Redis y RabbitMQ localmente:
-
-```yaml
-version: '3.8'
-
-services:
-  postgres:
-    image: postgres:16-alpine
-    container_name: styleradar-postgres-playlist
-    restart: always
-    environment:
-      POSTGRES_DB: playlist_db
-      POSTGRES_USER: styleradar_user
-      POSTGRES_PASSWORD: secret_dev_pass
-    ports:
-      - "5432:5432"
-    volumes:
-      - pgdata_playlist:/var/lib/postgresql/data
-
-  redis:
-    image: redis:7-alpine
-    container_name: styleradar-redis-playlist
-    restart: always
-    ports:
-      - "6379:6379"
-
-  rabbitmq:
-    image: rabbitmq:3.12-management-alpine
-    container_name: styleradar-rabbitmq-playlist
-    restart: always
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
-
-volumes:
-  pgdata_playlist:
-```
+* **JDK:** 21
+* **Apache Maven:** 3.9+
+* **Docker Engine y Docker Compose**
 
 ### Ejecución Local con Maven (Perfil Dev)
 
+Requiere PostgreSQL y RabbitMQ disponibles en las direcciones definidas en el archivo `.env`, creado a partir de `.env.example`.
+
 ```bash
-# 1. Clonar el repositorio
-git clone https://github.com/StyleRadar1/ms-playlist.git
-cd ms-playlist
+git clone https://github.com/StyleRadar1/RST-Playlist-Service.git
+cd RST-Playlist-Service
+./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
+```
 
-# 2. Levantar la infraestructura local en Docker
-docker compose up -d
+### Ejecución Contenerizada Completa con Docker
 
-# 3. Compilar y ejecutar el microservicio en puerto 8260
-mvn clean spring-boot:run -Dspring-boot.run.profiles=dev
+El servicio, junto con su base de datos y RabbitMQ, se levanta con Docker a partir del archivo `.env`:
+
+```bash
+docker compose up -d --build
 ```
 
 ### Comprobación de Salud (Health Check)
 
 ```bash
-curl -s http://localhost:8260/actuator/health | jq .
-# Esperado: {"status":"UP","components":{"db":{"status":"UP"},"redis":{"status":"UP"}}}
+curl http://localhost:8260/api/v1/health
 ```
+
+<div align="center">
+  <table width="100%" style="margin: 18px 0; border: 2px dashed #5600EF; border-radius: 8px; background-color: #FBFBFE;">
+    <tr>
+      <td align="center" style="padding: 22px;">
+        <p>
+          <img src="https://img.shields.io/badge/ESPACIO_DE_CAPTURA-EVIDENCIA_02-5600EF?style=for-the-badge" alt="Evidencia 02" /><br />
+          <strong><font color="#5600EF" size="3">CONTENEDOR OCI DOCKER EN EJECUCIÓN (docker compose ps)</font></strong>
+        </p>
+        <p>
+<em>Evidencia pendiente.</em>
+        </p>
+      </td>
+    </tr>
+  </table>
+</div>
 
 ---
 
@@ -347,55 +409,20 @@ curl -s http://localhost:8260/actuator/health | jq .
 
 ## <img src="https://img.shields.io/badge/08-5600EF?style=for-the-badge" height="20" align="absmiddle" /> 8. VARIABLES DE ENTORNO
 
-Todas las configuraciones se externalizan conforme al estándar **Twelve-Factor App**. En producción, la base de datos oficial se encuentra aprovisionada en Azure Database for PostgreSQL.
+Las variables se definen en `.env`, que no se versiona. La plantilla `.env.example` indica cuáles se requieren.
 
-### Matriz de Parámetros de Configuración
-
-| Variable | Descripción | Valor Local (`dev`) | Valor Producción (`prod`) |
-| :--- | :--- | :--- | :--- |
-| `SERVER_PORT` | Puerto HTTP del servicio | `8260` | `8260` |
-| `SPRING_PROFILES_ACTIVE`| Perfil activo de Spring | `dev` | `prod` |
-| `DB_HOST` | Host del servidor PostgreSQL | `localhost` | `styleradar-postgres-prod.postgres.database.azure.com` |
-| `DB_PORT` | Puerto de conexión a PostgreSQL| `5432` | `5432` |
-| `DB_NAME` | Nombre de la base de datos | `playlist_db` | `playlist_db` |
-| `DB_USER` | Usuario de conexión BD | `styleradar_user` | `styleradar_admin@styleradar-postgres-prod` |
-| `DB_PASSWORD` | Contraseña de conexión BD | `secret_dev_pass` | `${SECRET_AZURE_DB_PASSWORD}` |
-| `REDIS_HOST` | Hostname del servidor Redis | `localhost` | `styleradar-redis-prod.redis.cache.windows.net` |
-| `REDIS_PORT` | Puerto de conexión Redis | `6379` | `6380` |
-| `RABBITMQ_HOST` | Hostname broker RabbitMQ | `localhost` | `styleradar-rabbitmq.eastus.cloudapp.azure.com` |
-| `MAX_PLAYLISTS_DESTACADAS`| Límite estricto carrusel Home | `3` | `3` |
-
-### Archivo de Ejemplo `.env.example`
-
-```properties
-# ==============================================================================
-# CONFIGURACIÓN DE ENTORNO - STYLE RADAR: MS-PLAYLIST (:8260)
-# ==============================================================================
-
-SERVER_PORT=8260
-SPRING_PROFILES_ACTIVE=dev
-
-# Conexión PostgreSQL (En Prod: styleradar-postgres-prod.postgres.database.azure.com)
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=playlist_db
-DB_USER=styleradar_user
-DB_PASSWORD=secret_dev_pass
-
-# Conexión Redis L2 Cache
-REDIS_HOST=localhost
-REDIS_PORT=6379
-REDIS_PASSWORD=
-
-# RabbitMQ Event Broker
-RABBITMQ_HOST=localhost
-RABBITMQ_PORT=5672
-RABBITMQ_USER=guest
-RABBITMQ_PASS=guest
-
-# Reglas de Dominio StyleRadar
-MAX_PLAYLISTS_DESTACADAS=3
-```
+| Variable | Descripción | Valor por Defecto |
+| :--- | :--- | :--- |
+| `SERVER_PORT` | Puerto del servicio | `8260` |
+| `DB_HOST` | Host de PostgreSQL | `localhost` |
+| `DB_PORT` | Puerto de PostgreSQL | `5432` |
+| `DB_NAME` | Nombre de la base de datos | `styleradar_playlist` |
+| `DB_USER` | Usuario de PostgreSQL | `postgres` |
+| `DB_PASSWORD` | Contraseña de PostgreSQL | — |
+| `RABBITMQ_HOST` | Host de RabbitMQ | `localhost` |
+| `RABBITMQ_PORT` | Puerto de RabbitMQ | `5672` |
+| `RABBITMQ_USER` | Usuario de RabbitMQ | `styleradar` |
+| `RABBITMQ_PASSWORD` | Contraseña de RabbitMQ | — |
 
 ---
 
@@ -403,20 +430,40 @@ MAX_PLAYLISTS_DESTACADAS=3
 
 ## <img src="https://img.shields.io/badge/09-5600EF?style=for-the-badge" height="20" align="absmiddle" /> 9. PRUEBAS Y COBERTURA (≥ 85%)
 
-El proyecto exige una cobertura de código mínima del **85%** verificada automáticamente mediante el plugin de **JaCoCo** durante la fase de compilación.
+Las pruebas unitarias validan el dominio y los casos de uso, y las de integración validan la persistencia y la mensajería. Se exige una cobertura mínima del **85 %**, verificada con **JaCoCo** en cada ejecución del pipeline.
+
+### Comandos de Ejecución de Pruebas
 
 ```bash
-# Ejecutar pruebas unitarias y de integración
-mvn clean verify
-
-# Generar reporte HTML de cobertura
-mvn jacoco:report
+./mvnw clean verify
 ```
+
+Este comando ejecuta las pruebas, genera el reporte de cobertura y verifica el mínimo del 85 %.
 
 * **Ruta del Reporte HTML:** `target/site/jacoco/index.html`
 
-> [!IMPORTANT]
-> **Criterio de Fallo en CI:** El archivo `pom.xml` contiene la regla `<limit><minimum>0.85</minimum></limit>`. Si la cobertura total consolidada es inferior al 85%, el comando `mvn verify` fallará con error y el pipeline bloqueará el Pull Request.
+<div align="center">
+  <table width="100%" style="margin: 18px 0; border: 2px dashed #5600EF; border-radius: 8px; background-color: #FBFBFE;">
+    <tr>
+      <td align="center" style="padding: 22px;">
+        <p>
+          <img src="https://img.shields.io/badge/ESPACIO_DE_CAPTURA-EVIDENCIA_03-5600EF?style=for-the-badge" alt="Evidencia 03" /><br />
+          <strong><font color="#5600EF" size="3">REPORTE CONSOLIDADO DE COBERTURA JACOCO (≥ 85%)</font></strong>
+        </p>
+        <p>
+<em>Evidencia pendiente.</em>
+        </p>
+      </td>
+    </tr>
+  </table>
+</div>
+
+### Pirámide de Pruebas Implementada
+
+| Nivel de Prueba | Alcance | Tecnologías | Ubicación en el Código |
+| :--- | :--- | :--- | :--- |
+| **Pruebas Unitarias** | Dominio y casos de uso | JUnit 5, Mockito | `src/test/java/.../domain/`, `src/test/java/.../application/` |
+| **Pruebas de Integración** | Persistencia, mensajería y REST | Spring Boot Test, Testcontainers | `src/test/java/.../infrastructure/` |
 
 ---
 
@@ -424,8 +471,48 @@ mvn jacoco:report
 
 ## <img src="https://img.shields.io/badge/10-5600EF?style=for-the-badge" height="20" align="absmiddle" /> 10. CI/CD CON EL BADGE DEL PIPELINE
 
-* **Pipeline QA:** [![QA Pipeline](https://img.shields.io/badge/Pipeline_QA-Passing-5600EF?style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/StyleRadar1/ms-playlist/actions)
-* **Pipeline PROD:** [![PROD Pipeline](https://img.shields.io/badge/Pipeline_PROD-Passing-16A34A?style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/StyleRadar1/ms-playlist/actions)
+[![CI](https://github.com/StyleRadar1/RST-Playlist-Service/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/StyleRadar1/RST-Playlist-Service/actions/workflows/ci.yml)
+
+Cada cambio enviado a `master`, `develop` o a una rama `feature/*`, así como cada pull request, pasa por un pipeline de **GitHub Actions** que compila el proyecto, ejecuta las pruebas, verifica la cobertura, realiza el análisis estático del código y construye la imagen Docker.
+
+### Matriz de Pipelines por Rama Protegida
+
+| Rama | Desencadenador | Etapas |
+| :--- | :--- | :--- |
+| `develop` | Push y pull request | Compilación, pruebas, cobertura, análisis estático e imagen Docker |
+| `master` | Push y pull request | Compilación, pruebas, cobertura, análisis estático e imagen Docker |
+
+### Diagrama del Flujo Automatizado (Pipeline Stages)
+
+```mermaid
+flowchart LR
+    A["Push / PR<br>(GitHub)"] --> B["Compilar<br>(Maven, Java 21)"]
+    B --> C["Pruebas y JaCoCo<br>(cobertura ≥ 85%)"]
+    C --> D["Análisis estático<br>(SpotBugs)"]
+    D --> E["Imagen Docker"]
+
+    classDef step fill:#12063A,stroke:#5600EF,stroke-width:2px,color:#FFFFFF;
+    classDef pass fill:#DCFCE7,stroke:#16A34A,stroke-width:2px,color:#0C0C12;
+
+    class A,B,E step;
+    class C,D pass;
+```
+
+<div align="center">
+  <table width="100%" style="margin: 18px 0; border: 2px dashed #5600EF; border-radius: 8px; background-color: #FBFBFE;">
+    <tr>
+      <td align="center" style="padding: 22px;">
+        <p>
+          <img src="https://img.shields.io/badge/ESPACIO_DE_CAPTURA-EVIDENCIA_04-5600EF?style=for-the-badge" alt="Evidencia 04" /><br />
+          <strong><font color="#5600EF" size="3">EJECUCIÓN DEL PIPELINE CI/CD EN VERDE</font></strong>
+        </p>
+        <p>
+<em>Evidencia pendiente.</em>
+        </p>
+      </td>
+    </tr>
+  </table>
+</div>
 
 ---
 
@@ -433,25 +520,32 @@ mvn jacoco:report
 
 ## <img src="https://img.shields.io/badge/11-5600EF?style=for-the-badge" height="20" align="absmiddle" /> 11. RAMAS Y CÓMO CONTRIBUIR
 
-El equipo sigue el modelo **GitFlow adaptado para microservicios**.
-
-### Formato de Ramas Oficial
+### Estructura de Ramas Oficial
 
 ```text
-main                    <-- Producción
-└── develop             <-- Integración continua (Staging / QA)
-    ├── feature/SR-<ID>-<descripcion-corta>   <-- Nuevas funcionalidades
-    └── bugfix/SR-<ID>-<descripcion-corta>    <-- Corrección de defectos
+master                              <-- Versiones estables
+└── develop                         <-- Integración del trabajo del equipo
+    └── feature/HU-xx-descripcion   <-- Una rama por historia de usuario
 ```
+
+Los cambios llegan a `develop` y `master` únicamente por pull request, con revisión y el pipeline en verde.
 
 ### Convención de Commits (*Conventional Commits*)
 
+Todo mensaje de commit sigue el estándar:
+
 ```text
-feat(playlist): implementar logica de destacar maximo 3 playlists [#SR-RF-72]
-feat(playlist): endpoint para asociar prendas de vestir a lookbook [#SR-RF-70]
-test(playlist): pruebas unitarias para agregado de playlist y arquetipos [#SR-RF-69]
-fix(playlist): desvincular referencias de prendas eliminadas con amqp [#SR-RF-70]
+<tipo>(<alcance>): <descripción en español>
 ```
+
+Los tipos más usados son `feat`, `fix`, `test`, `docs`, `refactor` y `chore`.
+
+### Checklist Obligatorio para Pull Requests
+
+- [ ] La rama parte de la versión más reciente de `develop`.
+- [ ] Todas las pruebas pasan y la cobertura JaCoCo es mayor o igual al 85 %.
+- [ ] No se introducen credenciales ni tokens en el código fuente.
+- [ ] El PR tiene la aprobación de otro integrante del equipo antes del merge.
 
 ---
 
@@ -459,13 +553,33 @@ fix(playlist): desvincular referencias de prendas eliminadas con amqp [#SR-RF-70
 
 ## <img src="https://img.shields.io/badge/12-5600EF?style=for-the-badge" height="20" align="absmiddle" /> 12. ENLACE A LA ÉPICA EN JIRA
 
-* **Épica y Tablero Oficial de Trabajo:** [https://mail-team-nyjtgqcj.atlassian.net/jira/software/projects/RES/boards/76/timeline?selectedIssue=RES-4](https://mail-team-nyjtgqcj.atlassian.net/jira/software/projects/RES/boards/76/timeline?selectedIssue=RES-4)
+### Enlaces de Gestión, Repositorios y Evidencias
+
+* **Épica del Microservicio:** [RES-4 · ms-playlist](https://mail-team-nyjtgqcj.atlassian.net/browse/RES-4)
+* **Tablero del Equipo:** [Restrepo-StyleRadar (RES)](https://mail-team-nyjtgqcj.atlassian.net/jira/software/projects/RES/boards/76)
+* **Documento Técnico del Servicio:** [Documento técnico de ms-playlist](docs/DocumentoTecnicoPlaylist.html)
+
+<div align="center">
+  <table width="100%" style="margin: 18px 0; border: 2px dashed #5600EF; border-radius: 8px; background-color: #FBFBFE;">
+    <tr>
+      <td align="center" style="padding: 22px;">
+        <p>
+          <img src="https://img.shields.io/badge/ESPACIO_DE_CAPTURA-EVIDENCIA_05-5600EF?style=for-the-badge" alt="Evidencia 05" /><br />
+          <strong><font color="#5600EF" size="3">TABLERO SCRUM Y SEGUIMIENTO DE LA ÉPICA EN JIRA</font></strong>
+        </p>
+        <p>
+<em>Evidencia pendiente.</em>
+        </p>
+      </td>
+    </tr>
+  </table>
+</div>
 
 ### Requerimientos Funcionales Asignados
 
-| Código RF | Nombre del Requerimiento | Actor Principal | Criterio de Aceptación Clave |
-| :---: | :--- | :--- | :--- |
-| `SR-RF-69` | Crear lookbook vinculado a estilo de moda | Curador / Admin / Comprador | Persiste playlist asignándole arquetipo cultural urbano (Mateo - Calle). |
-| `SR-RF-70` | Asociar prendas de vestir al lookbook | Tienda / Comprador | Vincula prendas existentes con límite máximo de 15 por lista (`RNF-12`). |
-| `SR-RF-71` | Consultar playlists, dar likes y guardar en perfil | Comprador | Permite interacción social y filtrado según visibilidad pública o privada. |
-| `SR-RF-72` | Destacar hasta 3 playlists en el inicio | Admin / Sistema | Valida que nunca existan más de 3 playlists activas en el carrusel de Home. |
+| Código RF | Nombre del Requerimiento | Historia en Jira |
+| :---: | :--- | :---: |
+| `SR-RF-69` | Crear y configurar playlist | `RES-17` |
+| `SR-RF-70` | Agregar o retirar prendas de playlist | `RES-18` |
+| `SR-RF-71` | Interactuar con playlist | `RES-19` |
+| `SR-RF-72` | Destacar playlists populares | `RES-20` |
