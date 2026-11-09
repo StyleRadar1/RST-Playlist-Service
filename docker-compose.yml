@@ -14,9 +14,11 @@ services:
       DB_PORT: 5432
       DB_NAME: playlist_db
       DB_USER: styleradar_user
-      DB_PASSWORD: secret_dev_pass
+      DB_PASSWORD: ${DB_PASSWORD}
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: 5672
+      RABBITMQ_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-guest}
     depends_on:
       - postgres
       - rabbitmq
@@ -28,7 +30,7 @@ services:
     environment:
       POSTGRES_DB: playlist_db
       POSTGRES_USER: styleradar_user
-      POSTGRES_PASSWORD: secret_dev_pass
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
@@ -42,8 +44,8 @@ services:
       - "5672:5672"
       - "15672:15672"
     environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-guest}
 
 volumes:
   pgdata_playlist:
