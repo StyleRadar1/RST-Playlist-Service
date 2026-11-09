@@ -7,14 +7,32 @@ import edu.dosw.styleradar.playlist.domain.exception.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(MissingRequestHeaderException.class)
+    public ProblemDetail handleMissingHeader(MissingRequestHeaderException ex) {
+        if ("X-User-Id".equalsIgnoreCase(ex.getHeaderName())) {
+            return problem(HttpStatus.UNAUTHORIZED, "No autorizado", "La cabecera X-User-Id es obligatoria para acceder a este recurso");
+        }
+        return problem(HttpStatus.BAD_REQUEST, "Cabecera faltante", ex.getMessage());
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ProblemDetail handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        if ("X-User-Id".equalsIgnoreCase(ex.getName())) {
+            return problem(HttpStatus.UNAUTHORIZED, "No autorizado", "La cabecera X-User-Id debe ser un UUID válido");
+        }
+        return problem(HttpStatus.BAD_REQUEST, "Parámetro inválido", ex.getMessage());
+    }
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ProblemDetail handleNotFound(ResourceNotFoundException ex) {

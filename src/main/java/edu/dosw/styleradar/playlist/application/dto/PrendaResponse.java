@@ -1,9 +1,10 @@
 package edu.dosw.styleradar.playlist.application.dto;
 
 import java.time.Instant;
+import java.util.UUID;
 
 public record PrendaResponse(
-    Long prendaId,
+    UUID prendaId,
     String nombrePrenda,
     Instant fechaAsociacion
 ) {}

@@ -1,48 +1,49 @@
+version: '3.8'
+
 services:
   ms-playlist:
     build: .
-    container_name: ms-playlist
+    container_name: styleradar-ms-playlist
+    restart: always
     ports:
-      - "${SERVER_PORT:-8087}:8087"
-    env_file:
-      - .env
+      - "8260:8260"
     environment:
+      SERVER_PORT: 8260
+      SPRING_PROFILES_ACTIVE: dev
       DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: playlist_db
+      DB_USER: styleradar_user
+      DB_PASSWORD: secret_dev_pass
       RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
     depends_on:
-      postgres:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
+      - postgres
+      - rabbitmq
 
   postgres:
-    image: postgres:15.8-alpine
-    container_name: ms-playlist-db
+    image: postgres:16-alpine
+    container_name: styleradar-postgres-playlist
+    restart: always
     environment:
-      POSTGRES_DB: ${DB_NAME}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: playlist_db
+      POSTGRES_USER: styleradar_user
+      POSTGRES_PASSWORD: secret_dev_pass
+    ports:
+      - "5432:5432"
     volumes:
-      - db-data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
+      - pgdata_playlist:/var/lib/postgresql/data
 
   rabbitmq:
-    image: rabbitmq:3.13.7-management-alpine
-    container_name: ms-playlist-rabbitmq
-    environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+    image: rabbitmq:3.12-management-alpine
+    container_name: styleradar-rabbitmq-playlist
+    restart: always
     ports:
+      - "5672:5672"
       - "15672:15672"
-    healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
 
 volumes:
-  db-data:
+  pgdata_playlist:

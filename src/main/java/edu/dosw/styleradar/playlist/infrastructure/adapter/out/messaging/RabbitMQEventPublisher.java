@@ -1,6 +1,6 @@
 package edu.dosw.styleradar.playlist.infrastructure.adapter.out.messaging;
 
-import edu.dosw.styleradar.playlist.application.port.out.PlaylistEventPublisherPort;
+import edu.dosw.styleradar.playlist.domain.port.out.PlaylistEventPublisherPort;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
 
@@ -19,25 +19,25 @@ public class RabbitMQEventPublisher implements PlaylistEventPublisherPort {
     }
 
     @Override
-    public void publicarPlaylistDestacadaActualizada(Long playlistId, boolean destacada) {
+    public void publicarPlaylistDestacadaActualizada(UUID playlistId, boolean destacada) {
         Map<String, Object> payload = Map.of(
                 "eventId", UUID.randomUUID().toString(),
                 "eventType", "playlist.destacada.actualizada",
                 "timestamp", Instant.now().toString(),
                 "producer", "ms-playlist",
-                "data", Map.of("playlistId", playlistId, "destacada", destacada)
+                "data", Map.of("playlistId", playlistId.toString(), "destacada", destacada)
         );
         rabbitTemplate.convertAndSend(EXCHANGE, "playlist.destacada.actualizada", payload);
     }
 
     @Override
-    public void publicarPrendaAsociada(Long playlistId, Long prendaId) {
+    public void publicarPrendaAsociada(UUID playlistId, UUID prendaId) {
         Map<String, Object> payload = Map.of(
                 "eventId", UUID.randomUUID().toString(),
                 "eventType", "playlist.prenda.asociada",
                 "timestamp", Instant.now().toString(),
                 "producer", "ms-playlist",
-                "data", Map.of("playlistId", playlistId, "prendaId", prendaId)
+                "data", Map.of("playlistId", playlistId.toString(), "prendaId", prendaId.toString())
         );
         rabbitTemplate.convertAndSend(EXCHANGE, "playlist.prenda.asociada", payload);
     }

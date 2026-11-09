@@ -5,10 +5,11 @@ import edu.dosw.styleradar.playlist.domain.model.VisibilidadPlaylist;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 
 public record PlaylistResponse(
-    Long id,
-    Long usuarioId,
+    UUID id,
+    UUID usuarioId,
     String nombre,
     String descripcion,
     VisibilidadPlaylist visibilidad,
