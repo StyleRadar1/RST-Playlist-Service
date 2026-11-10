@@ -265,6 +265,45 @@ La petición debe traer la cabecera `X-User-Id` con el identificador del usuario
 
 Para destacar una playlist también se exige la cabecera `X-User-Id`. El caso de uso busca la playlist (si no existe, 404); si ya estaba destacada la devuelve sin cambios. Si no lo estaba, cuenta cuántas playlists destacadas hay: con 3 se responde 409, porque es el máximo permitido. Si hay cupo, la playlist se marca como destacada, se guarda, se publica el evento `playlist.destacada.actualizada` y se responde 200 (SR-RF-72).
 
+### Diagramas de Flujo
+
+Los diagramas de flujo muestran el recorrido del usuario por las pantallas de StyleRadar y los microservicios del paquete que intervienen en cada paso. Los archivos editables de Excalidraw están junto a las imágenes en `docs/evidencias`.
+
+<div align="center">
+  <table width="100%" style="margin: 18px 0; border: 2px dashed #C4B5FD; border-radius: 8px; background-color: #FBFBFE;">
+    <tr>
+      <td align="center" style="padding: 20px;">
+        <p>
+          <img src="https://img.shields.io/badge/DIAGRAMA-FLUJO-12063A?style=for-the-badge" alt="Diagrama de flujo de búsqueda de prendas y playlists" /><br />
+          <strong><font color="#5600EF" size="3">BÚSQUEDA DE PRENDAS Y PLAYLISTS</font></strong>
+        </p>
+        <p>
+          <img src="docs/evidencias/flujo-busqueda-playlists.png" width="100%" alt="Diagrama de flujo de búsqueda de prendas y playlists" /><br />
+        </p>
+      </td>
+    </tr>
+  </table>
+</div>
+
+El usuario busca y filtra prendas por tipo, color, talla o precio, y puede ordenar los resultados por distancia. ms-item-catalogo consulta a ms-inventario las prendas con unidades en la talla pedida y a ms-geolocalizacion la distancia a cada almacén. El usuario guarda una prenda en su playlist y, si la tienda la retira, ms-item-catalogo publica `catalogo.prenda.eliminada` y ms-playlist la quita de las playlists.
+
+<div align="center">
+  <table width="100%" style="margin: 18px 0; border: 2px dashed #C4B5FD; border-radius: 8px; background-color: #FBFBFE;">
+    <tr>
+      <td align="center" style="padding: 20px;">
+        <p>
+          <img src="https://img.shields.io/badge/DIAGRAMA-FLUJO-12063A?style=for-the-badge" alt="Diagrama de flujo de las playlists de estilo" /><br />
+          <strong><font color="#5600EF" size="3">PLAYLISTS DE ESTILO</font></strong>
+        </p>
+        <p>
+          <img src="docs/evidencias/flujo-playlists.png" width="100%" alt="Diagrama de flujo de las playlists de estilo" /><br />
+        </p>
+      </td>
+    </tr>
+  </table>
+</div>
+
+El usuario explora las playlists destacadas y las más populares, y crea la suya con nombre, estilo y visibilidad. Dentro de una playlist puede dar me gusta o guardarla en su perfil, y desde el catálogo agrega prendas con un máximo de 15. Al agregar una prenda, ms-playlist publica `playlist.prenda.asociada`; cuando el administrador destaca una playlist, con un máximo de tres, publica `playlist.destacada.actualizada`.
 ### Estructura Oficial de Paquetes en `src/main/java/`
 
 ```text
