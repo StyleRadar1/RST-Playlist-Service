@@ -1,0 +1,24 @@
+package edu.dosw.styleradar.playlist.infrastructure.adapter.in.rest;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+class HealthControllerTest {
+
+    @Test
+    void healthReturnsServiceUp() {
+        HealthController controller = new HealthController();
+        ResponseEntity<Map<String, Object>> response = controller.health();
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody())
+                .containsEntry("status", "UP")
+                .containsEntry("service", "ms-playlist")
+                .containsEntry("port", 8260);
+    }
+}
