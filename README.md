@@ -225,6 +225,46 @@ El agregado principal es `Playlist`, que guarda el nombre, la descripción, la `
 
 Se usa PostgreSQL porque las playlists, sus prendas y las interacciones de los usuarios tienen relaciones fijas. La tabla `playlist` guarda los datos de cada playlist y si está destacada; `playlist_prendas` guarda las prendas asociadas, y `playlist_likes` y `playlist_guardados` registran qué usuarios dieron me gusta o guardaron cada playlist, todas en relación uno a muchos con `playlist`. Las prendas y los usuarios se guardan solo por su identificador, ya que pertenecen a otros servicios (*Database-per-Service*).
 
+### Diagramas de Secuencia
+
+Los diagramas muestran, para cada funcionalidad, el recorrido de la petición por las capas del servicio, tanto en el camino exitoso como en los errores. Los fragmentos `alt` separan cada caso. Los archivos editables de draw.io están junto a las imágenes en `docs/evidencias`.
+
+<div align="center">
+  <table width="100%" style="margin: 18px 0; border: 2px dashed #C4B5FD; border-radius: 8px; background-color: #FBFBFE;">
+    <tr>
+      <td align="center" style="padding: 20px;">
+        <p>
+          <img src="https://img.shields.io/badge/DIAGRAMA-SECUENCIA-12063A?style=for-the-badge" alt="Diagrama de secuencia agregar prenda a una playlist" /><br />
+          <strong><font color="#5600EF" size="3">AGREGAR PRENDA A UNA PLAYLIST</font></strong>
+        </p>
+        <p>
+          <img src="docs/evidencias/diagrama-secuencia-agregar-prenda-playlist.png" width="100%" alt="Diagrama de secuencia agregar prenda a una playlist" /><br />
+        </p>
+      </td>
+    </tr>
+  </table>
+</div>
+
+La petición debe traer la cabecera `X-User-Id` con el identificador del usuario; si falta o no es válida se responde 401. Luego Spring valida el `AgregarPrendaRequest` y responde 400 si no viene la prenda. El caso de uso busca la playlist (si no existe, 404) y el dominio verifica que el usuario sea su dueño (si no, 403), que no supere las 15 prendas y que la prenda no esté repetida (si no, 422). Cuando todo está en orden, la prenda se agrega, se guarda en PostgreSQL, se publica el evento `playlist.prenda.asociada` y se responde 200 con la playlist actualizada (SR-RF-70).
+
+<div align="center">
+  <table width="100%" style="margin: 18px 0; border: 2px dashed #C4B5FD; border-radius: 8px; background-color: #FBFBFE;">
+    <tr>
+      <td align="center" style="padding: 20px;">
+        <p>
+          <img src="https://img.shields.io/badge/DIAGRAMA-SECUENCIA-12063A?style=for-the-badge" alt="Diagrama de secuencia destacar playlist" /><br />
+          <strong><font color="#5600EF" size="3">DESTACAR PLAYLIST</font></strong>
+        </p>
+        <p>
+          <img src="docs/evidencias/diagrama-secuencia-destacar-playlist.png" width="100%" alt="Diagrama de secuencia destacar playlist" /><br />
+        </p>
+      </td>
+    </tr>
+  </table>
+</div>
+
+Para destacar una playlist también se exige la cabecera `X-User-Id`. El caso de uso busca la playlist (si no existe, 404); si ya estaba destacada la devuelve sin cambios. Si no lo estaba, cuenta cuántas playlists destacadas hay: con 3 se responde 409, porque es el máximo permitido. Si hay cupo, la playlist se marca como destacada, se guarda, se publica el evento `playlist.destacada.actualizada` y se responde 200 (SR-RF-72).
+
 ### Estructura Oficial de Paquetes en `src/main/java/`
 
 ```text
@@ -300,22 +340,24 @@ src/main/java/edu/dosw/styleradar/playlist/
 
 | Método | Endpoint | Descripción | Rol Requerido | Códigos HTTP |
 | :---: | :--- | :--- | :--- | :---: |
-| `POST` | `/api/v1/playlists` | Crear una playlist | Autenticado | `201`, `400` |
+| `POST` | `/api/v1/playlists` | Crear una playlist (SR-RF-69) | Autenticado | `201`, `400`, `401` |
 | `GET` | `/api/v1/playlists` | Consultar las playlists públicas | Público | `200` |
-| `GET` | `/api/v1/playlists/{id}` | Consultar el detalle de una playlist | Público / Autenticado | `200`, `403`, `404` |
+| `GET` | `/api/v1/playlists/{id}` | Consultar el detalle de una playlist; las privadas solo las ve su dueño | Público / Autenticado | `200`, `403`, `404` |
 | `GET` | `/api/v1/playlists/destacadas` | Consultar las playlists destacadas (SR-RF-72) | Público | `200` |
-| `GET` | `/api/v1/playlists/populares` | Consultar las playlists más populares, paginadas | Público | `200` |
-| `GET` | `/api/v1/playlists/me` | Consultar las playlists creadas por el usuario | Autenticado | `200` |
-| `GET` | `/api/v1/playlists/me/guardadas` | Consultar las playlists guardadas por el usuario | Autenticado | `200` |
-| `PUT` | `/api/v1/playlists/{id}` | Editar una playlist propia (SR-RF-69) | Dueño | `200`, `400`, `403` |
-| `DELETE` | `/api/v1/playlists/{id}` | Eliminar una playlist propia | Dueño | `204`, `403`, `404` |
-| `PUT` | `/api/v1/playlists/{id}/destacar` | Destacar una playlist (SR-RF-72) | `ADMIN` | `200`, `409` |
-| `DELETE` | `/api/v1/playlists/{id}/destacar` | Quitar una playlist de destacadas | `ADMIN` | `200` |
-| `POST` | `/api/v1/playlists/{id}/prendas` | Agregar una prenda a la playlist (SR-RF-70) | Dueño | `200`, `404`, `422` |
-| `DELETE` | `/api/v1/playlists/{id}/prendas/{prendaId}` | Retirar una prenda de la playlist (SR-RF-70) | Dueño | `200`, `404` |
-| `POST` | `/api/v1/playlists/{id}/like` | Dar o quitar me gusta (SR-RF-71) | Autenticado | `200`, `404` |
-| `POST` | `/api/v1/playlists/{id}/guardar` | Guardar o quitar de guardadas (SR-RF-71) | Autenticado | `200`, `404` |
+| `GET` | `/api/v1/playlists/populares` | Consultar las playlists más populares, paginadas con `page` y `size` | Público | `200` |
+| `GET` | `/api/v1/playlists/me` | Consultar las playlists creadas por el usuario | Autenticado | `200`, `401` |
+| `GET` | `/api/v1/playlists/me/guardadas` | Consultar las playlists guardadas por el usuario | Autenticado | `200`, `401` |
+| `PUT` | `/api/v1/playlists/{id}` | Editar una playlist propia (SR-RF-69) | Dueño | `200`, `400`, `401`, `403`, `404` |
+| `DELETE` | `/api/v1/playlists/{id}` | Eliminar una playlist propia | Dueño | `204`, `401`, `403`, `404` |
+| `PUT` | `/api/v1/playlists/{id}/destacar` | Destacar una playlist, con un máximo de 3 (SR-RF-72) | `ADMIN` | `200`, `401`, `404`, `409` |
+| `DELETE` | `/api/v1/playlists/{id}/destacar` | Quitar una playlist de destacadas | `ADMIN` | `200`, `401`, `404` |
+| `POST` | `/api/v1/playlists/{id}/prendas` | Agregar una prenda a la playlist, con un máximo de 15 (SR-RF-70) | Dueño | `200`, `400`, `401`, `403`, `404`, `422` |
+| `DELETE` | `/api/v1/playlists/{id}/prendas/{prendaId}` | Retirar una prenda de la playlist (SR-RF-70) | Dueño | `200`, `401`, `403`, `404`, `422` |
+| `POST` | `/api/v1/playlists/{id}/like` | Dar o quitar me gusta (SR-RF-71) | Autenticado | `200`, `401`, `404` |
+| `POST` | `/api/v1/playlists/{id}/guardar` | Guardar o quitar de guardadas (SR-RF-71) | Autenticado | `200`, `401`, `404` |
 | `GET` | `/api/v1/health` | Estado del servicio | Público | `200` |
+
+Los endpoints que modifican datos o consultan las listas del usuario reciben la cabecera `X-User-Id` con su identificador (UUID), que envía el API Gateway; sin ella se responde 401.
 
 ---
 
@@ -329,8 +371,11 @@ La comunicación asíncrona entre microservicios se realiza a través de **Rabbi
 
 | Tipo | Evento | Emisor / Receptor | Propósito |
 | :---: | :--- | :--- | :--- |
-| **CONSUME** | `StockChangedEvent` | `ms-inventario` &rarr; `ms-playlist` | Actualiza la disponibilidad de las prendas de la playlist. |
-| **CONSUME** | `PrendaAgotadaEvent` | `ms-inventario` &rarr; `ms-playlist` | Marca la prenda como agotada sin retirarla de la playlist. |
+| **PUBLICA** | `playlist.prenda.asociada` | `ms-playlist` &rarr; `styleradar.events` | Se agregó una prenda a una playlist. |
+| **PUBLICA** | `playlist.destacada.actualizada` | `ms-playlist` &rarr; `styleradar.events` | Una playlist entró o salió de las destacadas. |
+| **CONSUME** | `catalogo.prenda.eliminada` | `ms-item-catalogo` &rarr; `ms-playlist` | Quita la prenda retirada del catálogo de todas las playlists. |
+
+Todos los eventos viajan por el exchange `styleradar.events` en formato JSON. Los que publica el servicio llevan `eventId`, `eventType`, `timestamp`, `producer` y, en `data`, el `playlistId` con el `prendaId` o el valor de `destacada`. El evento que consume se lee de la cola `q.playlist.prenda-eliminada` y toma el `prendaId` de la raíz del mensaje.
 
 ---
 
