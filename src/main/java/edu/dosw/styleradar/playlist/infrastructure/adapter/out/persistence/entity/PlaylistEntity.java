@@ -9,17 +9,18 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 @Entity
 @Table(name = "playlists")
 public class PlaylistEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "id", nullable = false, updatable = false)
+    private UUID id;
 
     @Column(name = "usuario_id", nullable = false)
-    private Long usuarioId;
+    private UUID usuarioId;
 
     @Column(nullable = false, length = 100)
     private String nombre;
@@ -51,19 +52,19 @@ public class PlaylistEntity {
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "playlist_likes", joinColumns = @JoinColumn(name = "playlist_id"))
     @Column(name = "usuario_id", nullable = false)
-    private Set<Long> likesUsuarios = new HashSet<>();
+    private Set<UUID> likesUsuarios = new HashSet<>();
 
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "playlist_guardados", joinColumns = @JoinColumn(name = "playlist_id"))
     @Column(name = "usuario_id", nullable = false)
-    private Set<Long> guardadosUsuarios = new HashSet<>();
+    private Set<UUID> guardadosUsuarios = new HashSet<>();
 
     public PlaylistEntity() {}
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public Long getUsuarioId() { return usuarioId; }
-    public void setUsuarioId(Long usuarioId) { this.usuarioId = usuarioId; }
+    public UUID getId() { return id; }
+    public void setId(UUID id) { this.id = id; }
+    public UUID getUsuarioId() { return usuarioId; }
+    public void setUsuarioId(UUID usuarioId) { this.usuarioId = usuarioId; }
     public String getNombre() { return nombre; }
     public void setNombre(String nombre) { this.nombre = nombre; }
     public String getDescripcion() { return descripcion; }
@@ -80,8 +81,8 @@ public class PlaylistEntity {
     public void setFechaActualizacion(Instant fechaActualizacion) { this.fechaActualizacion = fechaActualizacion; }
     public List<PrendaEmbeddable> getPrendas() { return prendas; }
     public void setPrendas(List<PrendaEmbeddable> prendas) { this.prendas = prendas; }
-    public Set<Long> getLikesUsuarios() { return likesUsuarios; }
-    public void setLikesUsuarios(Set<Long> likesUsuarios) { this.likesUsuarios = likesUsuarios; }
-    public Set<Long> getGuardadosUsuarios() { return guardadosUsuarios; }
-    public void setGuardadosUsuarios(Set<Long> guardadosUsuarios) { this.guardadosUsuarios = guardadosUsuarios; }
+    public Set<UUID> getLikesUsuarios() { return likesUsuarios; }
+    public void setLikesUsuarios(Set<UUID> likesUsuarios) { this.likesUsuarios = likesUsuarios; }
+    public Set<UUID> getGuardadosUsuarios() { return guardadosUsuarios; }
+    public void setGuardadosUsuarios(Set<UUID> guardadosUsuarios) { this.guardadosUsuarios = guardadosUsuarios; }
 }

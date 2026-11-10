@@ -25,6 +25,7 @@
         <jacoco.version>0.8.12</jacoco.version>
         <spotbugs.version>4.8.6.4</spotbugs.version>
         <jacoco.minimum>0.85</jacoco.minimum>
+        <testcontainers.version>1.21.4</testcontainers.version>
     </properties>
 
     <dependencies>

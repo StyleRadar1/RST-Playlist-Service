@@ -6,6 +6,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
+import java.util.UUID;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -17,18 +19,15 @@ class RabbitMQEventPublisherTest {
     private RabbitTemplate rabbitTemplate;
 
     @Test
-    void publicarPlaylistDestacadaActualizada() {
+    void publicarEventosConUUID() {
         RabbitMQEventPublisher publisher = new RabbitMQEventPublisher(rabbitTemplate);
-        publisher.publicarPlaylistDestacadaActualizada(1L, true);
+        UUID playlistId = UUID.randomUUID();
+        UUID prendaId = UUID.randomUUID();
 
+        publisher.publicarPlaylistDestacadaActualizada(playlistId, true);
         verify(rabbitTemplate).convertAndSend(eq("styleradar.events"), eq("playlist.destacada.actualizada"), any(Object.class));
-    }
 
-    @Test
-    void publicarPrendaAsociada() {
-        RabbitMQEventPublisher publisher = new RabbitMQEventPublisher(rabbitTemplate);
-        publisher.publicarPrendaAsociada(1L, 10L);
-
+        publisher.publicarPrendaAsociada(playlistId, prendaId);
         verify(rabbitTemplate).convertAndSend(eq("styleradar.events"), eq("playlist.prenda.asociada"), any(Object.class));
     }
 }

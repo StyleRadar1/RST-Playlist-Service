@@ -9,14 +9,15 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.UUID;
 
-public interface SpringDataPlaylistRepository extends JpaRepository<PlaylistEntity, Long> {
+public interface SpringDataPlaylistRepository extends JpaRepository<PlaylistEntity, UUID> {
 
     List<PlaylistEntity> findByVisibilidadOrderByFechaCreacionDesc(VisibilidadPlaylist visibilidad);
 
-    List<PlaylistEntity> findByUsuarioIdOrderByFechaCreacionDesc(Long usuarioId);
+    List<PlaylistEntity> findByUsuarioIdOrderByFechaCreacionDesc(UUID usuarioId);
 
-    List<PlaylistEntity> findByGuardadosUsuariosContainsOrderByFechaCreacionDesc(Long usuarioId);
+    List<PlaylistEntity> findByGuardadosUsuariosContainsOrderByFechaCreacionDesc(UUID usuarioId);
 
     List<PlaylistEntity> findByDestacadaTrueOrderByFechaActualizacionDesc();
 
@@ -28,5 +29,5 @@ public interface SpringDataPlaylistRepository extends JpaRepository<PlaylistEnti
     Page<PlaylistEntity> findPopulares(Pageable pageable);
 
     @Query("SELECT DISTINCT p FROM PlaylistEntity p JOIN p.prendas pr WHERE pr.prendaId = :prendaId")
-    List<PlaylistEntity> findAllByPrendaId(@Param("prendaId") Long prendaId);
+    List<PlaylistEntity> findAllByPrendaId(@Param("prendaId") UUID prendaId);
 }
