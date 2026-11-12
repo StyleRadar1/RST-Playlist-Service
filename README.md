@@ -64,7 +64,7 @@
 * **Identificador de Servicio:** `ms-playlist`
 * **Paquete Arquitectónico:** `Paquete 2: Catálogo`
 * **Puerto de Escucha Oficial:** `8260`
-* **Base de Datos Asignada:** `PostgreSQL 15.8` (`styleradar_playlist`), aislada bajo el patrón *Database-per-Service*.
+* **Base de Datos Asignada:** `PostgreSQL 16` (`playlist_db`), aislada bajo el patrón *Database-per-Service*.
 * **Bounded Context:** `Playlists de estilo`
 
 ### Responsabilidades del Dominio
@@ -387,7 +387,7 @@ Todos los eventos viajan por el exchange `styleradar.events` en formato JSON. Lo
 | :--- | :--- | :--- |
 | **Lenguaje Core** | Java | `21` |
 | **Framework** | Spring Boot | `3.3.4` |
-| **Base de Datos** | PostgreSQL | `15.8` |
+| **Base de Datos** | PostgreSQL | `16` |
 | **Migraciones de BD** | Flyway | Gestionada por Spring Boot |
 | **Broker de Mensajería** | RabbitMQ | `3.13.7` |
 | **Mapeo de DTOs** | MapStruct | `1.5.5.Final` |
@@ -461,7 +461,7 @@ Las variables se definen en `.env`, que no se versiona. La plantilla `.env.examp
 | `SERVER_PORT` | Puerto del servicio | `8260` |
 | `DB_HOST` | Host de PostgreSQL | `localhost` |
 | `DB_PORT` | Puerto de PostgreSQL | `5432` |
-| `DB_NAME` | Nombre de la base de datos | `styleradar_playlist` |
+| `DB_NAME` | Nombre de la base de datos | `playlist_db` |
 | `DB_USER` | Usuario de PostgreSQL | `postgres` |
 | `DB_PASSWORD` | Contraseña de PostgreSQL | — |
 | `RABBITMQ_HOST` | Host de RabbitMQ | `localhost` |
