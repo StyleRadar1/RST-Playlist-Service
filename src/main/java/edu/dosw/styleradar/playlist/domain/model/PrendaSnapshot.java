@@ -5,15 +5,10 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class PrendaSnapshot {
-    private UUID prendaId;
-    private String nombrePrenda;
-    private Instant fechaAsociacion;
+    private final UUID prendaId;
+    private final String nombrePrenda;
+    private final Instant fechaAsociacion;
     private boolean disponible;
-
-    public PrendaSnapshot() {
-        this.fechaAsociacion = Instant.now();
-        this.disponible = true;
-    }
 
     public PrendaSnapshot(UUID prendaId, String nombrePrenda, Instant fechaAsociacion) {
         this(prendaId, nombrePrenda, fechaAsociacion, true);
@@ -39,13 +34,8 @@ public class PrendaSnapshot {
     }
 
     public UUID getPrendaId() { return prendaId; }
-    public void setPrendaId(UUID prendaId) { this.prendaId = prendaId; }
-
     public String getNombrePrenda() { return nombrePrenda; }
-    public void setNombrePrenda(String nombrePrenda) { this.nombrePrenda = nombrePrenda; }
-
     public Instant getFechaAsociacion() { return fechaAsociacion; }
-    public void setFechaAsociacion(Instant fechaAsociacion) { this.fechaAsociacion = fechaAsociacion; }
 
     public boolean isDisponible() { return disponible; }
     public void setDisponible(boolean disponible) { this.disponible = disponible; }
