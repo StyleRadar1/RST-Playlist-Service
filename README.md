@@ -196,7 +196,7 @@ El diagrama muestra los cuatro microservicios del paquete Catálogo y cómo se r
           <strong><font color="#5600EF" size="3">DIAGRAMA DE COMPONENTES ESPECÍFICO (HEXAGONAL)</font></strong>
         </p>
         <p>
-          <img src="docs/evidencias/StyleRadar-ComponentesPlayList.png" width="100%" alt="Diagrama de componentes" /><br />
+          <img src="docs/evidencias/ComponentesPlaylistSR.drawio.png" width="100%" alt="Diagrama de componentes" /><br />
         </p>
       </td>
     </tr>
@@ -216,7 +216,7 @@ El diagrama muestra el servicio en arquitectura hexagonal. Las peticiones llegan
           <strong><font color="#5600EF" size="3">DIAGRAMA DE CLASES DEL DOMINIO</font></strong>
         </p>
         <p>
-          <img src="docs/evidencias/StyleRadar-DiagramadeClasesPlaylist.drawio.png" width="100%" alt="Diagrama de clases" /><br />
+          <img src="docs/evidencias/DiagramaClasesPlaylistSR.drawio.png" width="100%" alt="Diagrama de clases" /><br />
         </p>
       </td>
     </tr>
@@ -236,7 +236,7 @@ El agregado principal es `Playlist`, que guarda el nombre, la descripción, la `
           <strong><font color="#5600EF" size="3">MODELO DE DATOS (POSTGRESQL)</font></strong>
         </p>
         <p>
-          <img src="docs/evidencias/StyleRadar-DiagramaEventoRelacionPlaylist.drawio.png" width="100%" alt="Diagrama de base de datos" /><br />
+          <img src="docs/evidencias/DiagramaEntidadRelacionPlaylistSR.drawio.png" width="100%" alt="Diagrama de base de datos" /><br />
         </p>
       </td>
     </tr>
