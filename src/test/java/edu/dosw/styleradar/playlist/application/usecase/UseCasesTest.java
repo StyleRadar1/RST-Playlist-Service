@@ -128,6 +128,7 @@ class UseCasesTest {
 
         when(repository.findAllConPrenda(prendaId)).thenReturn(List.of(p));
         asociarPrendaUseCase.desvincularPrendaDeTodas(prendaId);
+        asociarPrendaUseCase.marcarPrendaNoDisponibleEnTodas(prendaId);
     }
 
     @Test

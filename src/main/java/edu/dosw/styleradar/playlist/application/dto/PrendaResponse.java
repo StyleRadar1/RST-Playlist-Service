@@ -6,5 +6,6 @@ import java.util.UUID;
 public record PrendaResponse(
     UUID prendaId,
     String nombrePrenda,
-    Instant fechaAsociacion
+    Instant fechaAsociacion,
+    boolean disponible
 ) {}

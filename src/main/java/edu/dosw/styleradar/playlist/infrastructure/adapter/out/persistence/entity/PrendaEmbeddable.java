@@ -18,12 +18,20 @@ public class PrendaEmbeddable {
     @Column(name = "fecha_asociacion")
     private Instant fechaAsociacion;
 
+    @Column(name = "disponible", nullable = false)
+    private boolean disponible = true;
+
     public PrendaEmbeddable() {}
 
-    public PrendaEmbeddable(UUID prendaId, String nombrePrenda, Instant fechaAsociacion) {
+    public PrendaEmbeddable(UUID prendaId, String nombrePrenda, Instant fechaAsociacion, boolean disponible) {
         this.prendaId = prendaId;
         this.nombrePrenda = nombrePrenda;
         this.fechaAsociacion = fechaAsociacion;
+        this.disponible = disponible;
+    }
+
+    public PrendaEmbeddable(UUID prendaId, String nombrePrenda, Instant fechaAsociacion) {
+        this(prendaId, nombrePrenda, fechaAsociacion, true);
     }
 
     public UUID getPrendaId() { return prendaId; }
@@ -32,4 +40,6 @@ public class PrendaEmbeddable {
     public void setNombrePrenda(String nombrePrenda) { this.nombrePrenda = nombrePrenda; }
     public Instant getFechaAsociacion() { return fechaAsociacion; }
     public void setFechaAsociacion(Instant fechaAsociacion) { this.fechaAsociacion = fechaAsociacion; }
+    public boolean isDisponible() { return disponible; }
+    public void setDisponible(boolean disponible) { this.disponible = disponible; }
 }
