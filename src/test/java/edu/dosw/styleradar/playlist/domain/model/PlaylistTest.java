@@ -121,6 +121,21 @@ class PlaylistTest {
     }
 
     @Test
+    void marcarPrendaNoDisponibleEnPlaylist() {
+        UUID prendaId = UUID.randomUUID();
+        Playlist p = Playlist.crear(UUID.randomUUID(), "Colección", null, VisibilidadPlaylist.PUBLICA, Estilo.CASUAL);
+        p.agregarPrenda(new PrendaSnapshot(prendaId, "Pantalón", Instant.now()));
+
+        assertThat(p.getPrendas().get(0).isDisponible()).isTrue();
+        boolean marcada = p.marcarPrendaNoDisponible(prendaId);
+        assertThat(marcada).isTrue();
+        assertThat(p.getPrendas().get(0).isDisponible()).isFalse();
+
+        assertThat(p.marcarPrendaNoDisponible(null)).isFalse();
+        assertThat(p.marcarPrendaNoDisponible(UUID.randomUUID())).isFalse();
+    }
+
+    @Test
     void alternarLikeYGuardado() {
         Playlist p = Playlist.crear(UUID.randomUUID(), "Colección", null, VisibilidadPlaylist.PUBLICA, Estilo.CASUAL);
         UUID userLike = UUID.randomUUID();

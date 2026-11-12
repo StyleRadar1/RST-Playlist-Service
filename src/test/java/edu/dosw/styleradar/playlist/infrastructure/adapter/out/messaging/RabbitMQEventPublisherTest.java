@@ -25,9 +25,9 @@ class RabbitMQEventPublisherTest {
         UUID prendaId = UUID.randomUUID();
 
         publisher.publicarPlaylistDestacadaActualizada(playlistId, true);
-        verify(rabbitTemplate).convertAndSend(eq("styleradar.events"), eq("playlist.destacada.actualizada"), any(Object.class));
+        verify(rabbitTemplate).convertAndSend(eq("styleradar.exchange"), eq("playlist.destacada.actualizada"), any(Object.class));
 
         publisher.publicarPrendaAsociada(playlistId, prendaId);
-        verify(rabbitTemplate).convertAndSend(eq("styleradar.events"), eq("playlist.prenda.asociada"), any(Object.class));
+        verify(rabbitTemplate).convertAndSend(eq("styleradar.exchange"), eq("playlist.prenda.asociada"), any(Object.class));
     }
 }
