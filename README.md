@@ -196,14 +196,14 @@ El diagrama muestra los cuatro microservicios del paquete Catálogo y cómo se r
           <strong><font color="#5600EF" size="3">DIAGRAMA DE COMPONENTES ESPECÍFICO (HEXAGONAL)</font></strong>
         </p>
         <p>
-          <img src="docs/evidencias/StyleRadar-ComponentesPlayList.png" width="100%" alt="Diagrama de componentes" /><br />
+          <img src="docs/evidencias/DiagramaComponentesPlaylist.png" width="100%" alt="Diagrama de componentes" /><br />
         </p>
       </td>
     </tr>
   </table>
 </div>
 
-El diagrama muestra el servicio en arquitectura hexagonal. Las peticiones llegan desde el API Gateway al controller REST de playlists y los eventos del catálogo llegan por RabbitMQ a `CatalogoEventsConsumer` (adaptadores de entrada), que solo conocen el caso de uso (puerto de entrada). La lógica de aplicación usa los puertos de salida para guardar las playlists en PostgreSQL (`PlaylistRepositoryPort`), publicar sus eventos en RabbitMQ (`PlaylistEventPublisherPort`) y mantener en Redis las playlists destacadas (`PlaylistCachePort`). Las dependencias apuntan hacia adentro, por lo que el dominio no conoce Spring, JPA ni HTTP.
+El diagrama muestra el servicio en arquitectura hexagonal. Las peticiones llegan desde el API Gateway al controller REST de playlists y el evento `styleradar.catalogo.prenda.retirada` llega por RabbitMQ a `CatalogoEventsConsumer` (adaptadores de entrada), que solo conocen los casos de uso (puertos de entrada): crear, consultar, interactuar, destacar y asociar prendas, cada uno con su implementación. La lógica de aplicación usa los puertos de salida para guardar las playlists en PostgreSQL 16 (`PlaylistRepositoryPort`) y publicar sus eventos en el exchange `styleradar.exchange` de RabbitMQ (`PlaylistEventPublisherPort`); los mensajes que fallan pasan por `styleradar.dlx` a la cola `styleradar.playlist.dlq`. El archivo editable está en `docs/evidencias/DiagramaComponentesPlaylist.drawio`. Las dependencias apuntan hacia adentro, por lo que el dominio no conoce Spring, JPA ni HTTP.
 
 ### Diagrama de Clases
 
@@ -216,14 +216,14 @@ El diagrama muestra el servicio en arquitectura hexagonal. Las peticiones llegan
           <strong><font color="#5600EF" size="3">DIAGRAMA DE CLASES DEL DOMINIO</font></strong>
         </p>
         <p>
-          <img src="docs/evidencias/StyleRadar-DiagramadeClasesPlaylist.drawio.png" width="100%" alt="Diagrama de clases" /><br />
+          <img src="docs/evidencias/DiagramaClasesPlaylist.png" width="100%" alt="Diagrama de clases" /><br />
         </p>
       </td>
     </tr>
   </table>
 </div>
 
-El agregado principal es `Playlist`, que guarda el nombre, la descripción, la `VisibilidadPlaylist` (pública o privada), el `EstiloMusical` y las prendas asociadas como `PrendaSnapshot`, una copia del nombre de la prenda tomada del catálogo. Los métodos del agregado cubren crear, destacar y quitar de destacadas (SR-RF-72), asociar y retirar prendas (SR-RF-70), y alternar el me gusta y el guardado de cada usuario (SR-RF-71). Antes de modificar o mostrar una playlist se valida que el usuario sea su dueño o que la playlist sea pública.
+El agregado principal es `Playlist`, que guarda el nombre, la descripción, la `VisibilidadPlaylist` (pública o privada), el `Estilo` (casual, formal, deportivo o urbano) y hasta 15 prendas asociadas como `PrendaSnapshot`, una copia del nombre de la prenda tomada del catálogo que se marca como no disponible cuando la prenda sale del catálogo. Los métodos del agregado cubren crear, destacar y quitar de destacadas (SR-RF-72), asociar y retirar prendas (SR-RF-70), y alternar el me gusta y el guardado de cada usuario (SR-RF-71). Antes de modificar o mostrar una playlist se valida que el usuario sea su dueño o que la playlist sea pública. Los errores de negocio heredan de `DomainException`. El archivo editable está en `docs/evidencias/DiagramaClasesPlaylist.drawio`.
 
 ### Diagrama de Base de Datos
 
@@ -236,14 +236,14 @@ El agregado principal es `Playlist`, que guarda el nombre, la descripción, la `
           <strong><font color="#5600EF" size="3">MODELO DE DATOS (POSTGRESQL)</font></strong>
         </p>
         <p>
-          <img src="docs/evidencias/StyleRadar-DiagramaEventoRelacionPlaylist.drawio.png" width="100%" alt="Diagrama de base de datos" /><br />
+          <img src="docs/evidencias/DiagramaEntidadRelacionPlaylist.png" width="100%" alt="Diagrama de base de datos" /><br />
         </p>
       </td>
     </tr>
   </table>
 </div>
 
-Se usa PostgreSQL porque las playlists, sus prendas y las interacciones de los usuarios tienen relaciones fijas. La tabla `playlist` guarda los datos de cada playlist y si está destacada; `playlist_prendas` guarda las prendas asociadas, y `playlist_likes` y `playlist_guardados` registran qué usuarios dieron me gusta o guardaron cada playlist, todas en relación uno a muchos con `playlist`. Las prendas y los usuarios se guardan solo por su identificador, ya que pertenecen a otros servicios (*Database-per-Service*).
+Se usa PostgreSQL porque las playlists, sus prendas y las interacciones de los usuarios tienen relaciones fijas. La tabla `playlists` guarda los datos de cada playlist y si está destacada; `playlist_prendas` guarda las prendas asociadas y si siguen disponibles, y `playlist_likes` y `playlist_guardados` registran qué usuarios dieron me gusta o guardaron cada playlist, todas en relación uno a muchos con `playlists`. Las prendas y los usuarios se guardan solo por su identificador, ya que pertenecen a otros servicios (*Database-per-Service*). El archivo editable está en `docs/evidencias/DiagramaEntidadRelacionPlaylist.drawio`.
 
 ### Diagramas de Secuencia
 
