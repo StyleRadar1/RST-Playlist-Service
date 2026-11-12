@@ -35,7 +35,7 @@ public class AsociarPrendaUseCaseImpl implements AsociarPrendaUseCase {
         Playlist playlist = repository.findById(playlistId)
                 .orElseThrow(() -> new ResourceNotFoundException("No existe playlist con ID: " + playlistId));
         playlist.validarPropietario(usuarioId);
-        PrendaSnapshot snapshot = new PrendaSnapshot(request.prendaId(), request.nombrePrenda(), Instant.now());
+        PrendaSnapshot snapshot = new PrendaSnapshot(request.prendaId(), request.nombrePrenda(), Instant.now(), true);
         playlist.agregarPrenda(snapshot);
         Playlist guardada = repository.save(playlist);
         eventPublisher.publicarPrendaAsociada(guardada.getId(), request.prendaId());
@@ -55,6 +55,16 @@ public class AsociarPrendaUseCaseImpl implements AsociarPrendaUseCase {
         List<Playlist> afectadas = repository.findAllConPrenda(prendaId);
         for (Playlist p : afectadas) {
             if (p.desvincularPrendaSilencioso(prendaId)) {
+                repository.save(p);
+            }
+        }
+    }
+
+    @Override
+    public void marcarPrendaNoDisponibleEnTodas(UUID prendaId) {
+        List<Playlist> afectadas = repository.findAllConPrenda(prendaId);
+        for (Playlist p : afectadas) {
+            if (p.marcarPrendaNoDisponible(prendaId)) {
                 repository.save(p);
             }
         }

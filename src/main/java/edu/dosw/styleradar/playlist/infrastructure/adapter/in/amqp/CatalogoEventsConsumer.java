@@ -16,12 +16,12 @@ public class CatalogoEventsConsumer {
         this.asociarPrendaUseCase = asociarPrendaUseCase;
     }
 
-    @RabbitListener(queues = "${styleradar.rabbitmq.queues.prenda-eliminada:q.playlist.prenda-eliminada}")
-    public void handlePrendaEliminada(Map<String, Object> event) {
+    @RabbitListener(queues = "${styleradar.rabbitmq.queues.prenda-retirada:styleradar.playlist.prenda-retirada.q}")
+    public void handlePrendaRetirada(Map<String, Object> event) {
         if (event != null && event.get("prendaId") != null) {
             try {
                 UUID prendaId = UUID.fromString(event.get("prendaId").toString());
-                asociarPrendaUseCase.desvincularPrendaDeTodas(prendaId);
+                asociarPrendaUseCase.marcarPrendaNoDisponibleEnTodas(prendaId);
             } catch (IllegalArgumentException ignored) {}
         }
     }
