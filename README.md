@@ -183,7 +183,7 @@ flowchart TD
   </table>
 </div>
 
-El diagrama muestra los cuatro microservicios del paquete Catálogo y cómo se relacionan. El front entra por el API Gateway con HTTPS bajo `/api/v1`. `ms-item-catalogo` consulta por Feign a `ms-inventario` las prendas con unidades en una talla y a `ms-geolocalizacion` la distancia a cada almacén. Los eventos viajan por el exchange `styleradar.events` de RabbitMQ: ítem-catálogo publica `catalogo.prenda.creada` y `catalogo.prenda.eliminada` y consume `inventario.stock.agotado`; inventario publica `inventario.stock.agotado` e `inventario.stock.ultimas-unidades`; y playlist consume `catalogo.prenda.eliminada`. Cada servicio tiene su propia base PostgreSQL. El archivo editable está en `docs/evidencias/diagrama-componentes-general-paquete.drawio`.
+El diagrama muestra los cuatro microservicios del paquete Catálogo y cómo se relacionan. El front entra por el API Gateway con HTTPS bajo `/api/v1`. `ms-item-catalogo` consulta por Feign a `ms-inventario` las prendas con unidades en una talla y a `ms-geolocalizacion` la distancia a cada almacén. Los eventos viajan por el exchange `styleradar.exchange` de RabbitMQ: ítem-catálogo publica `styleradar.catalogo.prenda.publicada`, `styleradar.catalogo.prenda.retirada` y `styleradar.catalogo.moderacion.cambiada` y consume `styleradar.inventario.actualizado` y `styleradar.inventario.stock.agotado`; inventario publica `styleradar.inventario.actualizado`, `styleradar.inventario.stock.agotado` y `styleradar.inventario.stock.ultimas-unidades`; y playlist consume `styleradar.catalogo.prenda.retirada`. Cada servicio tiene su propia base PostgreSQL. El archivo editable está en `docs/evidencias/diagrama-componentes-general-paquete.drawio`.
 
 ### Diagrama de Componentes Específico
 
@@ -305,7 +305,7 @@ Los diagramas de flujo muestran el recorrido del usuario por las pantallas de St
   </table>
 </div>
 
-El usuario busca y filtra prendas por tipo, color, talla o precio, y puede ordenar los resultados por distancia. ms-item-catalogo consulta a ms-inventario las prendas con unidades en la talla pedida y a ms-geolocalizacion la distancia a cada almacén. El usuario guarda una prenda en su playlist y, si la tienda la retira, ms-item-catalogo publica `catalogo.prenda.eliminada` y ms-playlist la quita de las playlists.
+El usuario busca y filtra prendas por tipo, color, talla o precio, y puede ordenar los resultados por distancia. ms-item-catalogo consulta a ms-inventario las prendas con unidades en la talla pedida y a ms-geolocalizacion la distancia a cada almacén. El usuario guarda una prenda en su playlist y, si la tienda la retira, ms-item-catalogo publica `styleradar.catalogo.prenda.retirada` y ms-playlist la marca como no disponible en las playlists.
 
 <div align="center">
   <table width="100%" style="margin: 18px 0; border: 2px dashed #C4B5FD; border-radius: 8px; background-color: #FBFBFE;">
@@ -430,11 +430,11 @@ La comunicación asíncrona entre microservicios se realiza a través de **Rabbi
 
 | Tipo | Evento | Emisor / Receptor | Propósito |
 | :---: | :--- | :--- | :--- |
-| **PUBLICA** | `playlist.prenda.asociada` | `ms-playlist` &rarr; `styleradar.events` | Se agregó una prenda a una playlist. |
-| **PUBLICA** | `playlist.destacada.actualizada` | `ms-playlist` &rarr; `styleradar.events` | Una playlist entró o salió de las destacadas. |
-| **CONSUME** | `catalogo.prenda.eliminada` | `ms-item-catalogo` &rarr; `ms-playlist` | Quita la prenda retirada del catálogo de todas las playlists. |
+| **PUBLICA** | `playlist.prenda.asociada` | `ms-playlist` &rarr; `styleradar.exchange` | Se agregó una prenda a una playlist. |
+| **PUBLICA** | `playlist.destacada.actualizada` | `ms-playlist` &rarr; `styleradar.exchange` | Una playlist entró o salió de las destacadas. |
+| **CONSUME** | `styleradar.catalogo.prenda.retirada` | `ms-item-catalogo` &rarr; `ms-playlist` | Marca la prenda como no disponible en todas las playlists. |
 
-Todos los eventos viajan por el exchange `styleradar.events` en formato JSON. Los que publica el servicio llevan `eventId`, `eventType`, `timestamp`, `producer` y, en `data`, el `playlistId` con el `prendaId` o el valor de `destacada`. El evento que consume se lee de la cola `q.playlist.prenda-eliminada` y toma el `prendaId` de la raíz del mensaje.
+Todos los eventos viajan por el exchange `styleradar.exchange` en formato JSON. Los que publica el servicio llevan `eventId`, `eventType`, `timestamp`, `producer` y, en `data`, el `playlistId` con el `prendaId` o el valor de `destacada`. El evento que consume se lee de la cola `styleradar.playlist.prenda-retirada.q` y toma el `prendaId` de la raíz del mensaje. Los mensajes que fallan pasan por `styleradar.dlx` a la cola `styleradar.playlist.dlq`.
 
 ---
 
