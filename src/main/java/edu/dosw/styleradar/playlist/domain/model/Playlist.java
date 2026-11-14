@@ -104,6 +104,21 @@ public class Playlist {
         return removida;
     }
 
+    public boolean marcarPrendaNoDisponible(UUID prendaId) {
+        if (prendaId == null) return false;
+        boolean encontrada = false;
+        for (PrendaSnapshot p : this.prendas) {
+            if (p.getPrendaId().equals(prendaId)) {
+                p.marcarNoDisponible();
+                encontrada = true;
+            }
+        }
+        if (encontrada) {
+            this.fechaActualizacion = Instant.now();
+        }
+        return encontrada;
+    }
+
     public void destacar() {
         this.destacada = true;
         this.fechaActualizacion = Instant.now();

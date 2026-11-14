@@ -19,19 +19,19 @@ class CatalogoEventsConsumerTest {
     private AsociarPrendaUseCase asociarPrendaUseCase;
 
     @Test
-    void consumeEventoPrendaEliminadaCorrectamente() {
+    void consumeEventoPrendaRetiradaCorrectamente() {
         UUID prendaId = UUID.randomUUID();
         CatalogoEventsConsumer consumer = new CatalogoEventsConsumer(asociarPrendaUseCase);
-        consumer.handlePrendaEliminada(Map.of("prendaId", prendaId.toString()));
+        consumer.handlePrendaRetirada(Map.of("prendaId", prendaId.toString()));
 
-        verify(asociarPrendaUseCase).desvincularPrendaDeTodas(prendaId);
+        verify(asociarPrendaUseCase).marcarPrendaNoDisponibleEnTodas(prendaId);
     }
 
     @Test
     void consumeEventoInvalidoNoFalla() {
         CatalogoEventsConsumer consumer = new CatalogoEventsConsumer(asociarPrendaUseCase);
-        consumer.handlePrendaEliminada(null);
-        consumer.handlePrendaEliminada(Map.of("prendaId", "no-es-uuid"));
+        consumer.handlePrendaRetirada(null);
+        consumer.handlePrendaRetirada(Map.of("prendaId", "no-es-uuid"));
 
         verifyNoInteractions(asociarPrendaUseCase);
     }

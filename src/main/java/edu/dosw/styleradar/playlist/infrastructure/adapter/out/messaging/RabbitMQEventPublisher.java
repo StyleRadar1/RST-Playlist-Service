@@ -11,7 +11,7 @@ import java.util.UUID;
 @Component
 public class RabbitMQEventPublisher implements PlaylistEventPublisherPort {
 
-    static final String EXCHANGE = "styleradar.events";
+    static final String EXCHANGE = "styleradar.exchange";
     private final RabbitTemplate rabbitTemplate;
 
     public RabbitMQEventPublisher(RabbitTemplate rabbitTemplate) {

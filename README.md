@@ -64,7 +64,7 @@
 * **Identificador de Servicio:** `ms-playlist`
 * **Paquete Arquitectónico:** `Paquete 2: Catálogo`
 * **Puerto de Escucha Oficial:** `8260`
-* **Base de Datos Asignada:** `PostgreSQL 15.8` (`styleradar_playlist`), aislada bajo el patrón *Database-per-Service*.
+* **Base de Datos Asignada:** `PostgreSQL 16` (`playlist_db`), aislada bajo el patrón *Database-per-Service*.
 * **Bounded Context:** `Playlists de estilo`
 
 ### Responsabilidades del Dominio
@@ -165,6 +165,46 @@ flowchart TD
     class INFRA_IN,INFRA_OUT,REST,AMQP_IN,JPA_REPO,RABBIT_PUB infra;
 ```
 
+### Diagrama de Componentes General del Paquete
+
+<div align="center">
+  <table width="100%" style="margin: 18px 0; border: 2px dashed #C4B5FD; border-radius: 8px; background-color: #FBFBFE;">
+    <tr>
+      <td align="center" style="padding: 20px;">
+        <p>
+          <img src="https://img.shields.io/badge/DIAGRAMA-COMPONENTES%20GENERAL-12063A?style=for-the-badge" alt="Diagrama de componentes general" /><br />
+          <strong><font color="#5600EF" size="3">DIAGRAMA DE COMPONENTES GENERAL · PAQUETE 2 CATÁLOGO</font></strong>
+        </p>
+        <p>
+          <img src="docs/evidencias/diagrama-componentes-general-paquete.png" width="100%" alt="Diagrama de componentes general del paquete" /><br />
+        </p>
+      </td>
+    </tr>
+  </table>
+</div>
+
+El diagrama muestra los cuatro microservicios del paquete Catálogo y cómo se relacionan. El front entra por el API Gateway con HTTPS bajo `/api/v1`. `ms-item-catalogo` consulta por Feign a `ms-inventario` las prendas con unidades en una talla y a `ms-geolocalizacion` la distancia a cada almacén. Los eventos viajan por el exchange `styleradar.exchange` de RabbitMQ: ítem-catálogo publica `styleradar.catalogo.prenda.publicada`, `styleradar.catalogo.prenda.retirada` y `styleradar.catalogo.moderacion.cambiada` y consume `styleradar.inventario.actualizado` y `styleradar.inventario.stock.agotado`; inventario publica `styleradar.inventario.actualizado`, `styleradar.inventario.stock.agotado` y `styleradar.inventario.stock.ultimas-unidades`; y playlist consume `styleradar.catalogo.prenda.retirada`. Cada servicio tiene su propia base PostgreSQL. El archivo editable está en `docs/evidencias/diagrama-componentes-general-paquete.drawio`.
+
+### Diagrama de Despliegue
+
+<div align="center">
+  <table width="100%" style="margin: 18px 0; border: 2px dashed #C4B5FD; border-radius: 8px; background-color: #FBFBFE;">
+    <tr>
+      <td align="center" style="padding: 20px;">
+        <p>
+          <img src="https://img.shields.io/badge/DIAGRAMA-DESPLIEGUE-12063A?style=for-the-badge" alt="Diagrama de despliegue" /><br />
+          <strong><font color="#5600EF" size="3">DIAGRAMA DE DESPLIEGUE · PAQUETE 2 CATÁLOGO</font></strong>
+        </p>
+        <p>
+          <img src="docs/evidencias/diagrama-despliegue-paquete.png" width="100%" alt="Diagrama de despliegue del paquete" /><br />
+        </p>
+      </td>
+    </tr>
+  </table>
+</div>
+
+El diagrama muestra dónde se ejecuta cada parte del paquete. Con cada push a `develop` o `master`, GitHub Actions construye la imagen del servicio, la publica en GitHub Container Registry y la despliega en Azure Container Apps (entorno `styleradar-cae-prod`, región northcentralus): `develop` va al ambiente QA y `master` al ambiente PROD, cada uno con un contenedor por servicio. El front llega a los contenedores a través del API Gateway por HTTPS. Los servicios guardan sus datos en Azure Database for PostgreSQL 16 (`styleradar-postgres-prod`), con una base por servicio y por ambiente, y se comunican por eventos con el broker RabbitMQ del curso. El archivo editable está en `docs/evidencias/diagrama-despliegue-paquete.drawio`.
+
 ### Diagrama de Componentes Específico
 
 <div align="center">
@@ -176,14 +216,14 @@ flowchart TD
           <strong><font color="#5600EF" size="3">DIAGRAMA DE COMPONENTES ESPECÍFICO (HEXAGONAL)</font></strong>
         </p>
         <p>
-          <img src="docs/evidencias/StyleRadar-ComponentesPlayList.png" width="100%" alt="Diagrama de componentes" /><br />
+          <img src="docs/evidencias/DiagramaComponentesPlaylist.png" width="100%" alt="Diagrama de componentes" /><br />
         </p>
       </td>
     </tr>
   </table>
 </div>
 
-El diagrama muestra el servicio en arquitectura hexagonal. Las peticiones llegan desde el API Gateway al controller REST de playlists y los eventos del catálogo llegan por RabbitMQ a `CatalogoEventsConsumer` (adaptadores de entrada), que solo conocen el caso de uso (puerto de entrada). La lógica de aplicación usa los puertos de salida para guardar las playlists en PostgreSQL (`PlaylistRepositoryPort`), publicar sus eventos en RabbitMQ (`PlaylistEventPublisherPort`) y mantener en Redis las playlists destacadas (`PlaylistCachePort`). Las dependencias apuntan hacia adentro, por lo que el dominio no conoce Spring, JPA ni HTTP.
+El diagrama muestra el servicio en arquitectura hexagonal. Las peticiones llegan desde el API Gateway al controller REST de playlists y el evento `styleradar.catalogo.prenda.retirada` llega por RabbitMQ a `CatalogoEventsConsumer` (adaptadores de entrada), que solo conocen los casos de uso (puertos de entrada): crear, consultar, interactuar, destacar y asociar prendas, cada uno con su implementación. La lógica de aplicación usa los puertos de salida para guardar las playlists en PostgreSQL 16 (`PlaylistRepositoryPort`) y publicar sus eventos en el exchange `styleradar.exchange` de RabbitMQ (`PlaylistEventPublisherPort`); los mensajes que fallan pasan por `styleradar.dlx` a la cola `styleradar.playlist.dlq`. El archivo editable está en `docs/evidencias/DiagramaComponentesPlaylist.drawio`. Las dependencias apuntan hacia adentro, por lo que el dominio no conoce Spring, JPA ni HTTP.
 
 ### Diagrama de Clases
 
@@ -196,14 +236,14 @@ El diagrama muestra el servicio en arquitectura hexagonal. Las peticiones llegan
           <strong><font color="#5600EF" size="3">DIAGRAMA DE CLASES DEL DOMINIO</font></strong>
         </p>
         <p>
-          <img src="docs/evidencias/StyleRadar-DiagramadeClasesPlaylist.drawio.png" width="100%" alt="Diagrama de clases" /><br />
+          <img src="docs/evidencias/DiagramaClasesPlaylist.png" width="100%" alt="Diagrama de clases" /><br />
         </p>
       </td>
     </tr>
   </table>
 </div>
 
-El agregado principal es `Playlist`, que guarda el nombre, la descripción, la `VisibilidadPlaylist` (pública o privada), el `EstiloMusical` y las prendas asociadas como `PrendaSnapshot`, una copia del nombre de la prenda tomada del catálogo. Los métodos del agregado cubren crear, destacar y quitar de destacadas (SR-RF-72), asociar y retirar prendas (SR-RF-70), y alternar el me gusta y el guardado de cada usuario (SR-RF-71). Antes de modificar o mostrar una playlist se valida que el usuario sea su dueño o que la playlist sea pública.
+El agregado principal es `Playlist`, que guarda el nombre, la descripción, la `VisibilidadPlaylist` (pública o privada), el `Estilo` (casual, formal, deportivo o urbano) y hasta 15 prendas asociadas como `PrendaSnapshot`, una copia del nombre de la prenda tomada del catálogo que se marca como no disponible cuando la prenda sale del catálogo. Los métodos del agregado cubren crear, destacar y quitar de destacadas (SR-RF-72), asociar y retirar prendas (SR-RF-70), y alternar el me gusta y el guardado de cada usuario (SR-RF-71). Antes de modificar o mostrar una playlist se valida que el usuario sea su dueño o que la playlist sea pública. Los errores de negocio heredan de `DomainException`. El archivo editable está en `docs/evidencias/DiagramaClasesPlaylist.drawio`.
 
 ### Diagrama de Base de Datos
 
@@ -216,14 +256,14 @@ El agregado principal es `Playlist`, que guarda el nombre, la descripción, la `
           <strong><font color="#5600EF" size="3">MODELO DE DATOS (POSTGRESQL)</font></strong>
         </p>
         <p>
-          <img src="docs/evidencias/StyleRadar-DiagramaEventoRelacionPlaylist.drawio.png" width="100%" alt="Diagrama de base de datos" /><br />
+          <img src="docs/evidencias/DiagramaEntidadRelacionPlaylist.png" width="100%" alt="Diagrama de base de datos" /><br />
         </p>
       </td>
     </tr>
   </table>
 </div>
 
-Se usa PostgreSQL porque las playlists, sus prendas y las interacciones de los usuarios tienen relaciones fijas. La tabla `playlist` guarda los datos de cada playlist y si está destacada; `playlist_prendas` guarda las prendas asociadas, y `playlist_likes` y `playlist_guardados` registran qué usuarios dieron me gusta o guardaron cada playlist, todas en relación uno a muchos con `playlist`. Las prendas y los usuarios se guardan solo por su identificador, ya que pertenecen a otros servicios (*Database-per-Service*).
+Se usa PostgreSQL porque las playlists, sus prendas y las interacciones de los usuarios tienen relaciones fijas. La tabla `playlists` guarda los datos de cada playlist y si está destacada; `playlist_prendas` guarda las prendas asociadas y si siguen disponibles, y `playlist_likes` y `playlist_guardados` registran qué usuarios dieron me gusta o guardaron cada playlist, todas en relación uno a muchos con `playlists`. Las prendas y los usuarios se guardan solo por su identificador, ya que pertenecen a otros servicios (*Database-per-Service*). El archivo editable está en `docs/evidencias/DiagramaEntidadRelacionPlaylist.drawio`.
 
 ### Diagramas de Secuencia
 
@@ -265,6 +305,45 @@ La petición debe traer la cabecera `X-User-Id` con el identificador del usuario
 
 Para destacar una playlist también se exige la cabecera `X-User-Id`. El caso de uso busca la playlist (si no existe, 404); si ya estaba destacada la devuelve sin cambios. Si no lo estaba, cuenta cuántas playlists destacadas hay: con 3 se responde 409, porque es el máximo permitido. Si hay cupo, la playlist se marca como destacada, se guarda, se publica el evento `playlist.destacada.actualizada` y se responde 200 (SR-RF-72).
 
+### Diagramas de Flujo
+
+Los diagramas de flujo muestran el recorrido del usuario por las pantallas de StyleRadar y los microservicios del paquete que intervienen en cada paso. Los archivos editables de Excalidraw están junto a las imágenes en `docs/evidencias`.
+
+<div align="center">
+  <table width="100%" style="margin: 18px 0; border: 2px dashed #C4B5FD; border-radius: 8px; background-color: #FBFBFE;">
+    <tr>
+      <td align="center" style="padding: 20px;">
+        <p>
+          <img src="https://img.shields.io/badge/DIAGRAMA-FLUJO-12063A?style=for-the-badge" alt="Diagrama de flujo de búsqueda de prendas y playlists" /><br />
+          <strong><font color="#5600EF" size="3">BÚSQUEDA DE PRENDAS Y PLAYLISTS</font></strong>
+        </p>
+        <p>
+          <img src="docs/evidencias/flujo-busqueda-playlists.png" width="100%" alt="Diagrama de flujo de búsqueda de prendas y playlists" /><br />
+        </p>
+      </td>
+    </tr>
+  </table>
+</div>
+
+El usuario busca y filtra prendas por tipo, color, talla o precio, y puede ordenar los resultados por distancia. ms-item-catalogo consulta a ms-inventario las prendas con unidades en la talla pedida y a ms-geolocalizacion la distancia a cada almacén. El usuario guarda una prenda en su playlist y, si la tienda la retira, ms-item-catalogo publica `styleradar.catalogo.prenda.retirada` y ms-playlist la marca como no disponible en las playlists.
+
+<div align="center">
+  <table width="100%" style="margin: 18px 0; border: 2px dashed #C4B5FD; border-radius: 8px; background-color: #FBFBFE;">
+    <tr>
+      <td align="center" style="padding: 20px;">
+        <p>
+          <img src="https://img.shields.io/badge/DIAGRAMA-FLUJO-12063A?style=for-the-badge" alt="Diagrama de flujo de las playlists de estilo" /><br />
+          <strong><font color="#5600EF" size="3">PLAYLISTS DE ESTILO</font></strong>
+        </p>
+        <p>
+          <img src="docs/evidencias/flujo-playlists.png" width="100%" alt="Diagrama de flujo de las playlists de estilo" /><br />
+        </p>
+      </td>
+    </tr>
+  </table>
+</div>
+
+El usuario explora las playlists destacadas y las más populares, y crea la suya con nombre, estilo y visibilidad. Dentro de una playlist puede dar me gusta o guardarla en su perfil, y desde el catálogo agrega prendas con un máximo de 15. Al agregar una prenda, ms-playlist publica `playlist.prenda.asociada`; cuando el administrador destaca una playlist, con un máximo de tres, publica `playlist.destacada.actualizada`.
 ### Estructura Oficial de Paquetes en `src/main/java/`
 
 ```text
@@ -371,11 +450,11 @@ La comunicación asíncrona entre microservicios se realiza a través de **Rabbi
 
 | Tipo | Evento | Emisor / Receptor | Propósito |
 | :---: | :--- | :--- | :--- |
-| **PUBLICA** | `playlist.prenda.asociada` | `ms-playlist` &rarr; `styleradar.events` | Se agregó una prenda a una playlist. |
-| **PUBLICA** | `playlist.destacada.actualizada` | `ms-playlist` &rarr; `styleradar.events` | Una playlist entró o salió de las destacadas. |
-| **CONSUME** | `catalogo.prenda.eliminada` | `ms-item-catalogo` &rarr; `ms-playlist` | Quita la prenda retirada del catálogo de todas las playlists. |
+| **PUBLICA** | `playlist.prenda.asociada` | `ms-playlist` &rarr; `styleradar.exchange` | Se agregó una prenda a una playlist. |
+| **PUBLICA** | `playlist.destacada.actualizada` | `ms-playlist` &rarr; `styleradar.exchange` | Una playlist entró o salió de las destacadas. |
+| **CONSUME** | `styleradar.catalogo.prenda.retirada` | `ms-item-catalogo` &rarr; `ms-playlist` | Marca la prenda como no disponible en todas las playlists. |
 
-Todos los eventos viajan por el exchange `styleradar.events` en formato JSON. Los que publica el servicio llevan `eventId`, `eventType`, `timestamp`, `producer` y, en `data`, el `playlistId` con el `prendaId` o el valor de `destacada`. El evento que consume se lee de la cola `q.playlist.prenda-eliminada` y toma el `prendaId` de la raíz del mensaje.
+Todos los eventos viajan por el exchange `styleradar.exchange` en formato JSON. Los que publica el servicio llevan `eventId`, `eventType`, `timestamp`, `producer` y, en `data`, el `playlistId` con el `prendaId` o el valor de `destacada`. El evento que consume se lee de la cola `styleradar.playlist.prenda-retirada.q` y toma el `prendaId` de la raíz del mensaje. Los mensajes que fallan pasan por `styleradar.dlx` a la cola `styleradar.playlist.dlq`.
 
 ---
 
@@ -387,7 +466,7 @@ Todos los eventos viajan por el exchange `styleradar.events` en formato JSON. Lo
 | :--- | :--- | :--- |
 | **Lenguaje Core** | Java | `21` |
 | **Framework** | Spring Boot | `3.3.4` |
-| **Base de Datos** | PostgreSQL | `15.8` |
+| **Base de Datos** | PostgreSQL | `16` |
 | **Migraciones de BD** | Flyway | Gestionada por Spring Boot |
 | **Broker de Mensajería** | RabbitMQ | `3.13.7` |
 | **Mapeo de DTOs** | MapStruct | `1.5.5.Final` |
@@ -461,7 +540,7 @@ Las variables se definen en `.env`, que no se versiona. La plantilla `.env.examp
 | `SERVER_PORT` | Puerto del servicio | `8260` |
 | `DB_HOST` | Host de PostgreSQL | `localhost` |
 | `DB_PORT` | Puerto de PostgreSQL | `5432` |
-| `DB_NAME` | Nombre de la base de datos | `styleradar_playlist` |
+| `DB_NAME` | Nombre de la base de datos | `playlist_db` |
 | `DB_USER` | Usuario de PostgreSQL | `postgres` |
 | `DB_PASSWORD` | Contraseña de PostgreSQL | — |
 | `RABBITMQ_HOST` | Host de RabbitMQ | `localhost` |
