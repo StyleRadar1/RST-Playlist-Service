@@ -19,15 +19,15 @@ class RabbitMQEventPublisherTest {
     private RabbitTemplate rabbitTemplate;
 
     @Test
-    void publicarEventosConUUID() {
+    void publicarEventosConPrefijoStyleRadar() {
         RabbitMQEventPublisher publisher = new RabbitMQEventPublisher(rabbitTemplate);
         UUID playlistId = UUID.randomUUID();
         UUID prendaId = UUID.randomUUID();
 
         publisher.publicarPlaylistDestacadaActualizada(playlistId, true);
-        verify(rabbitTemplate).convertAndSend(eq("styleradar.exchange"), eq("playlist.destacada.actualizada"), any(Object.class));
+        verify(rabbitTemplate).convertAndSend(eq("styleradar.exchange"), eq("styleradar.playlist.destacada.actualizada"), any(Object.class));
 
         publisher.publicarPrendaAsociada(playlistId, prendaId);
-        verify(rabbitTemplate).convertAndSend(eq("styleradar.exchange"), eq("playlist.prenda.asociada"), any(Object.class));
+        verify(rabbitTemplate).convertAndSend(eq("styleradar.exchange"), eq("styleradar.playlist.prenda.asociada"), any(Object.class));
     }
 }

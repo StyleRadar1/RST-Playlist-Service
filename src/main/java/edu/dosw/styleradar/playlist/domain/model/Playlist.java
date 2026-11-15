@@ -77,7 +77,7 @@ public class Playlist {
         }
         boolean yaExiste = this.prendas.stream().anyMatch(p -> p.getPrendaId().equals(prenda.getPrendaId()));
         if (yaExiste) {
-            throw new PrendaDuplicadaException("La prenda ya se encuentra asociada a este lookbook");
+            throw new PrendaDuplicadaException("La prenda ya se encuentra asociada a esta playlist");
         }
         this.prendas.add(prenda);
         this.fechaActualizacion = Instant.now();
@@ -169,21 +169,21 @@ public class Playlist {
 
     public void validarPropietario(UUID usuarioId) {
         if (usuarioId == null || !usuarioId.equals(this.usuarioId)) {
-            throw new AccesoDenegadoPlaylistException("No tienes permisos para modificar este lookbook");
+            throw new AccesoDenegadoPlaylistException("No tienes permisos para modificar esta playlist");
         }
     }
 
     public void validarAccesoLectura(UUID usuarioConsultaId) {
         if (this.visibilidad == VisibilidadPlaylist.PRIVADA) {
             if (usuarioConsultaId == null || !usuarioConsultaId.equals(this.usuarioId)) {
-                throw new AccesoDenegadoPlaylistException("No tienes permisos para consultar esta colección privada");
+                throw new AccesoDenegadoPlaylistException("No tienes permisos para consultar esta playlist privada");
             }
         }
     }
 
     public void setNombre(String nombre) {
         if (nombre == null || nombre.isBlank()) {
-            throw new DomainException("El nombre del lookbook es obligatorio");
+            throw new DomainException("El nombre de la playlist es obligatorio");
         }
         if (nombre.trim().length() > 100) {
             throw new DomainException("El nombre no puede superar los 100 caracteres");

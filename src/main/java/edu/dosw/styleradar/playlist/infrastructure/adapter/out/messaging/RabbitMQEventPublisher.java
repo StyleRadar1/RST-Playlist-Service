@@ -11,7 +11,10 @@ import java.util.UUID;
 @Component
 public class RabbitMQEventPublisher implements PlaylistEventPublisherPort {
 
-    static final String EXCHANGE = "styleradar.exchange";
+    public static final String EXCHANGE = "styleradar.exchange";
+    public static final String ROUTING_KEY_PLAYLIST_DESTACADA = "styleradar.playlist.destacada.actualizada";
+    public static final String ROUTING_KEY_PRENDA_ASOCIADA = "styleradar.playlist.prenda.asociada";
+
     private final RabbitTemplate rabbitTemplate;
 
     public RabbitMQEventPublisher(RabbitTemplate rabbitTemplate) {
@@ -22,23 +25,23 @@ public class RabbitMQEventPublisher implements PlaylistEventPublisherPort {
     public void publicarPlaylistDestacadaActualizada(UUID playlistId, boolean destacada) {
         Map<String, Object> payload = Map.of(
                 "eventId", UUID.randomUUID().toString(),
-                "eventType", "playlist.destacada.actualizada",
+                "eventType", ROUTING_KEY_PLAYLIST_DESTACADA,
                 "timestamp", Instant.now().toString(),
                 "producer", "ms-playlist",
                 "data", Map.of("playlistId", playlistId.toString(), "destacada", destacada)
         );
-        rabbitTemplate.convertAndSend(EXCHANGE, "playlist.destacada.actualizada", payload);
+        rabbitTemplate.convertAndSend(EXCHANGE, ROUTING_KEY_PLAYLIST_DESTACADA, payload);
     }
 
     @Override
     public void publicarPrendaAsociada(UUID playlistId, UUID prendaId) {
         Map<String, Object> payload = Map.of(
                 "eventId", UUID.randomUUID().toString(),
-                "eventType", "playlist.prenda.asociada",
+                "eventType", ROUTING_KEY_PRENDA_ASOCIADA,
                 "timestamp", Instant.now().toString(),
                 "producer", "ms-playlist",
                 "data", Map.of("playlistId", playlistId.toString(), "prendaId", prendaId.toString())
         );
-        rabbitTemplate.convertAndSend(EXCHANGE, "playlist.prenda.asociada", payload);
+        rabbitTemplate.convertAndSend(EXCHANGE, ROUTING_KEY_PRENDA_ASOCIADA, payload);
     }
 }

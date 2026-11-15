@@ -9,26 +9,26 @@ import org.springframework.http.ResponseEntity;
 import java.util.List;
 import java.util.UUID;
 
-@Tag(name = "Playlists", description = "Lookbooks y colecciones temáticas de prendas de vestir")
+@Tag(name = "Playlists", description = "Playlists y colecciones temáticas de prendas de vestir")
 public interface PlaylistApi {
 
-    @Operation(summary = "Crear nuevo lookbook de moda")
-    @ApiResponse(responseCode = "201", description = "Lookbook creado exitosamente")
+    @Operation(summary = "Crear nueva playlist de moda")
+    @ApiResponse(responseCode = "201", description = "Playlist creada exitosamente")
     ResponseEntity<PlaylistResponse> crear(UUID usuarioId, CrearPlaylistRequest request);
 
-    @Operation(summary = "Consultar lookbook por ID")
+    @Operation(summary = "Consultar playlist por ID")
     ResponseEntity<PlaylistResponse> obtenerPorId(UUID id, UUID usuarioId);
 
-    @Operation(summary = "Consultar lookbooks públicos")
+    @Operation(summary = "Consultar playlists públicas")
     ResponseEntity<List<PlaylistResponse>> obtenerPublicas();
 
     @Operation(summary = "Consultar las 3 playlists destacadas de Home (SR-RF-72)")
     ResponseEntity<List<PlaylistResponse>> obtenerDestacadas();
 
-    @Operation(summary = "Consultar lookbooks populares paginados")
+    @Operation(summary = "Consultar playlists populares paginadas")
     ResponseEntity<PageResponse<PlaylistResponse>> obtenerPopulares(int page, int size);
 
-    @Operation(summary = "Editar lookbook propio")
+    @Operation(summary = "Editar playlist propia")
     ResponseEntity<PlaylistResponse> editar(UUID usuarioId, UUID id, EditarPlaylistRequest request);
 
     @Operation(summary = "Fijar playlist como destacada (máx 3 · SR-RF-72)")
@@ -37,10 +37,10 @@ public interface PlaylistApi {
     @Operation(summary = "Quitar playlist de destacadas")
     ResponseEntity<PlaylistResponse> quitarDestacado(UUID usuarioId, UUID id);
 
-    @Operation(summary = "Asociar prenda al lookbook (máx 15 · RNF-12)")
+    @Operation(summary = "Asociar prenda a la playlist (máx 15 · RNF-12)")
     ResponseEntity<PlaylistResponse> agregarPrenda(UUID usuarioId, UUID id, AgregarPrendaRequest request);
 
-    @Operation(summary = "Retirar prenda del lookbook")
+    @Operation(summary = "Retirar prenda de la playlist")
     ResponseEntity<PlaylistResponse> retirarPrenda(UUID usuarioId, UUID id, UUID prendaId);
 
     @Operation(summary = "Alternar Me Gusta en la playlist")
@@ -49,12 +49,12 @@ public interface PlaylistApi {
     @Operation(summary = "Alternar guardado en perfil")
     ResponseEntity<PlaylistResponse> alternarGuardado(UUID usuarioId, UUID id);
 
-    @Operation(summary = "Eliminar lookbook")
+    @Operation(summary = "Eliminar playlist")
     ResponseEntity<Void> eliminar(UUID usuarioId, UUID id);
 
-    @Operation(summary = "Consultar lookbooks creados por el usuario")
+    @Operation(summary = "Consultar playlists creadas por el usuario")
     ResponseEntity<List<PlaylistResponse>> misPlaylists(UUID usuarioId);
 
-    @Operation(summary = "Consultar lookbooks guardados por el usuario")
+    @Operation(summary = "Consultar playlists guardadas por el usuario")
     ResponseEntity<List<PlaylistResponse>> misGuardadas(UUID usuarioId);
 }
