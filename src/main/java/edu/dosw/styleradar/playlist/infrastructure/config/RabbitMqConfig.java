@@ -23,14 +23,15 @@ public class RabbitMqConfig {
     }
 
     @Bean
-    public TopicExchange deadLetterExchange() {
-        return ExchangeBuilder.topicExchange(DLX_EXCHANGE).durable(true).build();
+    public DirectExchange deadLetterExchange() {
+        return ExchangeBuilder.directExchange(DLX_EXCHANGE).durable(true).build();
     }
 
     @Bean
     public Queue prendaRetiradaQueue() {
         return QueueBuilder.durable(QUEUE_PRENDA_RETIRADA)
                 .withArgument("x-dead-letter-exchange", DLX_EXCHANGE)
+                .withArgument("x-dead-letter-routing-key", DLQ_PLAYLIST)
                 .build();
     }
 
@@ -47,15 +48,22 @@ public class RabbitMqConfig {
     }
 
     @Bean
-    public Binding playlistDlqBinding(Queue playlistDlq, TopicExchange deadLetterExchange) {
+    public Binding playlistDlqBinding(Queue playlistDlq, DirectExchange deadLetterExchange) {
         return BindingBuilder.bind(playlistDlq)
                 .to(deadLetterExchange)
-                .with("#");
+                .with(DLQ_PLAYLIST);
     }
 
     @Bean
     public MessageConverter jacksonMessageConverter() {
-        return new Jackson2JsonMessageConverter();
+        return new Jackson2JsonMessageConverter() {
+            @Override
+            protected org.springframework.amqp.core.Message createMessage(Object objectToConvert, org.springframework.amqp.core.MessageProperties messageProperties) {
+                org.springframework.amqp.core.Message message = super.createMessage(objectToConvert, messageProperties);
+                message.getMessageProperties().getHeaders().remove("__TypeId__");
+                return message;
+            }
+        };
     }
 
     @Bean

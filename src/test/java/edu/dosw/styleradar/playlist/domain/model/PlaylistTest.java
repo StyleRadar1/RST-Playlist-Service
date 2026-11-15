@@ -183,7 +183,7 @@ class PlaylistTest {
     }
 
     @Test
-    void editarLookbookExitoso() {
+    void editarPlaylistExitoso() {
         UUID usuarioId = UUID.randomUUID();
         Playlist p = Playlist.crear(usuarioId, "Original", null, VisibilidadPlaylist.PUBLICA, Estilo.URBANO);
         p.editar(usuarioId, "Modificado", "Desc", VisibilidadPlaylist.PRIVADA, Estilo.FORMAL);
@@ -194,7 +194,7 @@ class PlaylistTest {
     }
 
     @Test
-    void editarLookbookUsuarioAjenoLanzaExcepcion() {
+    void editarPlaylistUsuarioAjenoLanzaExcepcion() {
         Playlist p = Playlist.crear(UUID.randomUUID(), "Original", null, VisibilidadPlaylist.PUBLICA, Estilo.URBANO);
         assertThatThrownBy(() -> p.editar(UUID.randomUUID(), "Modificado", null, null, null))
                 .isInstanceOf(AccesoDenegadoPlaylistException.class);

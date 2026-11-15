@@ -23,6 +23,9 @@ spring:
     port: ${RABBITMQ_PORT:5672}
     username: ${RABBITMQ_USER:guest}
     password: ${RABBITMQ_PASSWORD:}
+    ssl:
+      enabled: ${RABBITMQ_SSL_ENABLED:false}
+      verify-hostname: ${RABBITMQ_SSL_VERIFY_HOSTNAME:true}
 
 styleradar:
   rabbitmq:
@@ -34,6 +37,8 @@ styleradar:
       dlq: styleradar.playlist.dlq
     routing-keys:
       prenda-retirada: styleradar.catalogo.prenda.retirada
+      playlist-destacada: styleradar.playlist.destacada.actualizada
+      prenda-asociada: styleradar.playlist.prenda.asociada
 
 springdoc:
   api-docs:
