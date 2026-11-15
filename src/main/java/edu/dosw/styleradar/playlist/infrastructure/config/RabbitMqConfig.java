@@ -2,6 +2,7 @@ package edu.dosw.styleradar.playlist.infrastructure.config;
 
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
@@ -18,16 +19,6 @@ public class RabbitMqConfig {
     public static final String ROUTING_KEY_PRENDA_RETIRADA = "styleradar.catalogo.prenda.retirada";
 
     @Bean
-    public TopicExchange mainExchange() {
-        return ExchangeBuilder.topicExchange(MAIN_EXCHANGE).durable(true).build();
-    }
-
-    @Bean
-    public DirectExchange deadLetterExchange() {
-        return ExchangeBuilder.directExchange(DLX_EXCHANGE).durable(true).build();
-    }
-
-    @Bean
     public Queue prendaRetiradaQueue() {
         return QueueBuilder.durable(QUEUE_PRENDA_RETIRADA)
                 .withArgument("x-dead-letter-exchange", DLX_EXCHANGE)
@@ -41,17 +32,22 @@ public class RabbitMqConfig {
     }
 
     @Bean
-    public Binding prendaRetiradaBinding(Queue prendaRetiradaQueue, TopicExchange mainExchange) {
-        return BindingBuilder.bind(prendaRetiradaQueue)
-                .to(mainExchange)
-                .with(ROUTING_KEY_PRENDA_RETIRADA);
+    public Binding prendaRetiradaBinding(Queue prendaRetiradaQueue) {
+        return new Binding(prendaRetiradaQueue.getName(), Binding.DestinationType.QUEUE,
+                MAIN_EXCHANGE, ROUTING_KEY_PRENDA_RETIRADA, null);
     }
 
     @Bean
-    public Binding playlistDlqBinding(Queue playlistDlq, DirectExchange deadLetterExchange) {
-        return BindingBuilder.bind(playlistDlq)
-                .to(deadLetterExchange)
-                .with(DLQ_PLAYLIST);
+    public Binding playlistDlqBinding(Queue playlistDlq) {
+        return new Binding(playlistDlq.getName(), Binding.DestinationType.QUEUE,
+                DLX_EXCHANGE, DLQ_PLAYLIST, null);
+    }
+
+    @Bean
+    public RabbitAdmin rabbitAdmin(ConnectionFactory connectionFactory) {
+        RabbitAdmin admin = new RabbitAdmin(connectionFactory);
+        admin.setIgnoreDeclarationExceptions(true);
+        return admin;
     }
 
     @Bean
