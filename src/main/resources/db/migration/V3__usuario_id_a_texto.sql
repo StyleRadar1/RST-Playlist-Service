@@ -1,3 +1,4 @@
+DO $$
 BEGIN
     IF EXISTS (
         SELECT 1 FROM information_schema.columns
@@ -23,3 +24,4 @@ BEGIN
         ALTER TABLE playlist_guardados ALTER COLUMN usuario_id TYPE VARCHAR(100) USING usuario_id::varchar(100);
     END IF;
 END
+$$;
