@@ -14,11 +14,12 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class PlaylistTest {
 
     @Test
-    void crearPlaylistValida() {
-        UUID usuarioId = UUID.randomUUID();
+    void crearPlaylistValidaConUsuarioNumericoGateway() {
+        String usuarioId = "15";
         Playlist p = Playlist.crear(usuarioId, "Look Urbano Bogotá", "Hoodies y joggers", VisibilidadPlaylist.PUBLICA, Estilo.URBANO);
 
-        assertThat(p.getUsuarioId()).isEqualTo(usuarioId);
+        assertThat(p.getId()).isNotNull();
+        assertThat(p.getUsuarioId()).isEqualTo("15");
         assertThat(p.getNombre()).isEqualTo("Look Urbano Bogotá");
         assertThat(p.getDescripcion()).isEqualTo("Hoodies y joggers");
         assertThat(p.getVisibilidad()).isEqualTo(VisibilidadPlaylist.PUBLICA);
@@ -40,60 +41,66 @@ class PlaylistTest {
     @Test
     void crearPlaylistUsuarioInvalidoLanzaExcepcion() {
         assertThatThrownBy(() -> Playlist.crear(null, "Test", null, VisibilidadPlaylist.PUBLICA, Estilo.CASUAL))
-                .isInstanceOf(DomainException.class);
+                .isInstanceOf(NoAutorizadoException.class);
+        assertThatThrownBy(() -> Playlist.crear("   ", "Test", null, VisibilidadPlaylist.PUBLICA, Estilo.CASUAL))
+                .isInstanceOf(NoAutorizadoException.class);
     }
 
     @Test
     void setNombreVacioOLargoLanzaExcepcion() {
-        Playlist p = Playlist.crear(UUID.randomUUID(), "Inicial", null, VisibilidadPlaylist.PUBLICA, Estilo.CASUAL);
+        Playlist p = Playlist.crear("15", "Inicial", null, VisibilidadPlaylist.PUBLICA, Estilo.CASUAL);
 
         assertThatThrownBy(() -> p.setNombre(""))
                 .isInstanceOf(DomainException.class);
-        assertThatThrownBy(() -> p.setNombre("a".repeat(101)))
+        String largo = "a".repeat(101);
+        assertThatThrownBy(() -> p.setNombre(largo))
                 .isInstanceOf(DomainException.class);
     }
 
     @Test
     void setDescripcionLargaLanzaExcepcion() {
-        Playlist p = Playlist.crear(UUID.randomUUID(), "Inicial", null, VisibilidadPlaylist.PUBLICA, Estilo.CASUAL);
+        Playlist p = Playlist.crear("15", "Inicial", null, VisibilidadPlaylist.PUBLICA, Estilo.CASUAL);
+        String largo = "a".repeat(301);
 
-        assertThatThrownBy(() -> p.setDescripcion("a".repeat(301)))
+        assertThatThrownBy(() -> p.setDescripcion(largo))
                 .isInstanceOf(DomainException.class);
     }
 
     @Test
     void agregarPrendaHasta15Exitoso() {
-        Playlist p = Playlist.crear(UUID.randomUUID(), "Colección", null, VisibilidadPlaylist.PUBLICA, Estilo.CASUAL);
+        Playlist p = Playlist.crear("15", "Colección", null, VisibilidadPlaylist.PUBLICA, Estilo.CASUAL);
 
         for (int i = 1; i <= 15; i++) {
             p.agregarPrenda(new PrendaSnapshot(UUID.randomUUID(), "Prenda " + i, Instant.now()));
         }
 
         assertThat(p.getTotalPrendas()).isEqualTo(15);
-        assertThatThrownBy(() -> p.agregarPrenda(new PrendaSnapshot(UUID.randomUUID(), "Prenda 16", Instant.now())))
+        PrendaSnapshot extra = new PrendaSnapshot(UUID.randomUUID(), "Prenda 16", Instant.now());
+        assertThatThrownBy(() -> p.agregarPrenda(extra))
                 .isInstanceOf(LimitePrendasAlcanzadoException.class);
     }
 
     @Test
     void agregarPrendaNulaLanzaExcepcion() {
-        Playlist p = Playlist.crear(UUID.randomUUID(), "Colección", null, VisibilidadPlaylist.PUBLICA, Estilo.CASUAL);
+        Playlist p = Playlist.crear("15", "Colección", null, VisibilidadPlaylist.PUBLICA, Estilo.CASUAL);
         assertThatThrownBy(() -> p.agregarPrenda(null))
                 .isInstanceOf(DomainException.class);
     }
 
     @Test
     void agregarPrendaDuplicadaLanzaExcepcion() {
-        Playlist p = Playlist.crear(UUID.randomUUID(), "Colección", null, VisibilidadPlaylist.PUBLICA, Estilo.CASUAL);
+        Playlist p = Playlist.crear("15", "Colección", null, VisibilidadPlaylist.PUBLICA, Estilo.CASUAL);
         UUID prendaId = UUID.randomUUID();
         p.agregarPrenda(new PrendaSnapshot(prendaId, "Chaqueta", Instant.now()));
+        PrendaSnapshot duplicada = new PrendaSnapshot(prendaId, "Chaqueta Otra", Instant.now());
 
-        assertThatThrownBy(() -> p.agregarPrenda(new PrendaSnapshot(prendaId, "Chaqueta Otra", Instant.now())))
+        assertThatThrownBy(() -> p.agregarPrenda(duplicada))
                 .isInstanceOf(PrendaDuplicadaException.class);
     }
 
     @Test
     void retirarPrendaPorPropietario() {
-        UUID usuarioId = UUID.randomUUID();
+        String usuarioId = "15";
         UUID prendaId = UUID.randomUUID();
         Playlist p = Playlist.crear(usuarioId, "Colección", null, VisibilidadPlaylist.PUBLICA, Estilo.CASUAL);
         p.agregarPrenda(new PrendaSnapshot(prendaId, "Pantalón", Instant.now()));
@@ -108,7 +115,7 @@ class PlaylistTest {
     @Test
     void desvincularPrendaSilencioso() {
         UUID prendaId = UUID.randomUUID();
-        Playlist p = Playlist.crear(UUID.randomUUID(), "Colección", null, VisibilidadPlaylist.PUBLICA, Estilo.CASUAL);
+        Playlist p = Playlist.crear("15", "Colección", null, VisibilidadPlaylist.PUBLICA, Estilo.CASUAL);
         p.agregarPrenda(new PrendaSnapshot(prendaId, "Pantalón", Instant.now()));
 
         boolean removida = p.desvincularPrendaSilencioso(prendaId);
@@ -123,7 +130,7 @@ class PlaylistTest {
     @Test
     void marcarPrendaNoDisponibleEnPlaylist() {
         UUID prendaId = UUID.randomUUID();
-        Playlist p = Playlist.crear(UUID.randomUUID(), "Colección", null, VisibilidadPlaylist.PUBLICA, Estilo.CASUAL);
+        Playlist p = Playlist.crear("15", "Colección", null, VisibilidadPlaylist.PUBLICA, Estilo.CASUAL);
         p.agregarPrenda(new PrendaSnapshot(prendaId, "Pantalón", Instant.now()));
 
         assertThat(p.getPrendas().get(0).isDisponible()).isTrue();
@@ -137,27 +144,25 @@ class PlaylistTest {
 
     @Test
     void alternarLikeYGuardado() {
-        Playlist p = Playlist.crear(UUID.randomUUID(), "Colección", null, VisibilidadPlaylist.PUBLICA, Estilo.CASUAL);
-        UUID userLike = UUID.randomUUID();
-        UUID userGuardado = UUID.randomUUID();
+        Playlist p = Playlist.crear("15", "Colección", null, VisibilidadPlaylist.PUBLICA, Estilo.CASUAL);
 
-        p.alternarLike(userLike);
+        p.alternarLike("100");
         assertThat(p.getLikesCount()).isEqualTo(1);
-        p.alternarLike(userLike);
+        p.alternarLike("100");
         assertThat(p.getLikesCount()).isZero();
 
-        p.alternarGuardado(userGuardado);
+        p.alternarGuardado("200");
         assertThat(p.getGuardadosCount()).isEqualTo(1);
-        p.alternarGuardado(userGuardado);
+        p.alternarGuardado("200");
         assertThat(p.getGuardadosCount()).isZero();
 
-        assertThatThrownBy(() -> p.alternarLike(null)).isInstanceOf(DomainException.class);
-        assertThatThrownBy(() -> p.alternarGuardado(null)).isInstanceOf(DomainException.class);
+        assertThatThrownBy(() -> p.alternarLike(null)).isInstanceOf(NoAutorizadoException.class);
+        assertThatThrownBy(() -> p.alternarGuardado("  ")).isInstanceOf(NoAutorizadoException.class);
     }
 
     @Test
     void destacarYQuitarDestacado() {
-        Playlist p = Playlist.crear(UUID.randomUUID(), "Colección", null, VisibilidadPlaylist.PUBLICA, Estilo.CASUAL);
+        Playlist p = Playlist.crear("15", "Colección", null, VisibilidadPlaylist.PUBLICA, Estilo.CASUAL);
         p.destacar();
         assertThat(p.isDestacada()).isTrue();
         p.quitarDestacado();
@@ -166,27 +171,25 @@ class PlaylistTest {
 
     @Test
     void validarAccesoLecturaPrivada() {
-        UUID usuarioId = UUID.randomUUID();
-        Playlist p = Playlist.crear(usuarioId, "Colección Privada", null, VisibilidadPlaylist.PRIVADA, Estilo.FORMAL);
+        Playlist p = Playlist.crear("15", "Colección Privada", null, VisibilidadPlaylist.PRIVADA, Estilo.FORMAL);
 
-        p.validarAccesoLectura(usuarioId);
-        assertThatThrownBy(() -> p.validarAccesoLectura(UUID.randomUUID()))
+        p.validarAccesoLectura("15");
+        assertThatThrownBy(() -> p.validarAccesoLectura("99"))
                 .isInstanceOf(AccesoDenegadoPlaylistException.class);
     }
 
     @Test
     void validarAccesoLecturaPublica() {
-        Playlist p = Playlist.crear(UUID.randomUUID(), "Colección Pública", null, VisibilidadPlaylist.PUBLICA, Estilo.FORMAL);
+        Playlist p = Playlist.crear("15", "Colección Pública", null, VisibilidadPlaylist.PUBLICA, Estilo.FORMAL);
         p.validarAccesoLectura(null);
-        p.validarAccesoLectura(UUID.randomUUID());
+        p.validarAccesoLectura("99");
         assertThat(p.getNombre()).isEqualTo("Colección Pública");
     }
 
     @Test
     void editarPlaylistExitoso() {
-        UUID usuarioId = UUID.randomUUID();
-        Playlist p = Playlist.crear(usuarioId, "Original", null, VisibilidadPlaylist.PUBLICA, Estilo.URBANO);
-        p.editar(usuarioId, "Modificado", "Desc", VisibilidadPlaylist.PRIVADA, Estilo.FORMAL);
+        Playlist p = Playlist.crear("15", "Original", null, VisibilidadPlaylist.PUBLICA, Estilo.URBANO);
+        p.editar("15", "Modificado", "Desc", VisibilidadPlaylist.PRIVADA, Estilo.FORMAL);
 
         assertThat(p.getNombre()).isEqualTo("Modificado");
         assertThat(p.getVisibilidad()).isEqualTo(VisibilidadPlaylist.PRIVADA);
@@ -195,36 +198,34 @@ class PlaylistTest {
 
     @Test
     void editarPlaylistUsuarioAjenoLanzaExcepcion() {
-        Playlist p = Playlist.crear(UUID.randomUUID(), "Original", null, VisibilidadPlaylist.PUBLICA, Estilo.URBANO);
-        assertThatThrownBy(() -> p.editar(UUID.randomUUID(), "Modificado", null, null, null))
+        Playlist p = Playlist.crear("15", "Original", null, VisibilidadPlaylist.PUBLICA, Estilo.URBANO);
+        assertThatThrownBy(() -> p.editar("99", "Modificado", null, null, null))
                 .isInstanceOf(AccesoDenegadoPlaylistException.class);
     }
 
     @Test
     void retirarPrendaInvalidaLanzaExcepciones() {
-        UUID usuarioId = UUID.randomUUID();
-        Playlist p = Playlist.crear(usuarioId, "Original", null, VisibilidadPlaylist.PUBLICA, Estilo.URBANO);
-        assertThatThrownBy(() -> p.retirarPrenda(UUID.randomUUID(), UUID.randomUUID()))
+        Playlist p = Playlist.crear("15", "Original", null, VisibilidadPlaylist.PUBLICA, Estilo.URBANO);
+        UUID prendaId = UUID.randomUUID();
+        assertThatThrownBy(() -> p.retirarPrenda(prendaId, "99"))
                 .isInstanceOf(AccesoDenegadoPlaylistException.class);
-        assertThatThrownBy(() -> p.retirarPrenda(null, usuarioId))
+        assertThatThrownBy(() -> p.retirarPrenda(null, "15"))
                 .isInstanceOf(DomainException.class);
     }
 
     @Test
     void constructorCompletoConValidaciones() {
         UUID id = UUID.randomUUID();
-        UUID usuarioId = UUID.randomUUID();
         UUID prendaId = UUID.randomUUID();
-        UUID userLike = UUID.randomUUID();
-        UUID userGuardado = UUID.randomUUID();
 
         Playlist p = new Playlist(
-                id, usuarioId, "Nombre", "Desc", VisibilidadPlaylist.PUBLICA, Estilo.DEPORTIVO, true,
+                id, "15", "Nombre", "Desc", VisibilidadPlaylist.PUBLICA, Estilo.DEPORTIVO, true,
                 Instant.now(), Instant.now(), List.of(new PrendaSnapshot(prendaId, "p", Instant.now())),
-                Set.of(userLike), Set.of(userGuardado)
+                Set.of("100"), Set.of("200")
         );
 
         assertThat(p.getId()).isEqualTo(id);
+        assertThat(p.getUsuarioId()).isEqualTo("15");
         assertThat(p.isDestacada()).isTrue();
         assertThat(p.getTotalPrendas()).isEqualTo(1);
         assertThat(p.getLikesCount()).isEqualTo(1);
@@ -235,16 +236,15 @@ class PlaylistTest {
     void settersYGetters() {
         Playlist p = new Playlist();
         UUID id = UUID.randomUUID();
-        UUID usuarioId = UUID.randomUUID();
         p.setId(id);
-        p.setUsuarioId(usuarioId);
+        p.setUsuarioId("42");
         p.setVisibilidad(VisibilidadPlaylist.PRIVADA);
         p.setEstilo(Estilo.FORMAL);
         p.setDestacada(true);
         p.setFechaActualizacion(Instant.now());
 
         assertThat(p.getId()).isEqualTo(id);
-        assertThat(p.getUsuarioId()).isEqualTo(usuarioId);
+        assertThat(p.getUsuarioId()).isEqualTo("42");
         assertThat(p.getVisibilidad()).isEqualTo(VisibilidadPlaylist.PRIVADA);
         assertThat(p.getEstilo()).isEqualTo(Estilo.FORMAL);
         assertThat(p.isDestacada()).isTrue();

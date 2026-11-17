@@ -42,7 +42,7 @@ class PostgreSQLPlaylistRepositoryAdapterTest {
     @Test
     void guardarYRecuperarPlaylist() {
         UUID id = UUID.randomUUID();
-        UUID usuarioId = UUID.randomUUID();
+        String usuarioId = "15";
         PlaylistEntity entity = new PlaylistEntity();
         entity.setId(id);
         entity.setUsuarioId(usuarioId);
@@ -61,13 +61,14 @@ class PostgreSQLPlaylistRepositoryAdapterTest {
         Optional<Playlist> opt = adapter.findById(id);
 
         assertThat(guardada.getId()).isEqualTo(id);
+        assertThat(guardada.getUsuarioId()).isEqualTo("15");
         assertThat(opt).isPresent();
     }
 
     @Test
     void consultasMultiples() {
         UUID id = UUID.randomUUID();
-        UUID usuarioId = UUID.randomUUID();
+        String usuarioId = "15";
         UUID prendaId = UUID.randomUUID();
         PlaylistEntity entity = new PlaylistEntity();
         entity.setId(id);

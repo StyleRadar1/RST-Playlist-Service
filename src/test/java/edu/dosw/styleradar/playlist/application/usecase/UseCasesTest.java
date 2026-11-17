@@ -3,10 +3,8 @@ package edu.dosw.styleradar.playlist.application.usecase;
 import edu.dosw.styleradar.playlist.application.dto.*;
 import edu.dosw.styleradar.playlist.application.dto.mapper.PlaylistDtoMapper;
 import edu.dosw.styleradar.playlist.domain.exception.LimiteDestacadasSuperadoException;
-import edu.dosw.styleradar.playlist.domain.exception.ResourceNotFoundException;
 import edu.dosw.styleradar.playlist.domain.model.Estilo;
 import edu.dosw.styleradar.playlist.domain.model.Playlist;
-import edu.dosw.styleradar.playlist.domain.model.PrendaSnapshot;
 import edu.dosw.styleradar.playlist.domain.model.VisibilidadPlaylist;
 import edu.dosw.styleradar.playlist.domain.port.out.PlaylistEventPublisherPort;
 import edu.dosw.styleradar.playlist.domain.port.out.PlaylistRepositoryPort;
@@ -17,7 +15,6 @@ import org.mapstruct.factory.Mappers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -55,7 +52,7 @@ class UseCasesTest {
 
     @Test
     void crearYEditarPlaylist() {
-        UUID usuarioId = UUID.randomUUID();
+        String usuarioId = "15";
         UUID playlistId = UUID.randomUUID();
         Playlist p = Playlist.crear(usuarioId, "Urbano", "Desc", VisibilidadPlaylist.PUBLICA, Estilo.URBANO);
         p.setId(playlistId);
@@ -65,6 +62,7 @@ class UseCasesTest {
 
         PlaylistResponse resCrear = crearUseCase.crear(usuarioId, new CrearPlaylistRequest("Urbano", "Desc", VisibilidadPlaylist.PUBLICA, Estilo.URBANO));
         assertThat(resCrear.id()).isEqualTo(playlistId);
+        assertThat(resCrear.usuarioId()).isEqualTo("15");
 
         PlaylistResponse resEditar = crearUseCase.editar(usuarioId, playlistId, new EditarPlaylistRequest("Nuevo", "Desc", VisibilidadPlaylist.PRIVADA, Estilo.FORMAL));
         assertThat(resEditar.nombre()).isEqualTo("Nuevo");
@@ -75,7 +73,7 @@ class UseCasesTest {
 
     @Test
     void consultasPlaylist() {
-        UUID usuarioId = UUID.randomUUID();
+        String usuarioId = "15";
         UUID playlistId = UUID.randomUUID();
         Playlist p = Playlist.crear(usuarioId, "Test", null, VisibilidadPlaylist.PUBLICA, Estilo.CASUAL);
         p.setId(playlistId);
@@ -99,19 +97,19 @@ class UseCasesTest {
     @Test
     void destacarPlaylistValidaTope() {
         UUID playlistId = UUID.randomUUID();
-        Playlist p = Playlist.crear(UUID.randomUUID(), "Test", null, VisibilidadPlaylist.PUBLICA, Estilo.CASUAL);
+        Playlist p = Playlist.crear("15", "Test", null, VisibilidadPlaylist.PUBLICA, Estilo.CASUAL);
         p.setId(playlistId);
 
         when(repository.findById(playlistId)).thenReturn(Optional.of(p));
         when(repository.countDestacadas()).thenReturn(3L);
 
-        assertThatThrownBy(() -> destacarUseCase.destacar(UUID.randomUUID(), playlistId))
+        assertThatThrownBy(() -> destacarUseCase.destacar("1", playlistId))
                 .isInstanceOf(LimiteDestacadasSuperadoException.class);
     }
 
     @Test
     void asociarYRetirarPrenda() {
-        UUID usuarioId = UUID.randomUUID();
+        String usuarioId = "15";
         UUID playlistId = UUID.randomUUID();
         UUID prendaId = UUID.randomUUID();
         Playlist p = Playlist.crear(usuarioId, "Test", null, VisibilidadPlaylist.PUBLICA, Estilo.CASUAL);
@@ -133,7 +131,7 @@ class UseCasesTest {
 
     @Test
     void interactuarLikeYGuardado() {
-        UUID usuarioId = UUID.randomUUID();
+        String usuarioId = "15";
         UUID playlistId = UUID.randomUUID();
         Playlist p = Playlist.crear(usuarioId, "Test", null, VisibilidadPlaylist.PUBLICA, Estilo.CASUAL);
         p.setId(playlistId);

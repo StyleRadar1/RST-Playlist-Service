@@ -6,3 +6,9 @@ spring:
       ddl-auto: create-drop
   flyway:
     enabled: false
+  rabbitmq:
+    ssl:
+      enabled: false
+    listener:
+      simple:
+        auto-startup: false

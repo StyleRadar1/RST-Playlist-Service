@@ -1,22 +1,26 @@
 package edu.dosw.styleradar.playlist;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 @SpringBootTest
 @Testcontainers(disabledWithoutDocker = true)
 class PlaylistServiceApplicationIntegrationTest {
 
     @Container
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine")
-            .withDatabaseName("playlist_db")
-            .withUsername("styleradar_user")
-            .withPassword("secret_dev_pass");
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine");
+
+    @Autowired
+    private ApplicationContext context;
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
@@ -29,6 +33,6 @@ class PlaylistServiceApplicationIntegrationTest {
 
     @Test
     void contextLoads() {
-        // Valida que el contexto y la migración Flyway cargan de forma íntegra
+        assertThat(context).isNotNull();
     }
 }

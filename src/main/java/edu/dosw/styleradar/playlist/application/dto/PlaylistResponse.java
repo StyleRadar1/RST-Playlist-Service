@@ -9,7 +9,7 @@ import java.util.UUID;
 
 public record PlaylistResponse(
     UUID id,
-    UUID usuarioId,
+    String usuarioId,
     String nombre,
     String descripcion,
     VisibilidadPlaylist visibilidad,
