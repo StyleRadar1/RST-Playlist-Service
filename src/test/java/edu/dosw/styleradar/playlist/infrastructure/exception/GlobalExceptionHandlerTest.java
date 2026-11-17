@@ -7,10 +7,12 @@ import edu.dosw.styleradar.playlist.domain.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ProblemDetail;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
@@ -83,5 +85,13 @@ class GlobalExceptionHandlerTest {
         Exception ex = new IllegalStateException("fallo");
         ProblemDetail detail = handler.handleUnexpected(ex);
         assertThat(detail.getStatus()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR.value());
+    }
+
+    @Test
+    void unknownRouteReturns404() {
+        NoResourceFoundException ex = new NoResourceFoundException(HttpMethod.GET, "/");
+        ProblemDetail detail = handler.handleRouteNotFound(ex);
+        assertThat(detail.getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
+        assertThat(detail.getTitle()).isEqualTo("Ruta no encontrada");
     }
 }
