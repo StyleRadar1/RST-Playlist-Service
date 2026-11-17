@@ -2,9 +2,7 @@ package edu.dosw.styleradar.playlist.infrastructure.config;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.DirectExchange;
 import org.springframework.amqp.core.Queue;
-import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.support.converter.MessageConverter;
 
@@ -17,15 +15,13 @@ class RabbitMqConfigTest {
 
     @Test
     void validaConfiguracionExchangesYColas() {
-        TopicExchange mainExchange = config.mainExchange();
-        DirectExchange dlx = config.deadLetterExchange();
         Queue prendaRetiradaQueue = config.prendaRetiradaQueue();
         Queue dlq = config.playlistDlq();
-        Binding binding = config.prendaRetiradaBinding(prendaRetiradaQueue, mainExchange);
-        Binding dlqBinding = config.playlistDlqBinding(dlq, dlx);
+        Binding binding = config.prendaRetiradaBinding(prendaRetiradaQueue);
+        Binding dlqBinding = config.playlistDlqBinding(dlq);
 
-        assertThat(mainExchange.getName()).isEqualTo("styleradar.exchange");
-        assertThat(dlx.getName()).isEqualTo("styleradar.dlx");
+        assertThat(binding.getExchange()).isEqualTo("styleradar.exchange");
+        assertThat(dlqBinding.getExchange()).isEqualTo("styleradar.dlx");
         assertThat(prendaRetiradaQueue.getName()).isEqualTo("styleradar.playlist.prenda-retirada.q");
         assertThat(prendaRetiradaQueue.getArguments()).containsEntry("x-dead-letter-exchange", "styleradar.dlx");
         assertThat(prendaRetiradaQueue.getArguments()).containsEntry("x-dead-letter-routing-key", "styleradar.playlist.dlq");
@@ -36,5 +32,6 @@ class RabbitMqConfigTest {
         MessageConverter converter = config.jacksonMessageConverter();
         assertThat(converter).isNotNull();
         assertThat(config.rabbitTemplate(mock(ConnectionFactory.class), converter)).isNotNull();
+        assertThat(config.rabbitAdmin(mock(ConnectionFactory.class))).hasFieldOrPropertyWithValue("ignoreDeclarationExceptions", true);
     }
 }
