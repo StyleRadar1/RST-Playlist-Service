@@ -1,7 +1,7 @@
 package edu.dosw.styleradar.playlist.infrastructure.adapter.in.rest;
 
 import edu.dosw.styleradar.playlist.application.dto.*;
-import edu.dosw.styleradar.playlist.domain.exception.NoAutorizadoException;
+import edu.dosw.styleradar.playlist.domain.exception.UnauthorizedException;
 import edu.dosw.styleradar.playlist.domain.port.in.*;
 import edu.dosw.styleradar.playlist.infrastructure.adapter.in.rest.doc.PlaylistApi;
 import jakarta.validation.Valid;
@@ -13,151 +13,243 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/playlists")
+@RequestMapping("/api/v1/playlists")
 public class PlaylistController implements PlaylistApi {
 
-    private final CrearPlaylistUseCase crearPlaylistUseCase;
-    private final ConsultarPlaylistUseCase consultarPlaylistUseCase;
-    private final DestacarPlaylistUseCase destacarPlaylistUseCase;
-    private final AsociarPrendaUseCase asociarPrendaUseCase;
-    private final InteractuarPlaylistUseCase interactuarPlaylistUseCase;
+    private final CreatePlaylistUseCase createPlaylistUseCase;
+    private final GetPlaylistUseCase getPlaylistUseCase;
+    private final FeaturePlaylistUseCase featurePlaylistUseCase;
+    private final ManagePlaylistItemUseCase managePlaylistItemUseCase;
+    private final InteractWithPlaylistUseCase interactWithPlaylistUseCase;
 
-    public PlaylistController(CrearPlaylistUseCase crearPlaylistUseCase,
-                              ConsultarPlaylistUseCase consultarPlaylistUseCase,
-                              DestacarPlaylistUseCase destacarPlaylistUseCase,
-                              AsociarPrendaUseCase asociarPrendaUseCase,
-                              InteractuarPlaylistUseCase interactuarPlaylistUseCase) {
-        this.crearPlaylistUseCase = crearPlaylistUseCase;
-        this.consultarPlaylistUseCase = consultarPlaylistUseCase;
-        this.destacarPlaylistUseCase = destacarPlaylistUseCase;
-        this.asociarPrendaUseCase = asociarPrendaUseCase;
-        this.interactuarPlaylistUseCase = interactuarPlaylistUseCase;
+    public PlaylistController(
+            CreatePlaylistUseCase createPlaylistUseCase,
+            GetPlaylistUseCase getPlaylistUseCase,
+            FeaturePlaylistUseCase featurePlaylistUseCase,
+            ManagePlaylistItemUseCase managePlaylistItemUseCase,
+            InteractWithPlaylistUseCase interactWithPlaylistUseCase) {
+
+        this.createPlaylistUseCase = createPlaylistUseCase;
+        this.getPlaylistUseCase = getPlaylistUseCase;
+        this.featurePlaylistUseCase = featurePlaylistUseCase;
+        this.managePlaylistItemUseCase = managePlaylistItemUseCase;
+        this.interactWithPlaylistUseCase = interactWithPlaylistUseCase;
     }
 
     @Override
     @PostMapping
-    public ResponseEntity<PlaylistResponse> crear(
-            @RequestHeader(value = "X-User-Id") String usuarioId,
-            @Valid @RequestBody CrearPlaylistRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(crearPlaylistUseCase.crear(validarUsuarioId(usuarioId), request));
+    public ResponseEntity<PlaylistResponse> create(
+            @RequestHeader("X-User-Id") String userId,
+            @Valid @RequestBody CreatePlaylistRequest request) {
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(
+                        createPlaylistUseCase.create(
+                                validateUserId(userId),
+                                request
+                        )
+                );
     }
 
     @Override
     @GetMapping("/{id}")
-    public ResponseEntity<PlaylistResponse> obtenerPorId(
+    public ResponseEntity<PlaylistResponse> getById(
             @PathVariable UUID id,
-            @RequestHeader(value = "X-User-Id", required = false) String usuarioId) {
-        String usuarioNormalizado = (usuarioId == null || usuarioId.isBlank()) ? null : usuarioId.trim();
-        return ResponseEntity.ok(consultarPlaylistUseCase.obtenerPorId(id, usuarioNormalizado));
+            @RequestHeader(
+                    value = "X-User-Id",
+                    required = false
+            ) String userId) {
+
+        String normalizedUserId =
+                userId == null || userId.isBlank()
+                        ? null
+                        : userId.trim();
+
+        return ResponseEntity.ok(
+                getPlaylistUseCase.getById(
+                        id,
+                        normalizedUserId
+                )
+        );
     }
 
     @Override
     @GetMapping
-    public ResponseEntity<List<PlaylistResponse>> obtenerPublicas() {
-        return ResponseEntity.ok(consultarPlaylistUseCase.obtenerPublicas());
+    public ResponseEntity<List<PlaylistResponse>> getPublicPlaylists() {
+        return ResponseEntity.ok(
+                getPlaylistUseCase.getPublicPlaylists()
+        );
     }
 
     @Override
-    @GetMapping("/destacadas")
-    public ResponseEntity<List<PlaylistResponse>> obtenerDestacadas() {
-        return ResponseEntity.ok(consultarPlaylistUseCase.obtenerDestacadas());
+    @GetMapping("/featured")
+    public ResponseEntity<List<PlaylistResponse>> getFeaturedPlaylists() {
+        return ResponseEntity.ok(
+                getPlaylistUseCase.getFeaturedPlaylists()
+        );
     }
 
     @Override
-    @GetMapping("/populares")
-    public ResponseEntity<PageResponse<PlaylistResponse>> obtenerPopulares(
+    @GetMapping("/popular")
+    public ResponseEntity<PageResponse<PlaylistResponse>> getPopularPlaylists(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        return ResponseEntity.ok(consultarPlaylistUseCase.obtenerPopulares(page, size));
+
+        return ResponseEntity.ok(
+                getPlaylistUseCase.getPopularPlaylists(page, size)
+        );
     }
 
     @Override
     @PutMapping("/{id}")
-    public ResponseEntity<PlaylistResponse> editar(
-            @RequestHeader(value = "X-User-Id") String usuarioId,
+    public ResponseEntity<PlaylistResponse> update(
+            @RequestHeader("X-User-Id") String userId,
             @PathVariable UUID id,
-            @Valid @RequestBody EditarPlaylistRequest request) {
-        return ResponseEntity.ok(crearPlaylistUseCase.editar(validarUsuarioId(usuarioId), id, request));
+            @Valid @RequestBody UpdatePlaylistRequest request) {
+
+        return ResponseEntity.ok(
+                createPlaylistUseCase.update(
+                        validateUserId(userId),
+                        id,
+                        request
+                )
+        );
     }
 
     @Override
-    @PutMapping("/{id}/destacar")
-    public ResponseEntity<PlaylistResponse> destacar(
-            @RequestHeader(value = "X-User-Id") String usuarioId,
+    @PutMapping("/{id}/feature")
+    public ResponseEntity<PlaylistResponse> feature(
+            @RequestHeader("X-User-Id") String userId,
             @PathVariable UUID id) {
-        return ResponseEntity.ok(destacarPlaylistUseCase.destacar(validarUsuarioId(usuarioId), id));
+
+        return ResponseEntity.ok(
+                featurePlaylistUseCase.feature(
+                        validateUserId(userId),
+                        id
+                )
+        );
     }
 
     @Override
-    @DeleteMapping("/{id}/destacar")
-    public ResponseEntity<PlaylistResponse> quitarDestacado(
-            @RequestHeader(value = "X-User-Id") String usuarioId,
+    @DeleteMapping("/{id}/feature")
+    public ResponseEntity<PlaylistResponse> removeFeature(
+            @RequestHeader("X-User-Id") String userId,
             @PathVariable UUID id) {
-        return ResponseEntity.ok(destacarPlaylistUseCase.quitarDestacado(validarUsuarioId(usuarioId), id));
+
+        return ResponseEntity.ok(
+                featurePlaylistUseCase.removeFeature(
+                        validateUserId(userId),
+                        id
+                )
+        );
     }
 
     @Override
-    @PostMapping("/{id}/prendas")
-    public ResponseEntity<PlaylistResponse> agregarPrenda(
-            @RequestHeader(value = "X-User-Id") String usuarioId,
+    @PostMapping("/{id}/items")
+    public ResponseEntity<PlaylistResponse> addItem(
+            @RequestHeader("X-User-Id") String userId,
             @PathVariable UUID id,
-            @Valid @RequestBody AgregarPrendaRequest request) {
-        return ResponseEntity.ok(asociarPrendaUseCase.agregarPrenda(validarUsuarioId(usuarioId), id, request));
+            @Valid @RequestBody AddItemRequest request) {
+
+        return ResponseEntity.ok(
+                managePlaylistItemUseCase.addItem(
+                        validateUserId(userId),
+                        id,
+                        request
+                )
+        );
     }
 
     @Override
-    @DeleteMapping("/{id}/prendas/{prendaId}")
-    public ResponseEntity<PlaylistResponse> retirarPrenda(
-            @RequestHeader(value = "X-User-Id") String usuarioId,
+    @DeleteMapping("/{id}/items/{itemId}")
+    public ResponseEntity<PlaylistResponse> removeItem(
+            @RequestHeader("X-User-Id") String userId,
             @PathVariable UUID id,
-            @PathVariable UUID prendaId) {
-        return ResponseEntity.ok(asociarPrendaUseCase.retirarPrenda(validarUsuarioId(usuarioId), id, prendaId));
+            @PathVariable UUID itemId) {
+
+        return ResponseEntity.ok(
+                managePlaylistItemUseCase.removeItem(
+                        validateUserId(userId),
+                        id,
+                        itemId
+                )
+        );
     }
 
     @Override
-    @PostMapping("/{id}/like")
-    public ResponseEntity<PlaylistResponse> alternarLike(
-            @RequestHeader(value = "X-User-Id") String usuarioId,
+    @PostMapping("/{id}/likes")
+    public ResponseEntity<PlaylistResponse> toggleLike(
+            @RequestHeader("X-User-Id") String userId,
             @PathVariable UUID id) {
-        return ResponseEntity.ok(interactuarPlaylistUseCase.alternarLike(validarUsuarioId(usuarioId), id));
+
+        return ResponseEntity.ok(
+                interactWithPlaylistUseCase.toggleLike(
+                        validateUserId(userId),
+                        id
+                )
+        );
     }
 
     @Override
-    @PostMapping("/{id}/guardar")
-    public ResponseEntity<PlaylistResponse> alternarGuardado(
-            @RequestHeader(value = "X-User-Id") String usuarioId,
+    @PostMapping("/{id}/saved")
+    public ResponseEntity<PlaylistResponse> toggleSaved(
+            @RequestHeader("X-User-Id") String userId,
             @PathVariable UUID id) {
-        return ResponseEntity.ok(interactuarPlaylistUseCase.alternarGuardado(validarUsuarioId(usuarioId), id));
+
+        return ResponseEntity.ok(
+                interactWithPlaylistUseCase.toggleSaved(
+                        validateUserId(userId),
+                        id
+                )
+        );
     }
 
     @Override
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(
-            @RequestHeader(value = "X-User-Id") String usuarioId,
+    public ResponseEntity<Void> delete(
+            @RequestHeader("X-User-Id") String userId,
             @PathVariable UUID id) {
-        crearPlaylistUseCase.eliminar(validarUsuarioId(usuarioId), id);
+
+        createPlaylistUseCase.delete(
+                validateUserId(userId),
+                id
+        );
+
         return ResponseEntity.noContent().build();
     }
 
     @Override
     @GetMapping("/me")
-    public ResponseEntity<List<PlaylistResponse>> misPlaylists(
-            @RequestHeader(value = "X-User-Id") String usuarioId) {
-        return ResponseEntity.ok(consultarPlaylistUseCase.obtenerPorUsuario(validarUsuarioId(usuarioId)));
+    public ResponseEntity<List<PlaylistResponse>> getMyPlaylists(
+            @RequestHeader("X-User-Id") String userId) {
+
+        return ResponseEntity.ok(
+                getPlaylistUseCase.getByUser(
+                        validateUserId(userId)
+                )
+        );
     }
 
     @Override
-    @GetMapping("/me/guardadas")
-    public ResponseEntity<List<PlaylistResponse>> misGuardadas(
-            @RequestHeader(value = "X-User-Id") String usuarioId) {
-        return ResponseEntity.ok(consultarPlaylistUseCase.obtenerGuardadas(validarUsuarioId(usuarioId)));
+    @GetMapping("/me/saved")
+    public ResponseEntity<List<PlaylistResponse>> getMySavedPlaylists(
+            @RequestHeader("X-User-Id") String userId) {
+
+        return ResponseEntity.ok(
+                getPlaylistUseCase.getSavedPlaylists(
+                        validateUserId(userId)
+                )
+        );
     }
 
-    private String validarUsuarioId(String usuarioId) {
-        if (usuarioId == null || usuarioId.isBlank()) {
-            throw new NoAutorizadoException("La cabecera X-User-Id es obligatoria y no puede estar vacía");
+    private String validateUserId(String userId) {
+        if (userId == null || userId.isBlank()) {
+            throw new UnauthorizedException(
+                    "La cabecera X-User-Id es obligatoria y no puede estar vacía"
+            );
         }
-        return usuarioId.trim();
+
+        return userId.trim();
     }
 }
