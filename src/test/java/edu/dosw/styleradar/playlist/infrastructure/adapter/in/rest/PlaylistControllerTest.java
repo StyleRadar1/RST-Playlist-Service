@@ -153,4 +153,10 @@ class PlaylistControllerTest {
         assertThat(controller.misPlaylists(usuarioId).getBody()).hasSize(1);
         assertThat(controller.misGuardadas(usuarioId).getBody()).hasSize(1);
     }
+
+    @Test
+    void uuidInvalidoEnRutaRetorna400YNo500() throws Exception {
+        mockMvc.perform(get("/playlists/no-es-un-uuid"))
+                .andExpect(status().isBadRequest());
+    }
 }

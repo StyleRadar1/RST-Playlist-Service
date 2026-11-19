@@ -11,6 +11,8 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 import org.springframework.web.bind.MissingRequestHeaderException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -87,5 +89,12 @@ class GlobalExceptionHandlerTest {
         ProblemDetail detail = handler.handleRouteNotFound(ex);
         assertThat(detail.getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
         assertThat(detail.getTitle()).isEqualTo("Ruta no encontrada");
+    }
+
+    @Test
+    void invalidUuidPathReturns400() {
+        MethodArgumentTypeMismatchException ex = new MethodArgumentTypeMismatchException("no-es-uuid", UUID.class, "id", null, null);
+        ProblemDetail detail = handler.handleTypeMismatch(ex);
+        assertThat(detail.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
     }
 }

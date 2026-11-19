@@ -13,6 +13,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.LinkedHashMap;
@@ -34,6 +35,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NoAutorizadoException.class)
     public ProblemDetail handleNoAutorizado(NoAutorizadoException ex) {
         return problem(HttpStatus.UNAUTHORIZED, "No autorizado", ex.getMessage());
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ProblemDetail handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        return problem(HttpStatus.BAD_REQUEST, "Parámetro inválido",
+                "El parámetro '" + ex.getName() + "' tiene un formato inválido");
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
