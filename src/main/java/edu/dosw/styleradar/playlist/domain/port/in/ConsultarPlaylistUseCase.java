@@ -7,10 +7,10 @@ import java.util.List;
 import java.util.UUID;
 
 public interface ConsultarPlaylistUseCase {
-    PlaylistResponse obtenerPorId(UUID id, UUID usuarioConsultaId);
+    PlaylistResponse obtenerPorId(UUID id, String usuarioConsultaId);
     List<PlaylistResponse> obtenerPublicas();
     PageResponse<PlaylistResponse> obtenerPopulares(int page, int size);
-    List<PlaylistResponse> obtenerPorUsuario(UUID usuarioId);
-    List<PlaylistResponse> obtenerGuardadas(UUID usuarioId);
+    List<PlaylistResponse> obtenerPorUsuario(String usuarioId);
+    List<PlaylistResponse> obtenerGuardadas(String usuarioId);
     List<PlaylistResponse> obtenerDestacadas();
 }

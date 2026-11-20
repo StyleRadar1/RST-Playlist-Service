@@ -12,8 +12,8 @@ public interface PlaylistRepositoryPort {
     List<Playlist> findAllPublicas();
     List<Playlist> findPopulares(int page, int size);
     long countPublicas();
-    List<Playlist> findByUsuarioId(UUID usuarioId);
-    List<Playlist> findByGuardadosUsuarioId(UUID usuarioId);
+    List<Playlist> findByUsuarioId(String usuarioId);
+    List<Playlist> findByGuardadosUsuarioId(String usuarioId);
     List<Playlist> findDestacadas();
     long countDestacadas();
     void delete(UUID id);

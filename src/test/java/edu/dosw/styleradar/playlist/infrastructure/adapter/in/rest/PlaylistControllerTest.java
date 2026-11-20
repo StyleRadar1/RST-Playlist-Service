@@ -4,13 +4,17 @@ import edu.dosw.styleradar.playlist.application.dto.*;
 import edu.dosw.styleradar.playlist.domain.model.Estilo;
 import edu.dosw.styleradar.playlist.domain.model.VisibilidadPlaylist;
 import edu.dosw.styleradar.playlist.domain.port.in.*;
+import edu.dosw.styleradar.playlist.infrastructure.exception.GlobalExceptionHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.time.Instant;
 import java.util.List;
@@ -21,6 +25,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
 class PlaylistControllerTest {
@@ -32,14 +39,18 @@ class PlaylistControllerTest {
     @Mock private InteractuarPlaylistUseCase interactuarPlaylistUseCase;
 
     private PlaylistController controller;
+    private MockMvc mockMvc;
     private PlaylistResponse sampleResponse;
-    private final UUID usuarioId = UUID.randomUUID();
+    private final String usuarioId = "15";
     private final UUID playlistId = UUID.randomUUID();
     private final UUID prendaId = UUID.randomUUID();
 
     @BeforeEach
     void setUp() {
         controller = new PlaylistController(crearPlaylistUseCase, consultarPlaylistUseCase, destacarPlaylistUseCase, asociarPrendaUseCase, interactuarPlaylistUseCase);
+        mockMvc = MockMvcBuilders.standaloneSetup(controller)
+                .setControllerAdvice(new GlobalExceptionHandler())
+                .build();
         sampleResponse = new PlaylistResponse(
                 playlistId, usuarioId, "Streetwear", "Desc", VisibilidadPlaylist.PUBLICA, Estilo.URBANO, false,
                 Instant.now(), List.of(), 0, 0, 0
@@ -47,10 +58,28 @@ class PlaylistControllerTest {
     }
 
     @Test
-    void crearPlaylistRetorna201() {
-        when(crearPlaylistUseCase.crear(eq(usuarioId), any())).thenReturn(sampleResponse);
-        ResponseEntity<PlaylistResponse> response = controller.crear(usuarioId, new CrearPlaylistRequest("Streetwear", "Desc", VisibilidadPlaylist.PUBLICA, Estilo.URBANO));
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+    void peticionProtegidaSinHeaderOBlandRetorna401() throws Exception {
+        mockMvc.perform(get("/playlists/me"))
+                .andExpect(status().isUnauthorized());
+
+        mockMvc.perform(get("/playlists/me").header("X-User-Id", "   "))
+                .andExpect(status().isUnauthorized());
+
+        mockMvc.perform(post("/playlists")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"nombre\":\"Urbano\",\"visibilidad\":\"PUBLICA\"}"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void crearPlaylistConUsuarioEnteroDeGatewayRetorna201() throws Exception {
+        when(crearPlaylistUseCase.crear(eq("15"), any())).thenReturn(sampleResponse);
+
+        mockMvc.perform(post("/playlists")
+                        .header("X-User-Id", "15")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"nombre\":\"Streetwear\",\"descripcion\":\"Desc\",\"visibilidad\":\"PUBLICA\",\"estilo\":\"URBANO\"}"))
+                .andExpect(status().isCreated());
     }
 
     @Test
@@ -123,5 +152,11 @@ class PlaylistControllerTest {
 
         assertThat(controller.misPlaylists(usuarioId).getBody()).hasSize(1);
         assertThat(controller.misGuardadas(usuarioId).getBody()).hasSize(1);
+    }
+
+    @Test
+    void uuidInvalidoEnRutaRetorna400YNo500() throws Exception {
+        mockMvc.perform(get("/playlists/no-es-un-uuid"))
+                .andExpect(status().isBadRequest());
     }
 }

@@ -15,9 +15,9 @@ public interface SpringDataPlaylistRepository extends JpaRepository<PlaylistEnti
 
     List<PlaylistEntity> findByVisibilidadOrderByFechaCreacionDesc(VisibilidadPlaylist visibilidad);
 
-    List<PlaylistEntity> findByUsuarioIdOrderByFechaCreacionDesc(UUID usuarioId);
+    List<PlaylistEntity> findByUsuarioIdOrderByFechaCreacionDesc(String usuarioId);
 
-    List<PlaylistEntity> findByGuardadosUsuariosContainsOrderByFechaCreacionDesc(UUID usuarioId);
+    List<PlaylistEntity> findByGuardadosUsuariosContainsOrderByFechaCreacionDesc(String usuarioId);
 
     List<PlaylistEntity> findByDestacadaTrueOrderByFechaActualizacionDesc();
 

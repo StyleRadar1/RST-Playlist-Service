@@ -1,9 +1,6 @@
 package edu.dosw.styleradar.playlist.infrastructure.exception;
 
-import edu.dosw.styleradar.playlist.domain.exception.AccesoDenegadoPlaylistException;
-import edu.dosw.styleradar.playlist.domain.exception.DomainException;
-import edu.dosw.styleradar.playlist.domain.exception.LimiteDestacadasSuperadoException;
-import edu.dosw.styleradar.playlist.domain.exception.ResourceNotFoundException;
+import edu.dosw.styleradar.playlist.domain.exception.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
@@ -15,8 +12,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
-
-import java.util.Map;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -35,9 +31,9 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
-    void invalidUuidHeaderReturns401() {
-        MethodArgumentTypeMismatchException ex = new MethodArgumentTypeMismatchException("abc", String.class, "X-User-Id", null, null);
-        ProblemDetail detail = handler.handleTypeMismatch(ex);
+    void blankUserIdHeaderReturns401() {
+        NoAutorizadoException ex = new NoAutorizadoException("Cabecera vacía");
+        ProblemDetail detail = handler.handleNoAutorizado(ex);
         assertThat(detail.getStatus()).isEqualTo(HttpStatus.UNAUTHORIZED.value());
     }
 
@@ -93,5 +89,12 @@ class GlobalExceptionHandlerTest {
         ProblemDetail detail = handler.handleRouteNotFound(ex);
         assertThat(detail.getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
         assertThat(detail.getTitle()).isEqualTo("Ruta no encontrada");
+    }
+
+    @Test
+    void invalidUuidPathReturns400() {
+        MethodArgumentTypeMismatchException ex = new MethodArgumentTypeMismatchException("no-es-uuid", UUID.class, "id", null, null);
+        ProblemDetail detail = handler.handleTypeMismatch(ex);
+        assertThat(detail.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
     }
 }

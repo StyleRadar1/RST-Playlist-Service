@@ -6,8 +6,8 @@ import edu.dosw.styleradar.playlist.application.dto.PlaylistResponse;
 import java.util.UUID;
 
 public interface AsociarPrendaUseCase {
-    PlaylistResponse agregarPrenda(UUID usuarioId, UUID playlistId, AgregarPrendaRequest request);
-    PlaylistResponse retirarPrenda(UUID usuarioId, UUID playlistId, UUID prendaId);
+    PlaylistResponse agregarPrenda(String usuarioId, UUID playlistId, AgregarPrendaRequest request);
+    PlaylistResponse retirarPrenda(String usuarioId, UUID playlistId, UUID prendaId);
     void desvincularPrendaDeTodas(UUID prendaId);
     void marcarPrendaNoDisponibleEnTodas(UUID prendaId);
 }
