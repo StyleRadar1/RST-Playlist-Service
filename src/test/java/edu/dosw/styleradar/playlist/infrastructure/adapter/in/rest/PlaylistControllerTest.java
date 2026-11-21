@@ -8,13 +8,17 @@ import edu.dosw.styleradar.playlist.domain.exception.PrendaNoEncontradaEnCatalog
 import edu.dosw.styleradar.playlist.domain.model.Estilo;
 import edu.dosw.styleradar.playlist.domain.model.VisibilidadPlaylist;
 import edu.dosw.styleradar.playlist.domain.port.in.*;
+import edu.dosw.styleradar.playlist.infrastructure.exception.GlobalExceptionHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.time.Instant;
 import java.util.List;
@@ -25,13 +29,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-<<<<<<< Updated upstream
-=======
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
->>>>>>> Stashed changes
 
 @ExtendWith(MockitoExtension.class)
 class PlaylistControllerTest {
@@ -43,14 +44,18 @@ class PlaylistControllerTest {
     @Mock private InteractuarPlaylistUseCase interactuarPlaylistUseCase;
 
     private PlaylistController controller;
+    private MockMvc mockMvc;
     private PlaylistResponse sampleResponse;
-    private final UUID usuarioId = UUID.randomUUID();
+    private final String usuarioId = "15";
     private final UUID playlistId = UUID.randomUUID();
     private final UUID prendaId = UUID.randomUUID();
 
     @BeforeEach
     void setUp() {
         controller = new PlaylistController(crearPlaylistUseCase, consultarPlaylistUseCase, destacarPlaylistUseCase, asociarPrendaUseCase, interactuarPlaylistUseCase);
+        mockMvc = MockMvcBuilders.standaloneSetup(controller)
+                .setControllerAdvice(new GlobalExceptionHandler())
+                .build();
         sampleResponse = new PlaylistResponse(
                 playlistId, usuarioId, "Streetwear", "Desc", VisibilidadPlaylist.PUBLICA, Estilo.URBANO, false,
                 Instant.now(), List.of(), 0, 0, 0
@@ -58,12 +63,6 @@ class PlaylistControllerTest {
     }
 
     @Test
-<<<<<<< Updated upstream
-    void crearPlaylistRetorna201() {
-        when(crearPlaylistUseCase.crear(eq(usuarioId), any())).thenReturn(sampleResponse);
-        ResponseEntity<PlaylistResponse> response = controller.crear(usuarioId, new CrearPlaylistRequest("Streetwear", "Desc", VisibilidadPlaylist.PUBLICA, Estilo.URBANO));
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-=======
     void peticionProtegidaSinHeaderOBlankRetorna401ConCodigo() throws Exception {
         mockMvc.perform(get("/playlists/me"))
                 .andExpect(status().isUnauthorized())
@@ -90,7 +89,6 @@ class PlaylistControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"nombre\":\"Streetwear\",\"descripcion\":\"Desc\",\"visibilidad\":\"PUBLICA\",\"estilo\":\"URBANO\",\"prendasIds\":[\"" + prendaId + "\"]}"))
                 .andExpect(status().isCreated());
->>>>>>> Stashed changes
     }
 
     @Test
@@ -214,8 +212,6 @@ class PlaylistControllerTest {
         assertThat(controller.misPlaylists(usuarioId).getBody()).hasSize(1);
         assertThat(controller.misGuardadas(usuarioId).getBody()).hasSize(1);
     }
-<<<<<<< Updated upstream
-=======
 
     @Test
     void uuidInvalidoEnRutaRetorna400ConParametroInvalido() throws Exception {
@@ -224,5 +220,4 @@ class PlaylistControllerTest {
                 .andExpect(jsonPath("$.code").value("PARAMETRO_INVALIDO"))
                 .andExpect(jsonPath("$.timestamp").isNotEmpty());
     }
->>>>>>> Stashed changes
 }

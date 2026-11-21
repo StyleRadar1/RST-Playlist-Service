@@ -1,14 +1,7 @@
 package edu.dosw.styleradar.playlist.infrastructure.exception;
 
-<<<<<<< Updated upstream
-import edu.dosw.styleradar.playlist.domain.exception.AccesoDenegadoPlaylistException;
-import edu.dosw.styleradar.playlist.domain.exception.DomainException;
-import edu.dosw.styleradar.playlist.domain.exception.LimiteDestacadasSuperadoException;
-import edu.dosw.styleradar.playlist.domain.exception.ResourceNotFoundException;
-=======
 import edu.dosw.styleradar.playlist.domain.exception.*;
 import jakarta.validation.ConstraintViolationException;
->>>>>>> Stashed changes
 import org.junit.jupiter.api.Test;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpMethod;
@@ -21,17 +14,12 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
-<<<<<<< Updated upstream
-
-import java.util.Map;
-=======
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.time.Instant;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
->>>>>>> Stashed changes
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -54,16 +42,9 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
-<<<<<<< Updated upstream
-    void invalidUuidHeaderReturns401() {
-        MethodArgumentTypeMismatchException ex = new MethodArgumentTypeMismatchException("abc", String.class, "X-User-Id", null, null);
-        ProblemDetail detail = handler.handleTypeMismatch(ex);
-        assertThat(detail.getStatus()).isEqualTo(HttpStatus.UNAUTHORIZED.value());
-=======
     void blankUserIdHeaderReturns401() {
         NoAutorizadoException ex = new NoAutorizadoException("Cabecera vacía");
         assertCodigoYTimestamp(handler.handleNoAutorizado(ex), HttpStatus.UNAUTHORIZED, "USUARIO_NO_AUTENTICADO");
->>>>>>> Stashed changes
     }
 
     @Test
@@ -151,8 +132,6 @@ class GlobalExceptionHandlerTest {
         assertCodigoYTimestamp(detail, HttpStatus.NOT_FOUND, "RUTA_NO_ENCONTRADA");
         assertThat(detail.getTitle()).isEqualTo("Ruta no encontrada");
     }
-<<<<<<< Updated upstream
-=======
 
     @Test
     void invalidParamsReturn400ParametroInvalido() {
@@ -170,5 +149,4 @@ class GlobalExceptionHandlerTest {
         assertThat(detail.getProperties()).containsKey("timestamp");
         assertThat(Instant.parse(detail.getProperties().get("timestamp").toString())).isNotNull();
     }
->>>>>>> Stashed changes
 }

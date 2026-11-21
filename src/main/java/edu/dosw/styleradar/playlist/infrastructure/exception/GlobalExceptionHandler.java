@@ -6,9 +6,6 @@ import edu.dosw.styleradar.playlist.domain.exception.CodigoError;
 import edu.dosw.styleradar.playlist.domain.exception.DescripcionMuyLargaException;
 import edu.dosw.styleradar.playlist.domain.exception.DomainException;
 import edu.dosw.styleradar.playlist.domain.exception.LimiteDestacadasSuperadoException;
-<<<<<<< Updated upstream
-import edu.dosw.styleradar.playlist.domain.exception.ResourceNotFoundException;
-=======
 import edu.dosw.styleradar.playlist.domain.exception.NoAutorizadoException;
 import edu.dosw.styleradar.playlist.domain.exception.PlaylistSinPrendasException;
 import edu.dosw.styleradar.playlist.domain.exception.PrendaNoEncontradaEnCatalogoException;
@@ -16,7 +13,6 @@ import edu.dosw.styleradar.playlist.domain.exception.ResourceNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
->>>>>>> Stashed changes
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -25,13 +21,9 @@ import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-<<<<<<< Updated upstream
-=======
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
->>>>>>> Stashed changes
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
-import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.time.Instant;
 import java.util.LinkedHashMap;
@@ -39,6 +31,8 @@ import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(MissingRequestHeaderException.class)
     public ProblemDetail handleMissingHeader(MissingRequestHeaderException ex) {
@@ -50,14 +44,6 @@ public class GlobalExceptionHandler {
                 "Cabecera faltante", ex.getMessage());
     }
 
-<<<<<<< Updated upstream
-    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ProblemDetail handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
-        if ("X-User-Id".equalsIgnoreCase(ex.getName())) {
-            return problem(HttpStatus.UNAUTHORIZED, "No autorizado", "La cabecera X-User-Id debe ser un UUID válido");
-        }
-        return problem(HttpStatus.BAD_REQUEST, "Parámetro inválido", ex.getMessage());
-=======
     @ExceptionHandler(NoAutorizadoException.class)
     public ProblemDetail handleNoAutorizado(NoAutorizadoException ex) {
         return problem(HttpStatus.UNAUTHORIZED, ex.getCodigoError(), "No autorizado", ex.getMessage());
@@ -67,7 +53,6 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
         return problem(HttpStatus.BAD_REQUEST, CodigoError.PARAMETRO_INVALIDO, "Parámetro inválido",
                 "El parámetro '" + ex.getName() + "' tiene un formato inválido");
->>>>>>> Stashed changes
     }
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
@@ -76,8 +61,6 @@ public class GlobalExceptionHandler {
                 "Falta el parámetro obligatorio '" + ex.getParameterName() + "'");
     }
 
-<<<<<<< Updated upstream
-=======
     @ExceptionHandler({ResourceNotFoundException.class, PrendaNoEncontradaEnCatalogoException.class})
     public ProblemDetail handleNotFound(DomainException ex) {
         return problem(HttpStatus.NOT_FOUND, ex.getCodigoError(), "Recurso no encontrado", ex.getMessage());
@@ -89,7 +72,6 @@ public class GlobalExceptionHandler {
                 "Ruta no encontrada", "El recurso o ruta solicitada no existe");
     }
 
->>>>>>> Stashed changes
     @ExceptionHandler(LimiteDestacadasSuperadoException.class)
     public ProblemDetail handleLimiteDestacadas(LimiteDestacadasSuperadoException ex) {
         return problem(HttpStatus.CONFLICT, ex.getCodigoError(),
@@ -129,11 +111,6 @@ public class GlobalExceptionHandler {
         return detail;
     }
 
-<<<<<<< Updated upstream
-    @ExceptionHandler({NoResourceFoundException.class, NoHandlerFoundException.class})
-    public ProblemDetail handleRouteNotFound(Exception ex) {
-        return problem(HttpStatus.NOT_FOUND, "Ruta no encontrada", "El recurso o ruta solicitada no existe");
-=======
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ProblemDetail handleUnreadableBody(HttpMessageNotReadableException ex) {
         return problem(HttpStatus.BAD_REQUEST, CodigoError.DATOS_INVALIDOS,
@@ -145,18 +122,13 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleConstraintViolation(ConstraintViolationException ex) {
         return problem(HttpStatus.BAD_REQUEST, CodigoError.DATOS_INVALIDOS,
                 "Solicitud inválida", ex.getMessage());
->>>>>>> Stashed changes
     }
 
     @ExceptionHandler(Exception.class)
     public ProblemDetail handleUnexpected(Exception ex) {
-<<<<<<< Updated upstream
-        return problem(HttpStatus.INTERNAL_SERVER_ERROR, "Error interno", "Ocurrió un error inesperado");
-=======
         log.error("Error interno inesperado en ms-playlist", ex);
         return problem(HttpStatus.INTERNAL_SERVER_ERROR, CodigoError.ERROR_INTERNO,
                 "Error interno", "Ocurrió un error inesperado");
->>>>>>> Stashed changes
     }
 
     private ProblemDetail problem(HttpStatus status, CodigoError code, String title, String message) {

@@ -46,10 +46,6 @@ public class CrearPlaylistUseCaseImpl implements CrearPlaylistUseCase {
     }
 
     @Override
-<<<<<<< Updated upstream
-    public PlaylistResponse crear(UUID usuarioId, CrearPlaylistRequest request) {
-        Playlist playlist = Playlist.crear(
-=======
     public PlaylistResponse crear(String usuarioId, CrearPlaylistRequest request) {
         Playlist.crear(usuarioId, request.nombre(), request.descripcion(), request.visibilidad(), request.estilo());
 
@@ -77,7 +73,6 @@ public class CrearPlaylistUseCaseImpl implements CrearPlaylistUseCase {
         }
 
         Playlist playlist = Playlist.crearConPrendas(
->>>>>>> Stashed changes
                 usuarioId,
                 request.nombre(),
                 request.descripcion(),
@@ -92,7 +87,7 @@ public class CrearPlaylistUseCaseImpl implements CrearPlaylistUseCase {
     }
 
     @Override
-    public PlaylistResponse editar(UUID usuarioId, UUID playlistId, EditarPlaylistRequest request) {
+    public PlaylistResponse editar(String usuarioId, UUID playlistId, EditarPlaylistRequest request) {
         Playlist playlist = repository.findById(playlistId)
                 .orElseThrow(() -> new ResourceNotFoundException("No existe playlist con ID: " + playlistId));
         playlist.editar(usuarioId, request.nombre(), request.descripcion(), request.visibilidad(), request.estilo());
@@ -100,7 +95,7 @@ public class CrearPlaylistUseCaseImpl implements CrearPlaylistUseCase {
     }
 
     @Override
-    public void eliminar(UUID usuarioId, UUID playlistId) {
+    public void eliminar(String usuarioId, UUID playlistId) {
         Playlist playlist = repository.findById(playlistId)
                 .orElseThrow(() -> new ResourceNotFoundException("No existe playlist con ID: " + playlistId));
         playlist.validarPropietario(usuarioId);
