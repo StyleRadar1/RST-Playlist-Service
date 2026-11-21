@@ -52,12 +52,12 @@ public class Playlist {
 
     public static Playlist crear(String usuarioId, String nombre, String descripcion,
                                  VisibilidadPlaylist visibilidad, Estilo estilo) {
-        if (usuarioId == null) {
+        if (usuarioId == null || usuarioId.isBlank()) {
             throw new NoAutorizadoException("El ID del usuario creador es obligatorio");
         }
         Playlist p = new Playlist();
         p.id = UUID.randomUUID();
-        p.usuarioId = usuarioId;
+        p.usuarioId = usuarioId.trim();
         p.asignarNombre(nombre);
         p.asignarDescripcion(descripcion);
         p.visibilidad = (visibilidad != null) ? visibilidad : VisibilidadPlaylist.PUBLICA;
@@ -68,7 +68,7 @@ public class Playlist {
         return p;
     }
 
-    public static Playlist crearConPrendas(UUID usuarioId, String nombre, String descripcion,
+    public static Playlist crearConPrendas(String usuarioId, String nombre, String descripcion,
                                            VisibilidadPlaylist visibilidad, Estilo estilo,
                                            List<PrendaSnapshot> prendas) {
         Playlist p = crear(usuarioId, nombre, descripcion, visibilidad, estilo);
@@ -140,8 +140,8 @@ public class Playlist {
         this.fechaActualizacion = Instant.now();
     }
 
-    public void alternarLike(UUID usuarioId) {
-        if (usuarioId == null) {
+    public void alternarLike(String usuarioId) {
+        if (usuarioId == null || usuarioId.isBlank()) {
             throw new NoAutorizadoException("El ID de usuario es obligatorio");
         }
         String idLimpio = usuarioId.trim();
@@ -153,8 +153,8 @@ public class Playlist {
         this.fechaActualizacion = Instant.now();
     }
 
-    public void alternarGuardado(UUID usuarioId) {
-        if (usuarioId == null) {
+    public void alternarGuardado(String usuarioId) {
+        if (usuarioId == null || usuarioId.isBlank()) {
             throw new NoAutorizadoException("El ID de usuario es obligatorio");
         }
         String idLimpio = usuarioId.trim();
@@ -188,7 +188,7 @@ public class Playlist {
 
     public void validarAccesoLectura(String usuarioConsultaId) {
         if (this.visibilidad == VisibilidadPlaylist.PRIVADA) {
-            if (usuarioConsultaId == null || !usuarioConsultaId.equals(this.usuarioId)) {
+            if (usuarioConsultaId == null || usuarioConsultaId.isBlank() || !usuarioConsultaId.trim().equals(this.usuarioId)) {
                 throw new PlaylistPrivadaException("No tienes permisos para consultar esta playlist privada");
             }
         }
@@ -221,42 +221,15 @@ public class Playlist {
         }
     }
 
-    private void asignarLikesUsuarios(Set<UUID> likes) {
+    private void asignarLikesUsuarios(Set<String> likes) {
         this.likesUsuarios.clear();
         if (likes != null) this.likesUsuarios.addAll(likes);
     }
 
-    private void asignarGuardadosUsuarios(Set<UUID> guardados) {
+    private void asignarGuardadosUsuarios(Set<String> guardados) {
         this.guardadosUsuarios.clear();
         if (guardados != null) this.guardadosUsuarios.addAll(guardados);
     }
-
-    public void setNombre(String nombre) { asignarNombre(nombre); }
-    public void setDescripcion(String descripcion) { asignarDescripcion(descripcion); }
-    public void setPrendas(List<PrendaSnapshot> prendas) { asignarPrendas(prendas); }
-    public void setLikesUsuarios(Set<UUID> likes) { asignarLikesUsuarios(likes); }
-    public void setGuardadosUsuarios(Set<UUID> guardados) { asignarGuardadosUsuarios(guardados); }
-
-    public UUID getId() { return id; }
-    public void setId(UUID id) { this.id = id; }
-    public UUID getUsuarioId() { return usuarioId; }
-    public void setUsuarioId(UUID usuarioId) { this.usuarioId = usuarioId; }
-    public String getNombre() { return nombre; }
-    public String getDescripcion() { return descripcion; }
-    public VisibilidadPlaylist getVisibilidad() { return visibilidad; }
-    public void setVisibilidad(VisibilidadPlaylist visibilidad) { this.visibilidad = visibilidad; }
-    public Estilo getEstilo() { return estilo; }
-    public void setEstilo(Estilo estilo) { this.estilo = estilo; }
-    public boolean isDestacada() { return destacada; }
-    public void setDestacada(boolean destacada) { this.destacada = destacada; }
-    public Instant getFechaCreacion() { return fechaCreacion; }
-    public void setFechaCreacion(Instant fechaCreacion) { this.fechaCreacion = fechaCreacion; }
-    public Instant getFechaActualizacion() { return fechaActualizacion; }
-    public void setFechaActualizacion(Instant fechaActualizacion) { this.fechaActualizacion = fechaActualizacion; }
-
-    public List<PrendaSnapshot> getPrendas() { return Collections.unmodifiableList(prendas); }
-    public Set<UUID> getLikesUsuarios() { return Collections.unmodifiableSet(likesUsuarios); }
-    public Set<UUID> getGuardadosUsuarios() { return Collections.unmodifiableSet(guardadosUsuarios); }
 
     public void setNombre(String nombre) { asignarNombre(nombre); }
     public void setDescripcion(String descripcion) { asignarDescripcion(descripcion); }

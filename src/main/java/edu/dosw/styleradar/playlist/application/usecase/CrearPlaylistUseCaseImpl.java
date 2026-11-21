@@ -46,7 +46,7 @@ public class CrearPlaylistUseCaseImpl implements CrearPlaylistUseCase {
     }
 
     @Override
-    public PlaylistResponse crear(UUID usuarioId, CrearPlaylistRequest request) {
+    public PlaylistResponse crear(String usuarioId, CrearPlaylistRequest request) {
         Playlist.crear(usuarioId, request.nombre(), request.descripcion(), request.visibilidad(), request.estilo());
 
         List<UUID> prendasIds = request.prendasIds();

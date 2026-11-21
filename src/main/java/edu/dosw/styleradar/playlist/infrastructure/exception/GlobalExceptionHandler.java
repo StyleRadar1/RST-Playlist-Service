@@ -49,11 +49,6 @@ public class GlobalExceptionHandler {
         return problem(HttpStatus.UNAUTHORIZED, ex.getCodigoError(), "No autorizado", ex.getMessage());
     }
 
-    @ExceptionHandler(NoAutorizadoException.class)
-    public ProblemDetail handleNoAutorizado(NoAutorizadoException ex) {
-        return problem(HttpStatus.UNAUTHORIZED, "No autorizado", ex.getMessage());
-    }
-
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ProblemDetail handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
         return problem(HttpStatus.BAD_REQUEST, CodigoError.PARAMETRO_INVALIDO, "Parámetro inválido",
@@ -75,11 +70,6 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleRouteNotFound(Exception ex) {
         return problem(HttpStatus.NOT_FOUND, CodigoError.RUTA_NO_ENCONTRADA,
                 "Ruta no encontrada", "El recurso o ruta solicitada no existe");
-    }
-
-    @ExceptionHandler(NoResourceFoundException.class)
-    public ProblemDetail handleRouteNotFound(NoResourceFoundException ex) {
-        return problem(HttpStatus.NOT_FOUND, "Ruta no encontrada", ex.getMessage());
     }
 
     @ExceptionHandler(LimiteDestacadasSuperadoException.class)
