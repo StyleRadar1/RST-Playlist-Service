@@ -60,7 +60,7 @@ class UseCasesTest {
 
     @Test
     void crearYEditarPlaylistConPrendaAprobada() {
-        String usuarioId = "15";
+        UUID usuarioId = UUID.randomUUID();
         UUID prendaId = UUID.randomUUID();
         Playlist p = Playlist.crear(usuarioId, "Urbano", "Desc", VisibilidadPlaylist.PUBLICA, Estilo.URBANO);
 
@@ -71,7 +71,7 @@ class UseCasesTest {
 
         PlaylistResponse resCrear = crearUseCase.crear(usuarioId,
                 new CrearPlaylistRequest("Urbano", "Desc", VisibilidadPlaylist.PUBLICA, Estilo.URBANO, List.of(prendaId)));
-        assertThat(resCrear.usuarioId()).isEqualTo("15");
+        assertThat(resCrear.usuarioId().toString()).isEqualTo(usuarioId.toString());
         assertThat(resCrear.totalPrendas()).isEqualTo(1);
         assertThat(resCrear.prendas().getFirst().nombrePrenda()).isEqualTo("Chaqueta Denim");
         verify(eventPublisher).publicarPrendaAsociada(resCrear.id(), prendaId);
@@ -86,7 +86,7 @@ class UseCasesTest {
 
     @Test
     void crearPlaylistValidacionesCatalogoYSinPrendas() {
-        String usuarioId = "15";
+        UUID usuarioId = UUID.randomUUID();
         UUID prendaId = UUID.randomUUID();
 
         assertThatThrownBy(() -> crearUseCase.crear(usuarioId,
@@ -109,7 +109,7 @@ class UseCasesTest {
 
     @Test
     void consultasPlaylist() {
-        String usuarioId = "15";
+        UUID usuarioId = UUID.randomUUID();
         UUID playlistId = UUID.randomUUID();
         Playlist p = Playlist.crear(usuarioId, "Test", null, VisibilidadPlaylist.PUBLICA, Estilo.CASUAL);
         p.setId(playlistId);
@@ -133,19 +133,20 @@ class UseCasesTest {
     @Test
     void destacarPlaylistValidaTope() {
         UUID playlistId = UUID.randomUUID();
-        Playlist p = Playlist.crear("15", "Test", null, VisibilidadPlaylist.PUBLICA, Estilo.CASUAL);
+        UUID usuarioId = UUID.randomUUID();
+        Playlist p = Playlist.crear(usuarioId, "Test", null, VisibilidadPlaylist.PUBLICA, Estilo.CASUAL);
         p.setId(playlistId);
 
         when(repository.findById(playlistId)).thenReturn(Optional.of(p));
         when(repository.countDestacadas()).thenReturn(3L);
 
-        assertThatThrownBy(() -> destacarUseCase.destacar("1", playlistId))
+        assertThatThrownBy(() -> destacarUseCase.destacar(usuarioId, playlistId))
                 .isInstanceOf(LimiteDestacadasSuperadoException.class);
     }
 
     @Test
     void asociarYRetirarPrendaValidaCatalogo() {
-        String usuarioId = "15";
+        UUID usuarioId = UUID.randomUUID();
         UUID playlistId = UUID.randomUUID();
         UUID prendaId = UUID.randomUUID();
         Playlist p = Playlist.crear(usuarioId, "Test", null, VisibilidadPlaylist.PUBLICA, Estilo.CASUAL);
@@ -181,7 +182,7 @@ class UseCasesTest {
 
     @Test
     void interactuarLikeYGuardado() {
-        String usuarioId = "15";
+        UUID usuarioId = UUID.randomUUID();
         UUID playlistId = UUID.randomUUID();
         Playlist p = Playlist.crear(usuarioId, "Test", null, VisibilidadPlaylist.PUBLICA, Estilo.CASUAL);
         p.setId(playlistId);
