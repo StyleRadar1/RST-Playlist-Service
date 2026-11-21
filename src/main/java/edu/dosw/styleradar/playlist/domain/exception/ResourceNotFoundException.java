@@ -3,6 +3,6 @@ package edu.dosw.styleradar.playlist.domain.exception;
 public class ResourceNotFoundException extends DomainException {
 
     public ResourceNotFoundException(String message) {
-        super(message);
+        super(CodigoError.PLAYLIST_NO_ENCONTRADA, message);
     }
 }

@@ -1,3 +1,7 @@
+clients:
+  item-catalogo:
+    url: http://localhost:18220
+
 spring:
   application:
     name: ms-playlist-test
@@ -6,3 +10,9 @@ spring:
       ddl-auto: create-drop
   flyway:
     enabled: false
+  rabbitmq:
+    ssl:
+      enabled: false
+    listener:
+      simple:
+        auto-startup: false
