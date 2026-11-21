@@ -1,6 +1,10 @@
 package edu.dosw.styleradar.playlist.infrastructure.adapter.in.rest;
 
 import edu.dosw.styleradar.playlist.application.dto.*;
+import edu.dosw.styleradar.playlist.domain.exception.CatalogoNoDisponibleException;
+import edu.dosw.styleradar.playlist.domain.exception.PlaylistPrivadaException;
+import edu.dosw.styleradar.playlist.domain.exception.PlaylistSinPrendasException;
+import edu.dosw.styleradar.playlist.domain.exception.PrendaNoEncontradaEnCatalogoException;
 import edu.dosw.styleradar.playlist.domain.model.Estilo;
 import edu.dosw.styleradar.playlist.domain.model.VisibilidadPlaylist;
 import edu.dosw.styleradar.playlist.domain.port.in.*;
@@ -21,6 +25,13 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+<<<<<<< Updated upstream
+=======
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+>>>>>>> Stashed changes
 
 @ExtendWith(MockitoExtension.class)
 class PlaylistControllerTest {
@@ -47,10 +58,89 @@ class PlaylistControllerTest {
     }
 
     @Test
+<<<<<<< Updated upstream
     void crearPlaylistRetorna201() {
         when(crearPlaylistUseCase.crear(eq(usuarioId), any())).thenReturn(sampleResponse);
         ResponseEntity<PlaylistResponse> response = controller.crear(usuarioId, new CrearPlaylistRequest("Streetwear", "Desc", VisibilidadPlaylist.PUBLICA, Estilo.URBANO));
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+=======
+    void peticionProtegidaSinHeaderOBlankRetorna401ConCodigo() throws Exception {
+        mockMvc.perform(get("/playlists/me"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("USUARIO_NO_AUTENTICADO"))
+                .andExpect(jsonPath("$.timestamp").isNotEmpty());
+
+        mockMvc.perform(get("/playlists/me").header("X-User-Id", "   "))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("USUARIO_NO_AUTENTICADO"));
+
+        mockMvc.perform(post("/playlists")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"nombre\":\"Urbano\",\"visibilidad\":\"PUBLICA\"}"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("USUARIO_NO_AUTENTICADO"));
+    }
+
+    @Test
+    void crearPlaylistConUsuarioEnteroDeGatewayYPrendaRetorna201() throws Exception {
+        when(crearPlaylistUseCase.crear(eq("15"), any())).thenReturn(sampleResponse);
+
+        mockMvc.perform(post("/playlists")
+                        .header("X-User-Id", "15")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"nombre\":\"Streetwear\",\"descripcion\":\"Desc\",\"visibilidad\":\"PUBLICA\",\"estilo\":\"URBANO\",\"prendasIds\":[\"" + prendaId + "\"]}"))
+                .andExpect(status().isCreated());
+>>>>>>> Stashed changes
+    }
+
+    @Test
+    void crearPlaylistSinPrendasRetorna400ConCodigo() throws Exception {
+        when(crearPlaylistUseCase.crear(eq("15"), any()))
+                .thenThrow(new PlaylistSinPrendasException("Debe incluir al menos una prenda"));
+
+        mockMvc.perform(post("/playlists")
+                        .header("X-User-Id", "15")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"nombre\":\"Streetwear\",\"descripcion\":\"Desc\",\"visibilidad\":\"PUBLICA\",\"estilo\":\"URBANO\",\"prendasIds\":[]}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("PLAYLIST_SIN_PRENDAS"))
+                .andExpect(jsonPath("$.timestamp").isNotEmpty());
+    }
+
+    @Test
+    void agregarPrendaInexistenteOCatalogoCaidoRetorna404Y503() throws Exception {
+        when(asociarPrendaUseCase.agregarPrenda(eq("15"), eq(playlistId), any()))
+                .thenThrow(new PrendaNoEncontradaEnCatalogoException("Prenda no existe"));
+
+        mockMvc.perform(post("/playlists/{id}/prendas", playlistId)
+                        .header("X-User-Id", "15")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"prendaId\":\"" + prendaId + "\"}"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("PRENDA_NO_ENCONTRADA"))
+                .andExpect(jsonPath("$.timestamp").isNotEmpty());
+
+        when(asociarPrendaUseCase.agregarPrenda(eq("15"), eq(playlistId), any()))
+                .thenThrow(new CatalogoNoDisponibleException("Catálogo caído"));
+
+        mockMvc.perform(post("/playlists/{id}/prendas", playlistId)
+                        .header("X-User-Id", "15")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"prendaId\":\"" + prendaId + "\"}"))
+                .andExpect(status().isServiceUnavailable())
+                .andExpect(jsonPath("$.code").value("CATALOGO_NO_DISPONIBLE"))
+                .andExpect(jsonPath("$.timestamp").isNotEmpty());
+    }
+
+    @Test
+    void playlistPrivadaRetorna403ConCodigoPlaylistPrivada() throws Exception {
+        when(consultarPlaylistUseCase.obtenerPorId(playlistId, "99"))
+                .thenThrow(new PlaylistPrivadaException("Privada"));
+
+        mockMvc.perform(get("/playlists/{id}", playlistId).header("X-User-Id", "99"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("PLAYLIST_PRIVADA"))
+                .andExpect(jsonPath("$.timestamp").isNotEmpty());
     }
 
     @Test
@@ -124,4 +214,15 @@ class PlaylistControllerTest {
         assertThat(controller.misPlaylists(usuarioId).getBody()).hasSize(1);
         assertThat(controller.misGuardadas(usuarioId).getBody()).hasSize(1);
     }
+<<<<<<< Updated upstream
+=======
+
+    @Test
+    void uuidInvalidoEnRutaRetorna400ConParametroInvalido() throws Exception {
+        mockMvc.perform(get("/playlists/no-es-un-uuid"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("PARAMETRO_INVALIDO"))
+                .andExpect(jsonPath("$.timestamp").isNotEmpty());
+    }
+>>>>>>> Stashed changes
 }

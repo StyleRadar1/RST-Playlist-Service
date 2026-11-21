@@ -3,13 +3,21 @@ package edu.dosw.styleradar.playlist.application.usecase;
 import edu.dosw.styleradar.playlist.application.dto.*;
 import edu.dosw.styleradar.playlist.application.dto.mapper.PlaylistDtoMapper;
 import edu.dosw.styleradar.playlist.domain.exception.LimiteDestacadasSuperadoException;
+<<<<<<< Updated upstream
 import edu.dosw.styleradar.playlist.domain.exception.ResourceNotFoundException;
+=======
+import edu.dosw.styleradar.playlist.domain.exception.PlaylistSinPrendasException;
+import edu.dosw.styleradar.playlist.domain.exception.PrendaNoAprobadaException;
+import edu.dosw.styleradar.playlist.domain.exception.PrendaNoEncontradaEnCatalogoException;
+>>>>>>> Stashed changes
 import edu.dosw.styleradar.playlist.domain.model.Estilo;
 import edu.dosw.styleradar.playlist.domain.model.Playlist;
 import edu.dosw.styleradar.playlist.domain.model.PrendaSnapshot;
 import edu.dosw.styleradar.playlist.domain.model.VisibilidadPlaylist;
+import edu.dosw.styleradar.playlist.domain.port.out.ItemCatalogoPort;
 import edu.dosw.styleradar.playlist.domain.port.out.PlaylistEventPublisherPort;
 import edu.dosw.styleradar.playlist.domain.port.out.PlaylistRepositoryPort;
+import edu.dosw.styleradar.playlist.domain.port.out.PrendaCatalogoInfo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,6 +44,9 @@ class UseCasesTest {
     @Mock
     private PlaylistEventPublisherPort eventPublisher;
 
+    @Mock
+    private ItemCatalogoPort itemCatalogoPort;
+
     private final PlaylistDtoMapper mapper = Mappers.getMapper(PlaylistDtoMapper.class);
 
     private CrearPlaylistUseCaseImpl crearUseCase;
@@ -46,31 +57,71 @@ class UseCasesTest {
 
     @BeforeEach
     void setUp() {
-        crearUseCase = new CrearPlaylistUseCaseImpl(repository, mapper);
+        crearUseCase = new CrearPlaylistUseCaseImpl(repository, mapper, itemCatalogoPort, eventPublisher);
         consultarUseCase = new ConsultarPlaylistUseCaseImpl(repository, mapper);
         destacarUseCase = new DestacarPlaylistUseCaseImpl(repository, eventPublisher, mapper);
-        asociarPrendaUseCase = new AsociarPrendaUseCaseImpl(repository, eventPublisher, mapper);
+        asociarPrendaUseCase = new AsociarPrendaUseCaseImpl(repository, eventPublisher, mapper, itemCatalogoPort);
         interactuarUseCase = new InteractuarPlaylistUseCaseImpl(repository, mapper);
     }
 
     @Test
+<<<<<<< Updated upstream
     void crearYEditarPlaylist() {
         UUID usuarioId = UUID.randomUUID();
         UUID playlistId = UUID.randomUUID();
+=======
+    void crearYEditarPlaylistConPrendaAprobada() {
+        String usuarioId = "15";
+        UUID prendaId = UUID.randomUUID();
+>>>>>>> Stashed changes
         Playlist p = Playlist.crear(usuarioId, "Urbano", "Desc", VisibilidadPlaylist.PUBLICA, Estilo.URBANO);
-        p.setId(playlistId);
 
-        when(repository.save(any(Playlist.class))).thenReturn(p);
-        when(repository.findById(playlistId)).thenReturn(Optional.of(p));
+        when(itemCatalogoPort.obtenerPrendaPorId(prendaId))
+                .thenReturn(Optional.of(new PrendaCatalogoInfo(prendaId, "Chaqueta Denim", true)));
+        when(repository.save(any(Playlist.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(repository.findById(p.getId())).thenReturn(Optional.of(p));
 
+<<<<<<< Updated upstream
         PlaylistResponse resCrear = crearUseCase.crear(usuarioId, new CrearPlaylistRequest("Urbano", "Desc", VisibilidadPlaylist.PUBLICA, Estilo.URBANO));
         assertThat(resCrear.id()).isEqualTo(playlistId);
+=======
+        PlaylistResponse resCrear = crearUseCase.crear(usuarioId,
+                new CrearPlaylistRequest("Urbano", "Desc", VisibilidadPlaylist.PUBLICA, Estilo.URBANO, List.of(prendaId)));
+        assertThat(resCrear.usuarioId()).isEqualTo("15");
+        assertThat(resCrear.totalPrendas()).isEqualTo(1);
+        assertThat(resCrear.prendas().getFirst().nombrePrenda()).isEqualTo("Chaqueta Denim");
+        verify(eventPublisher).publicarPrendaAsociada(resCrear.id(), prendaId);
+>>>>>>> Stashed changes
 
-        PlaylistResponse resEditar = crearUseCase.editar(usuarioId, playlistId, new EditarPlaylistRequest("Nuevo", "Desc", VisibilidadPlaylist.PRIVADA, Estilo.FORMAL));
+        PlaylistResponse resEditar = crearUseCase.editar(usuarioId, p.getId(),
+                new EditarPlaylistRequest("Nuevo", "Desc", VisibilidadPlaylist.PRIVADA, Estilo.FORMAL));
         assertThat(resEditar.nombre()).isEqualTo("Nuevo");
 
-        crearUseCase.eliminar(usuarioId, playlistId);
-        verify(repository).delete(playlistId);
+        crearUseCase.eliminar(usuarioId, p.getId());
+        verify(repository).delete(p.getId());
+    }
+
+    @Test
+    void crearPlaylistValidacionesCatalogoYSinPrendas() {
+        String usuarioId = "15";
+        UUID prendaId = UUID.randomUUID();
+
+        assertThatThrownBy(() -> crearUseCase.crear(usuarioId,
+                new CrearPlaylistRequest("Urbano", "Desc", VisibilidadPlaylist.PUBLICA, Estilo.URBANO, List.of())))
+                .isInstanceOf(PlaylistSinPrendasException.class);
+
+        when(itemCatalogoPort.obtenerPrendaPorId(prendaId)).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> crearUseCase.crear(usuarioId,
+                new CrearPlaylistRequest("Urbano", "Desc", VisibilidadPlaylist.PUBLICA, Estilo.URBANO, List.of(prendaId))))
+                .isInstanceOf(PrendaNoEncontradaEnCatalogoException.class);
+
+        when(itemCatalogoPort.obtenerPrendaPorId(prendaId))
+                .thenReturn(Optional.of(new PrendaCatalogoInfo(prendaId, "Pendiente", false)));
+        assertThatThrownBy(() -> crearUseCase.crear(usuarioId,
+                new CrearPlaylistRequest("Urbano", "Desc", VisibilidadPlaylist.PUBLICA, Estilo.URBANO, List.of(prendaId))))
+                .isInstanceOf(PrendaNoAprobadaException.class);
+
+        verify(repository, never()).save(any());
     }
 
     @Test
@@ -110,21 +161,40 @@ class UseCasesTest {
     }
 
     @Test
+<<<<<<< Updated upstream
     void asociarYRetirarPrenda() {
         UUID usuarioId = UUID.randomUUID();
+=======
+    void asociarYRetirarPrendaValidaCatalogo() {
+        String usuarioId = "15";
+>>>>>>> Stashed changes
         UUID playlistId = UUID.randomUUID();
         UUID prendaId = UUID.randomUUID();
         Playlist p = Playlist.crear(usuarioId, "Test", null, VisibilidadPlaylist.PUBLICA, Estilo.CASUAL);
         p.setId(playlistId);
 
         when(repository.findById(playlistId)).thenReturn(Optional.of(p));
+        when(itemCatalogoPort.obtenerPrendaPorId(prendaId))
+                .thenReturn(Optional.of(new PrendaCatalogoInfo(prendaId, "Gorra Oficial Catálogo", true)));
         when(repository.save(any())).thenReturn(p);
 
-        PlaylistResponse res = asociarPrendaUseCase.agregarPrenda(usuarioId, playlistId, new AgregarPrendaRequest(prendaId, "Gorra"));
+        PlaylistResponse res = asociarPrendaUseCase.agregarPrenda(usuarioId, playlistId, new AgregarPrendaRequest(prendaId, "Ignorado"));
         assertThat(res.totalPrendas()).isEqualTo(1);
+        assertThat(res.prendas().getFirst().nombrePrenda()).isEqualTo("Gorra Oficial Catálogo");
 
         PlaylistResponse resRetiro = asociarPrendaUseCase.retirarPrenda(usuarioId, playlistId, prendaId);
         assertThat(resRetiro.totalPrendas()).isZero();
+
+        UUID prendaNoExiste = UUID.randomUUID();
+        when(itemCatalogoPort.obtenerPrendaPorId(prendaNoExiste)).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> asociarPrendaUseCase.agregarPrenda(usuarioId, playlistId, new AgregarPrendaRequest(prendaNoExiste)))
+                .isInstanceOf(PrendaNoEncontradaEnCatalogoException.class);
+
+        UUID prendaNoAprobada = UUID.randomUUID();
+        when(itemCatalogoPort.obtenerPrendaPorId(prendaNoAprobada))
+                .thenReturn(Optional.of(new PrendaCatalogoInfo(prendaNoAprobada, "Pendiente", false)));
+        assertThatThrownBy(() -> asociarPrendaUseCase.agregarPrenda(usuarioId, playlistId, new AgregarPrendaRequest(prendaNoAprobada)))
+                .isInstanceOf(PrendaNoAprobadaException.class);
 
         when(repository.findAllConPrenda(prendaId)).thenReturn(List.of(p));
         asociarPrendaUseCase.desvincularPrendaDeTodas(prendaId);

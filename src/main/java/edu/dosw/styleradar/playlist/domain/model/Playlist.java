@@ -68,9 +68,20 @@ public class Playlist {
         return p;
     }
 
+    public static Playlist crearConPrendas(String usuarioId, String nombre, String descripcion,
+                                           VisibilidadPlaylist visibilidad, Estilo estilo,
+                                           List<PrendaSnapshot> prendas) {
+        Playlist p = crear(usuarioId, nombre, descripcion, visibilidad, estilo);
+        if (prendas == null || prendas.isEmpty()) {
+            throw new PlaylistSinPrendasException("La playlist debe crearse con al menos una prenda");
+        }
+        prendas.forEach(p::agregarPrenda);
+        return p;
+    }
+
     public void agregarPrenda(PrendaSnapshot prenda) {
         if (prenda == null) {
-            throw new DomainException("La prenda no puede ser nula");
+            throw new DomainException(CodigoError.DATOS_INVALIDOS, "La prenda no puede ser nula");
         }
         if (this.prendas.size() >= MAX_PRENDAS) {
             throw new LimitePrendasAlcanzadoException("Límite máximo de " + MAX_PRENDAS + " prendas alcanzado");
@@ -86,7 +97,7 @@ public class Playlist {
     public void retirarPrenda(UUID prendaId, UUID usuarioEjecutorId) {
         validarPropietario(usuarioEjecutorId);
         if (prendaId == null) {
-            throw new DomainException("El ID de prenda es obligatorio");
+            throw new DomainException(CodigoError.DATOS_INVALIDOS, "El ID de prenda es obligatorio");
         }
         boolean removida = this.prendas.removeIf(p -> p.getPrendaId().equals(prendaId));
         if (!removida) {
@@ -175,25 +186,30 @@ public class Playlist {
 
     public void validarAccesoLectura(UUID usuarioConsultaId) {
         if (this.visibilidad == VisibilidadPlaylist.PRIVADA) {
+<<<<<<< Updated upstream
             if (usuarioConsultaId == null || !usuarioConsultaId.equals(this.usuarioId)) {
                 throw new AccesoDenegadoPlaylistException("No tienes permisos para consultar esta playlist privada");
+=======
+            if (usuarioConsultaId == null || usuarioConsultaId.isBlank() || !usuarioConsultaId.trim().equals(this.usuarioId)) {
+                throw new PlaylistPrivadaException("No tienes permisos para consultar esta playlist privada");
+>>>>>>> Stashed changes
             }
         }
     }
 
     public void setNombre(String nombre) {
         if (nombre == null || nombre.isBlank()) {
-            throw new DomainException("El nombre de la playlist es obligatorio");
+            throw new DomainException(CodigoError.DATOS_INVALIDOS, "El nombre de la playlist es obligatorio");
         }
         if (nombre.trim().length() > 100) {
-            throw new DomainException("El nombre no puede superar los 100 caracteres");
+            throw new DomainException(CodigoError.DATOS_INVALIDOS, "El nombre no puede superar los 100 caracteres");
         }
         this.nombre = nombre.trim();
     }
 
     public void setDescripcion(String descripcion) {
         if (descripcion != null && descripcion.trim().length() > 300) {
-            throw new DomainException("La descripción no puede superar los 300 caracteres");
+            throw new DescripcionMuyLargaException("La descripción no puede superar los 300 caracteres");
         }
         this.descripcion = (descripcion != null) ? descripcion.trim() : null;
     }

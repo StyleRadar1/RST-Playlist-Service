@@ -29,6 +29,26 @@ class PlaylistTest {
     }
 
     @Test
+    void crearConPrendasValidaMinimoUnaPrenda() {
+        UUID prendaId = UUID.randomUUID();
+        Playlist p = Playlist.crearConPrendas(
+                "15", "Look", "Desc", VisibilidadPlaylist.PUBLICA, Estilo.URBANO,
+                List.of(new PrendaSnapshot(prendaId, "Hoodie", Instant.now())));
+
+        assertThat(p.getTotalPrendas()).isEqualTo(1);
+
+        assertThatThrownBy(() -> Playlist.crearConPrendas(
+                "15", "Look", "Desc", VisibilidadPlaylist.PUBLICA, Estilo.URBANO, List.of()))
+                .isInstanceOf(PlaylistSinPrendasException.class)
+                .extracting(e -> ((DomainException) e).getCodigoError())
+                .isEqualTo(CodigoError.PLAYLIST_SIN_PRENDAS);
+
+        assertThatThrownBy(() -> Playlist.crearConPrendas(
+                "15", "Look", "Desc", VisibilidadPlaylist.PUBLICA, Estilo.URBANO, null))
+                .isInstanceOf(PlaylistSinPrendasException.class);
+    }
+
+    @Test
     void constructorPorDefecto() {
         Playlist p = new Playlist();
         assertThat(p.getId()).isNotNull();
@@ -57,8 +77,16 @@ class PlaylistTest {
     void setDescripcionLargaLanzaExcepcion() {
         Playlist p = Playlist.crear(UUID.randomUUID(), "Inicial", null, VisibilidadPlaylist.PUBLICA, Estilo.CASUAL);
 
+<<<<<<< Updated upstream
         assertThatThrownBy(() -> p.setDescripcion("a".repeat(301)))
                 .isInstanceOf(DomainException.class);
+=======
+        assertThatThrownBy(() -> p.setDescripcion(largo))
+                .isInstanceOf(DescripcionMuyLargaException.class)
+                .isInstanceOf(DomainException.class)
+                .extracting(e -> ((DomainException) e).getCodigoError())
+                .isEqualTo(CodigoError.DESCRIPCION_MUY_LARGA);
+>>>>>>> Stashed changes
     }
 
     @Test
@@ -169,9 +197,18 @@ class PlaylistTest {
         UUID usuarioId = UUID.randomUUID();
         Playlist p = Playlist.crear(usuarioId, "Colección Privada", null, VisibilidadPlaylist.PRIVADA, Estilo.FORMAL);
 
+<<<<<<< Updated upstream
         p.validarAccesoLectura(usuarioId);
         assertThatThrownBy(() -> p.validarAccesoLectura(UUID.randomUUID()))
                 .isInstanceOf(AccesoDenegadoPlaylistException.class);
+=======
+        p.validarAccesoLectura("15");
+        assertThatThrownBy(() -> p.validarAccesoLectura("99"))
+                .isInstanceOf(PlaylistPrivadaException.class)
+                .isInstanceOf(AccesoDenegadoPlaylistException.class)
+                .extracting(e -> ((DomainException) e).getCodigoError())
+                .isEqualTo(CodigoError.PLAYLIST_PRIVADA);
+>>>>>>> Stashed changes
     }
 
     @Test
@@ -195,9 +232,17 @@ class PlaylistTest {
 
     @Test
     void editarPlaylistUsuarioAjenoLanzaExcepcion() {
+<<<<<<< Updated upstream
         Playlist p = Playlist.crear(UUID.randomUUID(), "Original", null, VisibilidadPlaylist.PUBLICA, Estilo.URBANO);
         assertThatThrownBy(() -> p.editar(UUID.randomUUID(), "Modificado", null, null, null))
                 .isInstanceOf(AccesoDenegadoPlaylistException.class);
+=======
+        Playlist p = Playlist.crear("15", "Original", null, VisibilidadPlaylist.PUBLICA, Estilo.URBANO);
+        assertThatThrownBy(() -> p.editar("99", "Modificado", null, null, null))
+                .isInstanceOf(AccesoDenegadoPlaylistException.class)
+                .extracting(e -> ((DomainException) e).getCodigoError())
+                .isEqualTo(CodigoError.ACCESO_DENEGADO);
+>>>>>>> Stashed changes
     }
 
     @Test

@@ -1,0 +1,25 @@
+package edu.dosw.styleradar.playlist.domain.exception;
+
+/**
+ * Códigos de error estandarizados de ms-playlist (SR-RF-69 a SR-RF-72 y catálogo).
+ */
+public enum CodigoError {
+    DATOS_INVALIDOS,
+    PARAMETRO_INVALIDO,
+    PLAYLIST_SIN_PRENDAS,
+    USUARIO_NO_AUTENTICADO,
+    ACCESO_DENEGADO,
+    PLAYLIST_PRIVADA,
+    PLAYLIST_NO_ENCONTRADA,
+    DESCRIPCION_MUY_LARGA,
+    LIMITE_PRENDAS_PLAYLIST,
+    PRENDA_YA_EN_PLAYLIST,
+    PRENDA_NO_ESTA_EN_PLAYLIST,
+    LIMITE_DESTACADAS,
+    PRENDA_NO_ENCONTRADA,
+    PRENDA_NO_APROBADA,
+    CATALOGO_NO_DISPONIBLE,
+    RUTA_NO_ENCONTRADA,
+    REGLA_NEGOCIO_INCUMPLIDA,
+    ERROR_INTERNO
+}
