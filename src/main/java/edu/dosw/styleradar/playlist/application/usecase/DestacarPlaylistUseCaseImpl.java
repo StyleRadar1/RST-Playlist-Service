@@ -28,7 +28,7 @@ public class DestacarPlaylistUseCaseImpl implements DestacarPlaylistUseCase {
     }
 
     @Override
-    public PlaylistResponse destacar(UUID usuarioId, UUID playlistId) {
+    public PlaylistResponse destacar(String usuarioId, UUID playlistId) {
         Playlist playlist = repository.findById(playlistId)
                 .orElseThrow(() -> new ResourceNotFoundException("No existe playlist con ID: " + playlistId));
         if (!playlist.isDestacada()) {
@@ -44,7 +44,7 @@ public class DestacarPlaylistUseCaseImpl implements DestacarPlaylistUseCase {
     }
 
     @Override
-    public PlaylistResponse quitarDestacado(UUID usuarioId, UUID playlistId) {
+    public PlaylistResponse quitarDestacado(String usuarioId, UUID playlistId) {
         Playlist playlist = repository.findById(playlistId)
                 .orElseThrow(() -> new ResourceNotFoundException("No existe playlist con ID: " + playlistId));
         if (playlist.isDestacada()) {

@@ -53,13 +53,13 @@ public class PostgreSQLPlaylistRepositoryAdapter implements PlaylistRepositoryPo
     }
 
     @Override
-    public List<Playlist> findByUsuarioId(UUID usuarioId) {
+    public List<Playlist> findByUsuarioId(String usuarioId) {
         return springDataRepository.findByUsuarioIdOrderByFechaCreacionDesc(usuarioId)
                 .stream().map(mapper::toDomain).toList();
     }
 
     @Override
-    public List<Playlist> findByGuardadosUsuarioId(UUID usuarioId) {
+    public List<Playlist> findByGuardadosUsuarioId(String usuarioId) {
         return springDataRepository.findByGuardadosUsuariosContainsOrderByFechaCreacionDesc(usuarioId)
                 .stream().map(mapper::toDomain).toList();
     }

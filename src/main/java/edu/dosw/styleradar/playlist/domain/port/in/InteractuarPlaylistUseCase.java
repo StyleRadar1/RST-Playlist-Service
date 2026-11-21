@@ -5,6 +5,6 @@ import edu.dosw.styleradar.playlist.application.dto.PlaylistResponse;
 import java.util.UUID;
 
 public interface InteractuarPlaylistUseCase {
-    PlaylistResponse alternarLike(UUID usuarioId, UUID playlistId);
-    PlaylistResponse alternarGuardado(UUID usuarioId, UUID playlistId);
+    PlaylistResponse alternarLike(String usuarioId, UUID playlistId);
+    PlaylistResponse alternarGuardado(String usuarioId, UUID playlistId);
 }

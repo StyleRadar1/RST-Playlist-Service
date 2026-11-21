@@ -24,7 +24,7 @@ public class InteractuarPlaylistUseCaseImpl implements InteractuarPlaylistUseCas
     }
 
     @Override
-    public PlaylistResponse alternarLike(UUID usuarioId, UUID playlistId) {
+    public PlaylistResponse alternarLike(String usuarioId, UUID playlistId) {
         Playlist playlist = repository.findById(playlistId)
                 .orElseThrow(() -> new ResourceNotFoundException("No existe playlist con ID: " + playlistId));
         playlist.alternarLike(usuarioId);
@@ -32,7 +32,7 @@ public class InteractuarPlaylistUseCaseImpl implements InteractuarPlaylistUseCas
     }
 
     @Override
-    public PlaylistResponse alternarGuardado(UUID usuarioId, UUID playlistId) {
+    public PlaylistResponse alternarGuardado(String usuarioId, UUID playlistId) {
         Playlist playlist = repository.findById(playlistId)
                 .orElseThrow(() -> new ResourceNotFoundException("No existe playlist con ID: " + playlistId));
         playlist.alternarGuardado(usuarioId);

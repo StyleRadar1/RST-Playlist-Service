@@ -40,7 +40,7 @@ public class AsociarPrendaUseCaseImpl implements AsociarPrendaUseCase {
     }
 
     @Override
-    public PlaylistResponse agregarPrenda(UUID usuarioId, UUID playlistId, AgregarPrendaRequest request) {
+    public PlaylistResponse agregarPrenda(String usuarioId, UUID playlistId, AgregarPrendaRequest request) {
         Playlist playlist = repository.findById(playlistId)
                 .orElseThrow(() -> new ResourceNotFoundException("No existe playlist con ID: " + playlistId));
         playlist.validarPropietario(usuarioId);
@@ -61,7 +61,7 @@ public class AsociarPrendaUseCaseImpl implements AsociarPrendaUseCase {
     }
 
     @Override
-    public PlaylistResponse retirarPrenda(UUID usuarioId, UUID playlistId, UUID prendaId) {
+    public PlaylistResponse retirarPrenda(String usuarioId, UUID playlistId, UUID prendaId) {
         Playlist playlist = repository.findById(playlistId)
                 .orElseThrow(() -> new ResourceNotFoundException("No existe playlist con ID: " + playlistId));
         playlist.retirarPrenda(prendaId, usuarioId);

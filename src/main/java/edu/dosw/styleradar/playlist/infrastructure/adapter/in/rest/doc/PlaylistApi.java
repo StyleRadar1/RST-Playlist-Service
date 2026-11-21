@@ -35,7 +35,7 @@ public interface PlaylistApi {
                     content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))
     })
     ResponseEntity<PlaylistResponse> crear(
-            @Parameter(description = "UUID del usuario propagado por el Gateway") UUID usuarioId,
+            @Parameter(description = "ID de usuario propagado por el Gateway", example = "15") String usuarioId,
             CrearPlaylistRequest request);
 
     @Operation(summary = "Consultar playlist por ID")
@@ -50,7 +50,7 @@ public interface PlaylistApi {
     })
     ResponseEntity<PlaylistResponse> obtenerPorId(
             UUID id,
-            @Parameter(description = "UUID de usuario opcional") UUID usuarioId);
+            @Parameter(description = "ID de usuario opcional", example = "15") String usuarioId);
 
     @Operation(summary = "Consultar playlists públicas")
     ResponseEntity<List<PlaylistResponse>> obtenerPublicas();
@@ -73,7 +73,7 @@ public interface PlaylistApi {
             @ApiResponse(responseCode = "404", description = "Playlist no encontrada (PLAYLIST_NO_ENCONTRADA)",
                     content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))
     })
-    ResponseEntity<PlaylistResponse> editar(UUID usuarioId, UUID id, EditarPlaylistRequest request);
+    ResponseEntity<PlaylistResponse> editar(String usuarioId, UUID id, EditarPlaylistRequest request);
 
     @Operation(summary = "Fijar playlist como destacada (máx 3 · SR-RF-72)")
     @ApiResponses({
@@ -85,10 +85,10 @@ public interface PlaylistApi {
             @ApiResponse(responseCode = "409", description = "Límite de 3 destacadas superado (LIMITE_DESTACADAS)",
                     content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))
     })
-    ResponseEntity<PlaylistResponse> destacar(UUID usuarioId, UUID id);
+    ResponseEntity<PlaylistResponse> destacar(String usuarioId, UUID id);
 
     @Operation(summary = "Quitar playlist de destacadas")
-    ResponseEntity<PlaylistResponse> quitarDestacado(UUID usuarioId, UUID id);
+    ResponseEntity<PlaylistResponse> quitarDestacado(String usuarioId, UUID id);
 
     @Operation(summary = "Asociar prenda aprobada a la playlist (máx 15 · RNF-12)")
     @ApiResponses({
@@ -106,7 +106,7 @@ public interface PlaylistApi {
             @ApiResponse(responseCode = "503", description = "Servicio ms-item-catalogo no disponible (CATALOGO_NO_DISPONIBLE)",
                     content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))
     })
-    ResponseEntity<PlaylistResponse> agregarPrenda(UUID usuarioId, UUID id, AgregarPrendaRequest request);
+    ResponseEntity<PlaylistResponse> agregarPrenda(String usuarioId, UUID id, AgregarPrendaRequest request);
 
     @Operation(summary = "Retirar prenda de la playlist")
     @ApiResponses({
@@ -120,20 +120,20 @@ public interface PlaylistApi {
             @ApiResponse(responseCode = "422", description = "La prenda no pertenece a la playlist (PRENDA_NO_ESTA_EN_PLAYLIST)",
                     content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))
     })
-    ResponseEntity<PlaylistResponse> retirarPrenda(UUID usuarioId, UUID id, UUID prendaId);
+    ResponseEntity<PlaylistResponse> retirarPrenda(String usuarioId, UUID id, UUID prendaId);
 
     @Operation(summary = "Alternar Me Gusta en la playlist")
-    ResponseEntity<PlaylistResponse> alternarLike(UUID usuarioId, UUID id);
+    ResponseEntity<PlaylistResponse> alternarLike(String usuarioId, UUID id);
 
     @Operation(summary = "Alternar guardado en perfil")
-    ResponseEntity<PlaylistResponse> alternarGuardado(UUID usuarioId, UUID id);
+    ResponseEntity<PlaylistResponse> alternarGuardado(String usuarioId, UUID id);
 
     @Operation(summary = "Eliminar playlist")
-    ResponseEntity<Void> eliminar(UUID usuarioId, UUID id);
+    ResponseEntity<Void> eliminar(String usuarioId, UUID id);
 
     @Operation(summary = "Consultar playlists creadas por el usuario")
-    ResponseEntity<List<PlaylistResponse>> misPlaylists(UUID usuarioId);
+    ResponseEntity<List<PlaylistResponse>> misPlaylists(String usuarioId);
 
     @Operation(summary = "Consultar playlists guardadas por el usuario")
-    ResponseEntity<List<PlaylistResponse>> misGuardadas(UUID usuarioId);
+    ResponseEntity<List<PlaylistResponse>> misGuardadas(String usuarioId);
 }

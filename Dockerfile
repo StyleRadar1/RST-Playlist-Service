@@ -1,19 +1,17 @@
-FROM eclipse-temurin:21-jdk-alpine AS builder
-WORKDIR /app
-COPY . .
-RUN if [ -f target/*.jar ]; then \
-      echo "JAR ya presente"; \
-    else \
-      chmod +x mvnw 2>/dev/null || true; \
-      ./mvnw clean package -DskipTests || mvn clean package -DskipTests; \
-    fi
+FROM maven:3.9.9-eclipse-temurin-21-alpine AS build
+WORKDIR /build
+COPY pom.xml .
+RUN mvn -B dependency:go-offline
+COPY src ./src
+RUN mvn -B clean package -DskipTests
 
-FROM eclipse-temurin:21-jre-alpine
-WORKDIR /app
+FROM eclipse-temurin:21.0.5_11-jre-alpine
+RUN addgroup -S app && adduser -S app -G app
 COPY rabbitmq-ca.pem /tmp/rabbitmq-ca.pem
-RUN if [ -f /tmp/rabbitmq-ca.pem ]; then \
-      keytool -importcert -trustcacerts -cacerts -storepass changeit -noprompt -alias styleradar-rabbitmq-ca -file /tmp/rabbitmq-ca.pem && rm -f /tmp/rabbitmq-ca.pem; \
-    fi
-COPY --from=builder /app/target/*-SNAPSHOT.jar app.jar
+RUN keytool -importcert -trustcacerts -cacerts -storepass changeit -noprompt -alias styleradar-rabbitmq-ca -file /tmp/rabbitmq-ca.pem \
+    && rm -f /tmp/rabbitmq-ca.pem
+WORKDIR /app
+COPY --from=build --chown=app:app /build/target/ms-playlist-0.0.1-SNAPSHOT.jar app.jar
+USER app
 EXPOSE 8260
 ENTRYPOINT ["java", "-jar", "app.jar"]
