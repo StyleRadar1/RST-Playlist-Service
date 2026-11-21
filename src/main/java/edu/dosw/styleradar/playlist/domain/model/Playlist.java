@@ -52,12 +52,12 @@ public class Playlist {
 
     public static Playlist crear(String usuarioId, String nombre, String descripcion,
                                  VisibilidadPlaylist visibilidad, Estilo estilo) {
-        if (usuarioId == null || usuarioId.isBlank()) {
+        if (usuarioId == null) {
             throw new NoAutorizadoException("El ID del usuario creador es obligatorio");
         }
         Playlist p = new Playlist();
         p.id = UUID.randomUUID();
-        p.usuarioId = usuarioId.trim();
+        p.usuarioId = usuarioId;
         p.asignarNombre(nombre);
         p.asignarDescripcion(descripcion);
         p.visibilidad = (visibilidad != null) ? visibilidad : VisibilidadPlaylist.PUBLICA;
@@ -68,9 +68,20 @@ public class Playlist {
         return p;
     }
 
+    public static Playlist crearConPrendas(UUID usuarioId, String nombre, String descripcion,
+                                           VisibilidadPlaylist visibilidad, Estilo estilo,
+                                           List<PrendaSnapshot> prendas) {
+        Playlist p = crear(usuarioId, nombre, descripcion, visibilidad, estilo);
+        if (prendas == null || prendas.isEmpty()) {
+            throw new PlaylistSinPrendasException("La playlist debe crearse con al menos una prenda");
+        }
+        prendas.forEach(p::agregarPrenda);
+        return p;
+    }
+
     public void agregarPrenda(PrendaSnapshot prenda) {
         if (prenda == null) {
-            throw new DomainException("La prenda no puede ser nula");
+            throw new DomainException(CodigoError.DATOS_INVALIDOS, "La prenda no puede ser nula");
         }
         if (this.prendas.size() >= MAX_PRENDAS) {
             throw new LimitePrendasAlcanzadoException("Límite máximo de " + MAX_PRENDAS + " prendas alcanzado");
@@ -86,7 +97,7 @@ public class Playlist {
     public void retirarPrenda(UUID prendaId, String usuarioEjecutorId) {
         validarPropietario(usuarioEjecutorId);
         if (prendaId == null) {
-            throw new DomainException("El ID de prenda es obligatorio");
+            throw new DomainException(CodigoError.DATOS_INVALIDOS, "El ID de prenda es obligatorio");
         }
         boolean removida = this.prendas.removeIf(p -> p.getPrendaId().equals(prendaId));
         if (!removida) {
@@ -129,8 +140,8 @@ public class Playlist {
         this.fechaActualizacion = Instant.now();
     }
 
-    public void alternarLike(String usuarioId) {
-        if (usuarioId == null || usuarioId.isBlank()) {
+    public void alternarLike(UUID usuarioId) {
+        if (usuarioId == null) {
             throw new NoAutorizadoException("El ID de usuario es obligatorio");
         }
         String idLimpio = usuarioId.trim();
@@ -142,8 +153,8 @@ public class Playlist {
         this.fechaActualizacion = Instant.now();
     }
 
-    public void alternarGuardado(String usuarioId) {
-        if (usuarioId == null || usuarioId.isBlank()) {
+    public void alternarGuardado(UUID usuarioId) {
+        if (usuarioId == null) {
             throw new NoAutorizadoException("El ID de usuario es obligatorio");
         }
         String idLimpio = usuarioId.trim();
@@ -177,25 +188,25 @@ public class Playlist {
 
     public void validarAccesoLectura(String usuarioConsultaId) {
         if (this.visibilidad == VisibilidadPlaylist.PRIVADA) {
-            if (usuarioConsultaId == null || usuarioConsultaId.isBlank() || !usuarioConsultaId.trim().equals(this.usuarioId)) {
-                throw new AccesoDenegadoPlaylistException("No tienes permisos para consultar esta playlist privada");
+            if (usuarioConsultaId == null || !usuarioConsultaId.equals(this.usuarioId)) {
+                throw new PlaylistPrivadaException("No tienes permisos para consultar esta playlist privada");
             }
         }
     }
 
     private void asignarNombre(String nombre) {
         if (nombre == null || nombre.isBlank()) {
-            throw new DomainException("El nombre de la playlist es obligatorio");
+            throw new DomainException(CodigoError.DATOS_INVALIDOS, "El nombre de la playlist es obligatorio");
         }
         if (nombre.trim().length() > 100) {
-            throw new DomainException("El nombre no puede superar los 100 caracteres");
+            throw new DomainException(CodigoError.DATOS_INVALIDOS, "El nombre no puede superar los 100 caracteres");
         }
         this.nombre = nombre.trim();
     }
 
     private void asignarDescripcion(String descripcion) {
         if (descripcion != null && descripcion.trim().length() > 300) {
-            throw new DomainException("La descripción no puede superar los 300 caracteres");
+            throw new DescripcionMuyLargaException("La descripción no puede superar los 300 caracteres");
         }
         this.descripcion = (descripcion != null) ? descripcion.trim() : null;
     }
@@ -210,15 +221,42 @@ public class Playlist {
         }
     }
 
-    private void asignarLikesUsuarios(Set<String> likes) {
+    private void asignarLikesUsuarios(Set<UUID> likes) {
         this.likesUsuarios.clear();
         if (likes != null) this.likesUsuarios.addAll(likes);
     }
 
-    private void asignarGuardadosUsuarios(Set<String> guardados) {
+    private void asignarGuardadosUsuarios(Set<UUID> guardados) {
         this.guardadosUsuarios.clear();
         if (guardados != null) this.guardadosUsuarios.addAll(guardados);
     }
+
+    public void setNombre(String nombre) { asignarNombre(nombre); }
+    public void setDescripcion(String descripcion) { asignarDescripcion(descripcion); }
+    public void setPrendas(List<PrendaSnapshot> prendas) { asignarPrendas(prendas); }
+    public void setLikesUsuarios(Set<UUID> likes) { asignarLikesUsuarios(likes); }
+    public void setGuardadosUsuarios(Set<UUID> guardados) { asignarGuardadosUsuarios(guardados); }
+
+    public UUID getId() { return id; }
+    public void setId(UUID id) { this.id = id; }
+    public UUID getUsuarioId() { return usuarioId; }
+    public void setUsuarioId(UUID usuarioId) { this.usuarioId = usuarioId; }
+    public String getNombre() { return nombre; }
+    public String getDescripcion() { return descripcion; }
+    public VisibilidadPlaylist getVisibilidad() { return visibilidad; }
+    public void setVisibilidad(VisibilidadPlaylist visibilidad) { this.visibilidad = visibilidad; }
+    public Estilo getEstilo() { return estilo; }
+    public void setEstilo(Estilo estilo) { this.estilo = estilo; }
+    public boolean isDestacada() { return destacada; }
+    public void setDestacada(boolean destacada) { this.destacada = destacada; }
+    public Instant getFechaCreacion() { return fechaCreacion; }
+    public void setFechaCreacion(Instant fechaCreacion) { this.fechaCreacion = fechaCreacion; }
+    public Instant getFechaActualizacion() { return fechaActualizacion; }
+    public void setFechaActualizacion(Instant fechaActualizacion) { this.fechaActualizacion = fechaActualizacion; }
+
+    public List<PrendaSnapshot> getPrendas() { return Collections.unmodifiableList(prendas); }
+    public Set<UUID> getLikesUsuarios() { return Collections.unmodifiableSet(likesUsuarios); }
+    public Set<UUID> getGuardadosUsuarios() { return Collections.unmodifiableSet(guardadosUsuarios); }
 
     public void setNombre(String nombre) { asignarNombre(nombre); }
     public void setDescripcion(String descripcion) { asignarDescripcion(descripcion); }

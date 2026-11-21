@@ -165,6 +165,26 @@ flowchart TD
     class INFRA_IN,INFRA_OUT,REST,AMQP_IN,JPA_REPO,RABBIT_PUB infra;
 ```
 
+### Diagrama de Casos de Uso
+
+<div align="center">
+  <table width="100%" style="margin: 18px 0; border: 2px dashed #C4B5FD; border-radius: 8px; background-color: #FBFBFE;">
+    <tr>
+      <td align="center" style="padding: 20px;">
+        <p>
+          <img src="https://img.shields.io/badge/DIAGRAMA-CASOS%20DE%20USO-12063A?style=for-the-badge" alt="Diagrama de casos de uso" /><br />
+          <strong><font color="#5600EF" size="3">DIAGRAMA DE CASOS DE USO · MS-PLAYLIST</font></strong>
+        </p>
+        <p>
+          <img src="docs/evidencias/diagrama-casos-uso.png" width="100%" alt="Diagrama de casos de uso de ms-playlist" /><br />
+        </p>
+      </td>
+    </tr>
+  </table>
+</div>
+
+El usuario comprador crea y configura sus playlists (SR-RF-69), les agrega o retira prendas (SR-RF-70) e interactúa con ellas con me gusta y guardado (SR-RF-71). El administrador StyleRadar destaca las playlists populares (SR-RF-72). Cada caso de uso lleva el código de su requerimiento en el análisis de requerimientos, los actores usan los nombres oficiales del análisis y el rectángulo marca el límite del microservicio. El archivo editable está en `docs/evidencias/diagrama-casos-uso.drawio`.
+
 ### Diagrama de Componentes General
 
 <div align="center">

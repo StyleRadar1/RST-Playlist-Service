@@ -1,6 +1,10 @@
 package edu.dosw.styleradar.playlist.infrastructure.adapter.in.rest;
 
 import edu.dosw.styleradar.playlist.application.dto.*;
+import edu.dosw.styleradar.playlist.domain.exception.CatalogoNoDisponibleException;
+import edu.dosw.styleradar.playlist.domain.exception.PlaylistPrivadaException;
+import edu.dosw.styleradar.playlist.domain.exception.PlaylistSinPrendasException;
+import edu.dosw.styleradar.playlist.domain.exception.PrendaNoEncontradaEnCatalogoException;
 import edu.dosw.styleradar.playlist.domain.model.Estilo;
 import edu.dosw.styleradar.playlist.domain.model.VisibilidadPlaylist;
 import edu.dosw.styleradar.playlist.domain.port.in.*;
@@ -27,6 +31,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
@@ -58,28 +63,79 @@ class PlaylistControllerTest {
     }
 
     @Test
-    void peticionProtegidaSinHeaderOBlandRetorna401() throws Exception {
+    void peticionProtegidaSinHeaderRetorna401ConCodigo() throws Exception {
         mockMvc.perform(get("/playlists/me"))
-                .andExpect(status().isUnauthorized());
-
-        mockMvc.perform(get("/playlists/me").header("X-User-Id", "   "))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("USUARIO_NO_AUTENTICADO"))
+                .andExpect(jsonPath("$.timestamp").isNotEmpty());
 
         mockMvc.perform(post("/playlists")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"nombre\":\"Urbano\",\"visibilidad\":\"PUBLICA\"}"))
-                .andExpect(status().isUnauthorized());
+                        .content("{\"nombre\":\"Urbano\",\"visibilidad\":\"PUBLICA\",\"prendasIds\":[\"" + prendaId + "\"]}"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("USUARIO_NO_AUTENTICADO"));
     }
 
     @Test
-    void crearPlaylistConUsuarioEnteroDeGatewayRetorna201() throws Exception {
-        when(crearPlaylistUseCase.crear(eq("15"), any())).thenReturn(sampleResponse);
+    void crearPlaylistConUsuarioUuidYPrendaRetorna201() throws Exception {
+        when(crearPlaylistUseCase.crear(eq(usuarioId), any())).thenReturn(sampleResponse);
 
         mockMvc.perform(post("/playlists")
-                        .header("X-User-Id", "15")
+                        .header("X-User-Id", usuarioId.toString())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"nombre\":\"Streetwear\",\"descripcion\":\"Desc\",\"visibilidad\":\"PUBLICA\",\"estilo\":\"URBANO\"}"))
+                        .content("{\"nombre\":\"Streetwear\",\"descripcion\":\"Desc\",\"visibilidad\":\"PUBLICA\",\"estilo\":\"URBANO\",\"prendasIds\":[\"" + prendaId + "\"]}"))
                 .andExpect(status().isCreated());
+    }
+
+    @Test
+    void crearPlaylistSinPrendasRetorna400ConCodigo() throws Exception {
+        when(crearPlaylistUseCase.crear(eq(usuarioId), any()))
+                .thenThrow(new PlaylistSinPrendasException("Debe incluir al menos una prenda"));
+
+        mockMvc.perform(post("/playlists")
+                        .header("X-User-Id", usuarioId.toString())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"nombre\":\"Streetwear\",\"descripcion\":\"Desc\",\"visibilidad\":\"PUBLICA\",\"estilo\":\"URBANO\",\"prendasIds\":[]}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("PLAYLIST_SIN_PRENDAS"))
+                .andExpect(jsonPath("$.timestamp").isNotEmpty());
+    }
+
+    @Test
+    void agregarPrendaInexistenteOCatalogoCaidoRetorna404Y503() throws Exception {
+        when(asociarPrendaUseCase.agregarPrenda(eq(usuarioId), eq(playlistId), any()))
+                .thenThrow(new PrendaNoEncontradaEnCatalogoException("Prenda no existe"));
+
+        mockMvc.perform(post("/playlists/{id}/prendas", playlistId)
+                        .header("X-User-Id", usuarioId.toString())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"prendaId\":\"" + prendaId + "\"}"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("PRENDA_NO_ENCONTRADA"))
+                .andExpect(jsonPath("$.timestamp").isNotEmpty());
+
+        when(asociarPrendaUseCase.agregarPrenda(eq(usuarioId), eq(playlistId), any()))
+                .thenThrow(new CatalogoNoDisponibleException("Catálogo caído"));
+
+        mockMvc.perform(post("/playlists/{id}/prendas", playlistId)
+                        .header("X-User-Id", usuarioId.toString())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"prendaId\":\"" + prendaId + "\"}"))
+                .andExpect(status().isServiceUnavailable())
+                .andExpect(jsonPath("$.code").value("CATALOGO_NO_DISPONIBLE"))
+                .andExpect(jsonPath("$.timestamp").isNotEmpty());
+    }
+
+    @Test
+    void playlistPrivadaRetorna403ConCodigoPlaylistPrivada() throws Exception {
+        UUID ajeno = UUID.randomUUID();
+        when(consultarPlaylistUseCase.obtenerPorId(playlistId, ajeno))
+                .thenThrow(new PlaylistPrivadaException("Privada"));
+
+        mockMvc.perform(get("/playlists/{id}", playlistId).header("X-User-Id", ajeno.toString()))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("PLAYLIST_PRIVADA"))
+                .andExpect(jsonPath("$.timestamp").isNotEmpty());
     }
 
     @Test
@@ -155,8 +211,10 @@ class PlaylistControllerTest {
     }
 
     @Test
-    void uuidInvalidoEnRutaRetorna400YNo500() throws Exception {
+    void uuidInvalidoEnRutaRetorna400ConParametroInvalido() throws Exception {
         mockMvc.perform(get("/playlists/no-es-un-uuid"))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("PARAMETRO_INVALIDO"))
+                .andExpect(jsonPath("$.timestamp").isNotEmpty());
     }
 }
