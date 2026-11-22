@@ -75,20 +75,39 @@ public interface PlaylistApi {
     })
     ResponseEntity<PlaylistResponse> editar(String usuarioId, UUID id, EditarPlaylistRequest request);
 
-    @Operation(summary = "Fijar playlist como destacada (máx 3 · SR-RF-72)")
+    @Operation(summary = "Fijar playlist como destacada (solo administrador StyleRadar, máx 3 · SR-RF-72)")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Playlist destacada"),
             @ApiResponse(responseCode = "401", description = "Usuario no autenticado (USUARIO_NO_AUTENTICADO)",
+                    content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "403", description = "Acceso denegado: requiere rol STYLERADAR_ADMIN o ADMIN_STYLERADAR (ACCESO_DENEGADO)",
                     content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class))),
             @ApiResponse(responseCode = "404", description = "Playlist no encontrada (PLAYLIST_NO_ENCONTRADA)",
                     content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class))),
             @ApiResponse(responseCode = "409", description = "Límite de 3 destacadas superado (LIMITE_DESTACADAS)",
                     content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))
     })
-    ResponseEntity<PlaylistResponse> destacar(String usuarioId, UUID id);
+    ResponseEntity<PlaylistResponse> destacar(
+            @Parameter(description = "ID de usuario propagado por el Gateway", example = "15") String usuarioId,
+            @Parameter(description = "Rol principal del usuario", example = "STYLERADAR_ADMIN") String userRole,
+            @Parameter(description = "Lista de roles del usuario", example = "STYLERADAR_ADMIN") String userRoles,
+            UUID id);
 
-    @Operation(summary = "Quitar playlist de destacadas")
-    ResponseEntity<PlaylistResponse> quitarDestacado(String usuarioId, UUID id);
+    @Operation(summary = "Quitar playlist de destacadas (solo administrador StyleRadar)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Destacado removido"),
+            @ApiResponse(responseCode = "401", description = "Usuario no autenticado (USUARIO_NO_AUTENTICADO)",
+                    content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "403", description = "Acceso denegado: requiere rol STYLERADAR_ADMIN o ADMIN_STYLERADAR (ACCESO_DENEGADO)",
+                    content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "404", description = "Playlist no encontrada (PLAYLIST_NO_ENCONTRADA)",
+                    content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    ResponseEntity<PlaylistResponse> quitarDestacado(
+            @Parameter(description = "ID de usuario propagado por el Gateway", example = "15") String usuarioId,
+            @Parameter(description = "Rol principal del usuario", example = "STYLERADAR_ADMIN") String userRole,
+            @Parameter(description = "Lista de roles del usuario", example = "STYLERADAR_ADMIN") String userRoles,
+            UUID id);
 
     @Operation(summary = "Asociar prenda aprobada a la playlist (máx 15 · RNF-12)")
     @ApiResponses({

@@ -29,8 +29,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -175,8 +177,36 @@ class PlaylistControllerTest {
         when(destacarPlaylistUseCase.destacar(usuarioId, playlistId)).thenReturn(sampleResponse);
         when(destacarPlaylistUseCase.quitarDestacado(usuarioId, playlistId)).thenReturn(sampleResponse);
 
-        assertThat(controller.destacar(usuarioId, playlistId).getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(controller.quitarDestacado(usuarioId, playlistId).getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(controller.destacar(usuarioId, "STYLERADAR_ADMIN", null, playlistId).getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(controller.quitarDestacado(usuarioId, null, "CLIENTE, ADMIN_STYLERADAR", playlistId).getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
+    void destacarYQuitarDestacadoValidaRolAdminRetorna200O403() throws Exception {
+        when(destacarPlaylistUseCase.destacar(usuarioId, playlistId)).thenReturn(sampleResponse);
+        when(destacarPlaylistUseCase.quitarDestacado(usuarioId, playlistId)).thenReturn(sampleResponse);
+
+        mockMvc.perform(put("/playlists/{id}/destacar", playlistId)
+                        .header("X-User-Id", usuarioId)
+                        .header("X-User-Role", "STYLERADAR_ADMIN"))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(delete("/playlists/{id}/destacar", playlistId)
+                        .header("X-User-Id", usuarioId)
+                        .header("X-User-Role", "   ")
+                        .header("X-User-Roles", "[\"ROLE_STYLERADAR_ADMIN\"]"))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(put("/playlists/{id}/destacar", playlistId)
+                        .header("X-User-Id", usuarioId)
+                        .header("X-User-Role", "CLIENTE"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("ACCESO_DENEGADO"));
+
+        mockMvc.perform(delete("/playlists/{id}/destacar", playlistId)
+                        .header("X-User-Id", usuarioId))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("ACCESO_DENEGADO"));
     }
 
     @Test
