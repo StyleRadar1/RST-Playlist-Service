@@ -1,6 +1,7 @@
 package edu.dosw.styleradar.playlist.infrastructure.adapter.in.rest;
 
 import edu.dosw.styleradar.playlist.application.dto.*;
+import edu.dosw.styleradar.playlist.domain.exception.AccesoDenegadoPlaylistException;
 import edu.dosw.styleradar.playlist.domain.exception.NoAutorizadoException;
 import edu.dosw.styleradar.playlist.domain.port.in.*;
 import edu.dosw.styleradar.playlist.infrastructure.adapter.in.rest.doc.PlaylistApi;
@@ -10,11 +11,20 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/playlists")
 public class PlaylistController implements PlaylistApi {
+
+    private static final Set<String> ROLES_ADMIN_STYLERADAR = Set.of(
+            "STYLERADAR_ADMIN",
+            "ADMIN_STYLERADAR",
+            "ROLE_STYLERADAR_ADMIN",
+            "ROLE_ADMIN_STYLERADAR"
+    );
 
     private final CrearPlaylistUseCase crearPlaylistUseCase;
     private final ConsultarPlaylistUseCase consultarPlaylistUseCase;
@@ -86,16 +96,24 @@ public class PlaylistController implements PlaylistApi {
     @PutMapping("/{id}/destacar")
     public ResponseEntity<PlaylistResponse> destacar(
             @RequestHeader("X-User-Id") String usuarioId,
+            @RequestHeader(value = "X-User-Role", required = false) String userRole,
+            @RequestHeader(value = "X-User-Roles", required = false) String userRoles,
             @PathVariable UUID id) {
-        return ResponseEntity.ok(destacarPlaylistUseCase.destacar(validarUsuarioId(usuarioId), id));
+        String usuario = validarUsuarioId(usuarioId);
+        validarRolAdmin(userRole, userRoles);
+        return ResponseEntity.ok(destacarPlaylistUseCase.destacar(usuario, id));
     }
 
     @Override
     @DeleteMapping("/{id}/destacar")
     public ResponseEntity<PlaylistResponse> quitarDestacado(
             @RequestHeader("X-User-Id") String usuarioId,
+            @RequestHeader(value = "X-User-Role", required = false) String userRole,
+            @RequestHeader(value = "X-User-Roles", required = false) String userRoles,
             @PathVariable UUID id) {
-        return ResponseEntity.ok(destacarPlaylistUseCase.quitarDestacado(validarUsuarioId(usuarioId), id));
+        String usuario = validarUsuarioId(usuarioId);
+        validarRolAdmin(userRole, userRoles);
+        return ResponseEntity.ok(destacarPlaylistUseCase.quitarDestacado(usuario, id));
     }
 
     @Override
@@ -160,5 +178,26 @@ public class PlaylistController implements PlaylistApi {
             throw new NoAutorizadoException("La cabecera X-User-Id es obligatoria y no puede estar vacía");
         }
         return usuarioId.trim();
+    }
+
+    private void validarRolAdmin(String userRole, String userRoles) {
+        if (tieneRolAdmin(userRole) || tieneRolAdmin(userRoles)) {
+            return;
+        }
+        throw new AccesoDenegadoPlaylistException(
+                "Solo un administrador de StyleRadar puede destacar o quitar destacado de una playlist");
+    }
+
+    private boolean tieneRolAdmin(String headerValue) {
+        if (headerValue == null || headerValue.isBlank()) {
+            return false;
+        }
+        String limpio = headerValue.replace("[", "").replace("]", "").replace("\"", "");
+        for (String token : limpio.split(",")) {
+            if (ROLES_ADMIN_STYLERADAR.contains(token.trim().toUpperCase(Locale.ROOT))) {
+                return true;
+            }
+        }
+        return false;
     }
 }
