@@ -112,7 +112,7 @@ class PlaylistControllerTest {
         when(asociarPrendaUseCase.agregarPrenda(eq("15"), eq(playlistId), any()))
                 .thenThrow(new PrendaNoEncontradaEnCatalogoException("Prenda no existe"));
 
-        mockMvc.perform(post("/playlists/{id}/prendas", playlistId)
+        mockMvc.perform(post("/playlists/{id}/items", playlistId)
                         .header("X-User-Id", "15")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"prendaId\":\"" + prendaId + "\"}"))
@@ -123,7 +123,7 @@ class PlaylistControllerTest {
         when(asociarPrendaUseCase.agregarPrenda(eq("15"), eq(playlistId), any()))
                 .thenThrow(new CatalogoNoDisponibleException("Catálogo caído"));
 
-        mockMvc.perform(post("/playlists/{id}/prendas", playlistId)
+        mockMvc.perform(post("/playlists/{id}/items", playlistId)
                         .header("X-User-Id", "15")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"prendaId\":\"" + prendaId + "\"}"))
@@ -151,18 +151,24 @@ class PlaylistControllerTest {
     }
 
     @Test
-    void obtenerPublicasYPopulares() {
+    void obtenerPublicasYPopulares() throws Exception {
         when(consultarPlaylistUseCase.obtenerPublicas()).thenReturn(List.of(sampleResponse));
         when(consultarPlaylistUseCase.obtenerPopulares(0, 20)).thenReturn(new PageResponse<>(List.of(sampleResponse), 0, 20, 1L, 1, true, true));
 
         assertThat(controller.obtenerPublicas().getBody()).hasSize(1);
         assertThat(controller.obtenerPopulares(0, 20).getBody().content()).hasSize(1);
+
+        mockMvc.perform(get("/playlists/popular"))
+                .andExpect(status().isOk());
     }
 
     @Test
-    void obtenerDestacadasRetornaLista() {
+    void obtenerDestacadasRetornaLista() throws Exception {
         when(consultarPlaylistUseCase.obtenerDestacadas()).thenReturn(List.of(sampleResponse));
         assertThat(controller.obtenerDestacadas().getBody()).hasSize(1);
+
+        mockMvc.perform(get("/playlists/featured"))
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -186,45 +192,53 @@ class PlaylistControllerTest {
         when(destacarPlaylistUseCase.destacar(usuarioId, playlistId)).thenReturn(sampleResponse);
         when(destacarPlaylistUseCase.quitarDestacado(usuarioId, playlistId)).thenReturn(sampleResponse);
 
-        mockMvc.perform(put("/playlists/{id}/destacar", playlistId)
+        mockMvc.perform(put("/playlists/{id}/featured", playlistId)
                         .header("X-User-Id", usuarioId)
                         .header("X-User-Role", "STYLERADAR_ADMIN"))
                 .andExpect(status().isOk());
 
-        mockMvc.perform(delete("/playlists/{id}/destacar", playlistId)
+        mockMvc.perform(delete("/playlists/{id}/featured", playlistId)
                         .header("X-User-Id", usuarioId)
                         .header("X-User-Role", "   ")
                         .header("X-User-Roles", "[\"ROLE_STYLERADAR_ADMIN\"]"))
                 .andExpect(status().isOk());
 
-        mockMvc.perform(put("/playlists/{id}/destacar", playlistId)
+        mockMvc.perform(put("/playlists/{id}/featured", playlistId)
                         .header("X-User-Id", usuarioId)
                         .header("X-User-Role", "CLIENTE"))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value("ACCESO_DENEGADO"));
 
-        mockMvc.perform(delete("/playlists/{id}/destacar", playlistId)
+        mockMvc.perform(delete("/playlists/{id}/featured", playlistId)
                         .header("X-User-Id", usuarioId))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value("ACCESO_DENEGADO"));
     }
 
     @Test
-    void agregarYRetirarPrenda() {
+    void agregarYRetirarPrenda() throws Exception {
         when(asociarPrendaUseCase.agregarPrenda(eq(usuarioId), eq(playlistId), any())).thenReturn(sampleResponse);
         when(asociarPrendaUseCase.retirarPrenda(usuarioId, playlistId, prendaId)).thenReturn(sampleResponse);
 
         assertThat(controller.agregarPrenda(usuarioId, playlistId, new AgregarPrendaRequest(prendaId, "Gorra")).getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(controller.retirarPrenda(usuarioId, playlistId, prendaId).getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        mockMvc.perform(delete("/playlists/{id}/items/{itemId}", playlistId, prendaId)
+                        .header("X-User-Id", usuarioId))
+                .andExpect(status().isOk());
     }
 
     @Test
-    void alternarLikeYGuardado() {
+    void alternarLikeYGuardado() throws Exception {
         when(interactuarPlaylistUseCase.alternarLike(usuarioId, playlistId)).thenReturn(sampleResponse);
         when(interactuarPlaylistUseCase.alternarGuardado(usuarioId, playlistId)).thenReturn(sampleResponse);
 
         assertThat(controller.alternarLike(usuarioId, playlistId).getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(controller.alternarGuardado(usuarioId, playlistId).getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        mockMvc.perform(post("/playlists/{id}/save", playlistId)
+                        .header("X-User-Id", usuarioId))
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -235,12 +249,16 @@ class PlaylistControllerTest {
     }
 
     @Test
-    void misPlaylistsYMisGuardadas() {
+    void misPlaylistsYMisGuardadas() throws Exception {
         when(consultarPlaylistUseCase.obtenerPorUsuario(usuarioId)).thenReturn(List.of(sampleResponse));
         when(consultarPlaylistUseCase.obtenerGuardadas(usuarioId)).thenReturn(List.of(sampleResponse));
 
         assertThat(controller.misPlaylists(usuarioId).getBody()).hasSize(1);
         assertThat(controller.misGuardadas(usuarioId).getBody()).hasSize(1);
+
+        mockMvc.perform(get("/playlists/me/saved")
+                        .header("X-User-Id", usuarioId))
+                .andExpect(status().isOk());
     }
 
     @Test
