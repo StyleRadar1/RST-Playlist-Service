@@ -13,6 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-java@v4
         with:
@@ -26,6 +28,22 @@ jobs:
       - name: Pruebas, cobertura y análisis estático
         run: mvn -B -ntp verify
 
+      - name: Análisis con SonarQube Cloud
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          if [ -z "$SONAR_TOKEN" ]; then
+            echo "SONAR_TOKEN no configurado en Secrets. Análisis SonarQube omitido (pass)."
+            exit 0
+          fi
+          mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+            -Dsonar.projectKey=StyleRadar1_RST-Playlist-Service \
+            -Dsonar.organization=styleradar1 \
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml || {
+              echo "SonarQube Cloud no disponible aún. Continuando sin bloquear el CI."
+              exit 0
+            }
       - name: Publicar reporte de cobertura
         if: always()
         uses: actions/upload-artifact@v4
@@ -39,6 +57,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: docker/setup-buildx-action@v3
 

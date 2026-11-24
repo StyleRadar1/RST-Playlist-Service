@@ -3,14 +3,26 @@ server:
   forward-headers-strategy: framework
   servlet:
     context-path: /api/v1
+    encoding:
+      charset: UTF-8
+      force: true
+
+clients:
+  item-catalogo:
+    url: ${ITEM_CATALOGO_URL:http://localhost:8220}
 
 spring:
   application:
     name: ms-playlist
   datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:styleradar_playlist}
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:styleradar_playlist}?sslmode=${DB_SSL_MODE:prefer}
     username: ${DB_USER:postgres}
     password: ${DB_PASSWORD:}
+    hikari:
+      maximum-pool-size: ${DB_POOL_SIZE:3}
+      minimum-idle: ${DB_POOL_MIN_IDLE:1}
+      idle-timeout: 60000
+      initialization-fail-timeout: ${DB_INIT_FAIL_TIMEOUT:60000}
   jpa:
     open-in-view: false
     hibernate:
@@ -18,11 +30,22 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            connect-timeout: 5000
+            read-timeout: 15000
   rabbitmq:
     host: ${RABBITMQ_HOST:localhost}
     port: ${RABBITMQ_PORT:5672}
     username: ${RABBITMQ_USER:guest}
     password: ${RABBITMQ_PASSWORD:}
+    virtual-host: ${RABBITMQ_VHOST:/}
+    ssl:
+      enabled: ${RABBITMQ_SSL_ENABLED:false}
+      verify-hostname: ${RABBITMQ_SSL_VERIFY_HOSTNAME:true}
 
 styleradar:
   rabbitmq:
@@ -34,6 +57,8 @@ styleradar:
       dlq: styleradar.playlist.dlq
     routing-keys:
       prenda-retirada: styleradar.catalogo.prenda.retirada
+      playlist-destacada: styleradar.playlist.destacada.actualizada
+      prenda-asociada: styleradar.playlist.prenda.asociada
 
 springdoc:
   api-docs:

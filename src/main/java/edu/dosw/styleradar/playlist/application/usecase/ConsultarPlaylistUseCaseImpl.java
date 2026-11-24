@@ -26,7 +26,7 @@ public class ConsultarPlaylistUseCaseImpl implements ConsultarPlaylistUseCase {
     }
 
     @Override
-    public PlaylistResponse obtenerPorId(UUID id, UUID usuarioConsultaId) {
+    public PlaylistResponse obtenerPorId(UUID id, String usuarioConsultaId) {
         Playlist playlist = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("No existe playlist con ID: " + id));
         playlist.validarAccesoLectura(usuarioConsultaId);
@@ -50,12 +50,12 @@ public class ConsultarPlaylistUseCaseImpl implements ConsultarPlaylistUseCase {
     }
 
     @Override
-    public List<PlaylistResponse> obtenerPorUsuario(UUID usuarioId) {
+    public List<PlaylistResponse> obtenerPorUsuario(String usuarioId) {
         return repository.findByUsuarioId(usuarioId).stream().map(mapper::toResponse).toList();
     }
 
     @Override
-    public List<PlaylistResponse> obtenerGuardadas(UUID usuarioId) {
+    public List<PlaylistResponse> obtenerGuardadas(String usuarioId) {
         return repository.findByGuardadosUsuarioId(usuarioId).stream().map(mapper::toResponse).toList();
     }
 

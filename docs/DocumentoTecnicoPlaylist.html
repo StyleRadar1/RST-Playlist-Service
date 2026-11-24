@@ -213,7 +213,7 @@ var D = [
 {
   c: 'vio',
   cover: 1,
-  h: cover('Documento de microservicio', 'Back por', 'ms-playlist', ['Playlists de Estilo', 'Puerto 8260', 'Versión 1.0.0', 'Daniel Mosquera'], 1)
+  h: cover('Documento Técnico de Microservicio', 'Back por', 'ms-playlist', ['Playlists de Estilo', 'Puerto 8260', 'Versión 1.0.0', 'Daniel Mosquera'], 1)
 },
 {
   c: 'cream',
@@ -227,14 +227,13 @@ var D = [
   tab: 'Mapa',
   h: K('01 · Mapa') + H('Dónde vive', 'este microservicio') +
      '<div class="g2">' +
-     '<div class="card pop"><p class="lab">Microservicio 1</p><p><b>ms-inventario</b></p><p class="sm">Puerto 8200 · Stock físico</p></div>' +
-     '<div class="card pop" style="background:#48119A;color:#FBF7F0;border:0"><p class="lab" style="color:#E8DCCB">Microservicio 2 · este</p><p><b>ms-playlist</b></p><p class="sm">Puerto 8260 · Lookbooks de moda</p></div>' +
-     '<div class="card pop"><p class="lab">Microservicio 3</p><p><b>ms-item-catalogo</b></p><p class="sm">Puerto 8210 · Prendas activas</p></div>' +
-     '<div class="card pop"><p class="lab">Microservicio 4</p><p><b>ms-tienda</b></p><p class="sm">Puerto 8220 · Tiendas locales</p></div>' +
-     '<div class="card pop"><p class="lab">Microservicio 5</p><p><b>ms-probador-virtual</b></p><p class="sm">Puerto 8240 · IA de arquetipos</p></div>' +
-     '<div class="card pop"><p class="lab">Microservicio 6</p><p><b>api-gateway</b></p><p class="sm">Puerto 8080 · JWT & Enrutamiento</p></div>' +
+     '<div class="card pop"><p class="lab">Microservicio 1 · Paquete 2</p><p><b>ms-inventario</b></p><p class="sm">Puerto 8200 · Stock y bodegas físicas</p></div>' +
+     '<div class="card pop"><p class="lab">Microservicio 2 · Paquete 2</p><p><b>ms-item-catalogo</b></p><p class="sm">Puerto 8220 · Catálogo y prendas activas</p></div>' +
+     '<div class="card pop"><p class="lab">Microservicio 3 · Paquete 2</p><p><b>ms-geolocalizacion</b></p><p class="sm">Puerto 8240 · Cobertura y tiendas locales</p></div>' +
+     '<div class="card pop" style="background:#48119A;color:#FBF7F0;border:0"><p class="lab" style="color:#E8DCCB">Microservicio 4 · Paquete 2 (Este)</p><p><b>ms-playlist</b></p><p class="sm">Puerto 8260 · Colecciones y estilo urbano</p></div>' +
      '</div>' +
-     '<p class="sm">Parte del Paquete 2 (Catálogo y Experiencia). Encapsula las colecciones de estilo urbano (Arquetipo Mateo - Calle).</p>'
+     '<div class="card" style="margin-top:6px"><p class="lab">Enrutamiento Central</p><p class="sm"><b>api-gateway (Puerto 8080):</b> Autentica JWT y propaga la identidad del usuario mediante la cabecera <code>X-User-Id</code> (UUID).</p></div>' +
+     '<p class="sm">Encapsula la curaduría temática y lookbooks de prendas vinculadas al arquetipo Mateo (Calle · Cultura Urbana).</p>'
 },
 {
   c: 'arena',
@@ -242,32 +241,40 @@ var D = [
   tag: '02',
   tab: 'Ficha',
   h: K('02 · Ficha') + H('Datos', 'clave') +
-     cv('Propósito', 'Curaduría de estilo y colecciones temáticas de prendas de vestir urbanas (Lookbooks) vinculadas al arquetipo Mateo - Calle.') +
+     cv('Propósito', 'Curaduría de estilo y colecciones temáticas de prendas de vestir urbanas vinculadas al arquetipo cultural Mateo - Calle (RF-69 a RF-72).') +
      '<div class="g2">' +
      cd('Responsable', 'Daniel Mosquera (Tech Lead / Arquitecto)') +
      cd('Versión', '1.0.0 (Java 21 · Spring Boot 3.3.4)') +
-     cd('Depende de', 'PostgreSQL 16, Redis 7.x y RabbitMQ 3.12') +
+     cd('Depende de', 'PostgreSQL 16 (playlist_db) y RabbitMQ 3.12 (TLS :5671)') +
      cd('Lo usan', 'Frontend Web/Móvil y Compradores') +
      '</div>' +
-     '<div style="display:flex;gap:10px;align-items:center"><span class="lab">Estado</span><span class="pill">' + cy(['EN DESARROLLO', 'EN DISEÑO', 'ESTABLE'], 0) + '</span></div>'
+     '<div style="display:flex;gap:10px;align-items:center"><span class="lab">Estado</span><span class="pill">' + cy(['ESTABLE (QA)', 'EN DESARROLLO', 'EN REVISIÓN'], 0) + '</span></div>'
 },
 {
   c: 'graf',
   t: 'Endpoints',
   tag: '03',
   tab: 'Endpoints',
-  h: K('03 · Endpoints') + H('Qué', 'expone') +
-     tb(['Método', 'Ruta', 'Rol', 'Qué hace'], [
-       [cyd(MET, 0), '/api/v1/playlists/destacadas', 'Público', '3 lookbooks de inicio (Redis L2)'],
-       [cyd(MET, 0), '/api/v1/playlists/populares', 'Público', 'Colecciones ordenadas por likes'],
-       [cyd(MET, 0), '/api/v1/playlists/{id}', 'Público/Dueño', 'Detalle y prendas del lookbook'],
-       [cyd(MET, 1), '/api/v1/playlists', 'Comprador', 'Crea nueva colección de estilo'],
-       [cyd(MET, 2), '/api/v1/playlists/{id}/destacar', 'Admin', 'Fija en Home (máx 3 · SR-RF-72)'],
-       [cyd(MET, 1), '/api/v1/playlists/{id}/prendas', 'Dueño', 'Asocia prenda (máx 15 · RNF-12)'],
-       [cyd(MET, 1), '/api/v1/playlists/{id}/like', 'Comprador', 'Alterna Me Gusta en la colección']
-     ]).replace('color:#262626', 'color:#FBF7F0') +
-     '<p class="sm">Contrato OpenAPI 3.0. Ejemplo de payload JSON para creación de Lookbook:</p>' +
-     mono('POST /api/v1/playlists\n{\n  "nombre": "Vibra Urbana Bogotá",\n  "descripcion": "Outfits streetwear de Chapinero",\n  "estilo": "URBANO",\n  "visibilidad": "PUBLICA"\n}\n→ 201 { "id": 105, "totalPrendas": 0, "destacada": false }')
+  h: K('03 · Endpoints') + H('15 Contratos', 'oficiales') +
+     '<table style="font-size:10.5px;line-height:1.2;color:#FBF7F0">' +
+     '<tr><th>MÉTODO</th><th>RUTA (/api/v1/...)</th><th>SEGURIDAD</th><th>DESCRIPCIÓN</th></tr>' +
+     '<tr><td><span style="color:#60A5FA;font-weight:700">GET</span></td><td>/health</td><td>Público</td><td>Health check y verificación de puerto 8260</td></tr>' +
+     '<tr><td><span style="color:#34D399;font-weight:700">POST</span></td><td>/playlists</td><td>X-User-Id</td><td>Crear nueva playlist temática (HTTP 201)</td></tr>' +
+     '<tr><td><span style="color:#60A5FA;font-weight:700">GET</span></td><td>/playlists</td><td>Público</td><td>Listar todas las playlists con visibilidad pública</td></tr>' +
+     '<tr><td><span style="color:#60A5FA;font-weight:700">GET</span></td><td>/playlists/destacadas</td><td>Público</td><td>Obtener las 3 playlists del Home (SR-RF-72)</td></tr>' +
+     '<tr><td><span style="color:#60A5FA;font-weight:700">GET</span></td><td>/playlists/populares</td><td>Público</td><td>Paginación de playlists ordenadas por likes</td></tr>' +
+     '<tr><td><span style="color:#60A5FA;font-weight:700">GET</span></td><td>/playlists/{id}</td><td>Opcional</td><td>Detalle de playlist y prendas (UUID). Privada exige dueño</td></tr>' +
+     '<tr><td><span style="color:#FBBF24;font-weight:700">PUT</span></td><td>/playlists/{id}</td><td>X-User-Id</td><td>Editar nombre, descripción, estilo o visibilidad</td></tr>' +
+     '<tr><td><span style="color:#F87171;font-weight:700">DELETE</span></td><td>/playlists/{id}</td><td>X-User-Id</td><td>Eliminar playlist propia (HTTP 204 No Content)</td></tr>' +
+     '<tr><td><span style="color:#FBBF24;font-weight:700">PUT</span></td><td>/playlists/{id}/destacar</td><td>X-User-Id</td><td>Fijar en Home (Admin · Valida máx 3 simultáneas)</td></tr>' +
+     '<tr><td><span style="color:#F87171;font-weight:700">DELETE</span></td><td>/playlists/{id}/destacar</td><td>X-User-Id</td><td>Quitar playlist del carrusel de destacadas</td></tr>' +
+     '<tr><td><span style="color:#34D399;font-weight:700">POST</span></td><td>/playlists/{id}/prendas</td><td>X-User-Id</td><td>Asociar prenda activa (Valida máx 15 · RNF-12)</td></tr>' +
+     '<tr><td><span style="color:#F87171;font-weight:700">DELETE</span></td><td>/playlists/{id}/prendas/{prendaId}</td><td>X-User-Id</td><td>Desvincular prenda física de la playlist</td></tr>' +
+     '<tr><td><span style="color:#34D399;font-weight:700">POST</span></td><td>/playlists/{id}/like</td><td>X-User-Id</td><td>Alternar Me Gusta (Idempotente por usuario)</td></tr>' +
+     '<tr><td><span style="color:#34D399;font-weight:700">POST</span></td><td>/playlists/{id}/guardar</td><td>X-User-Id</td><td>Guardar o quitar playlist en perfil de comprador</td></tr>' +
+     '<tr><td><span style="color:#60A5FA;font-weight:700">GET</span></td><td>/playlists/me</td><td>X-User-Id</td><td>Listar playlists creadas por el usuario autenticado</td></tr>' +
+     '</table>' +
+     mono('POST /api/v1/playlists (Header obligatorio: X-User-Id: 7b2d5a1e-8c3f-4e9a-9b1d-2f4a6c8e0b2a)\n{\n  "nombre": "Streetwear Bogotá Chapinero",\n  "descripcion": "Prendas oversize y estética urbana local",\n  "estilo": "URBANO",\n  "visibilidad": "PUBLICA"\n}\n→ 201 Created { "id": "9f1c3d2e-4b5a-6c7d-8e9f-0a1b2c3d4e5f", "totalPrendas": 0, "destacada": false }')
 },
 {
   c: 'vio',
@@ -276,10 +283,10 @@ var D = [
   h: K('04 · Flujo') + H('Qué pasa', 'por dentro') +
      '<div class="col" style="gap:6px">' +
      [
-       ['1 · Entrada', 'Valida invariantes de dominio: máx 15 prendas (RNF-12) y tope de 3 destacadas en Home (SR-RF-72).'],
-       ['2 · Regla', 'Aplica lógica de agregados de moda en Java 21 puro y verifica pertenencia del usuario creador.'],
-       ['3 · Datos', 'Persistencia relacional desacoplada en PostgreSQL 16 sin llaves foráneas a catálogos remotos.'],
-       ['4 · Salida', 'Retorna DTO de lookbook e invalida inmediatamente la clave de caché Redis del carrusel Home.']
+       ['1 · Entrada y Seguridad', 'Spring MVC valida DTOs (@Valid) y la presencia obligatoria de X-User-Id (UUID). Si falta, responde 401 Unauthorized.'],
+       ['2 · Dominio Puro (DDD)', 'Ejecución de casos de uso atómicos (Crear, Consultar, Destacar, AsociarPrenda, Interactuar). Aplica invariantes: máx 15 prendas (RNF-12) y 3 destacadas (SR-RF-72).'],
+       ['3 · Persistencia Relacional', 'PostgreSQL 16 gestiona tablas desacopladas con Flyway V1 y V2. Almacena prenda_id (UUID) sin llaves foráneas a catálogo.'],
+       ['4 · Salida y Eventos AMQP', 'MapStruct transforma entidades a DTOs Records inmutables. Se emiten eventos oficiales (styleradar.playlist.*) hacia styleradar.exchange.']
      ].map(function(r, i) {
        return (i ? '<p style="text-align:center;font-size:22px;line-height:1;color:#E8DCCB">↓</p>' : '') +
               '<div class="card"><p class="lab">' + r[0] + '</p><p class="sm" style="opacity:1">' + r[1] + '</p></div>';
@@ -291,28 +298,29 @@ var D = [
   t: 'Datos',
   tag: '05',
   tab: 'Datos',
-  h: K('05 · Datos') + H('Qué', 'guarda') +
-     tb(['Tabla', 'Columnas Clave', 'Propósito'], [
-       ['playlists', 'id (PK), usuario_id, nombre, estilo, destacada', 'Colección / Lookbook raíz'],
-       ['playlist_prendas', 'id (PK), playlist_id (FK), prenda_id, fecha', 'Snapshot de prendas asociadas'],
-       ['playlist_likes', 'playlist_id (PK,FK), usuario_id (PK)', 'Registro único de Me Gusta'],
-       ['playlist_guardados', 'playlist_id (PK,FK), usuario_id (PK)', 'Guardados en perfil de comprador']
+  h: K('05 · Datos') + H('Esquema', 'con UUID') +
+     tb(['Tabla', 'Columnas (PostgreSQL 16)', 'Propósito'], [
+       ['playlists', 'id UUID PK, usuario_id UUID, nombre, estilo, destacada, fechas', 'Entidad raíz de la colección de estilo'],
+       ['playlist_prendas', 'playlist_id UUID FK, prenda_id UUID, nombre_prenda, disponible, fecha', 'Snapshot desacoplado (Flyway V1 + V2)'],
+       ['playlist_likes', 'playlist_id UUID PK,FK, usuario_id UUID PK', 'Registro único e idempotente de likes'],
+       ['playlist_guardados', 'playlist_id UUID PK,FK, usuario_id UUID PK', 'Colecciones guardadas en perfil de usuario']
      ]) +
-     cd('Aislamiento de Microservicio', 'No existen llaves foráneas hacia ms-item-catalogo. Se almacena prenda_id como identificador de referencia lógica y snapshot. La consistencia eventual se mantiene de forma asíncrona vía RabbitMQ.')
+     cd('Desacoplamiento Total con UUID', 'No existen llaves foráneas cruzadas entre microservicios. ms-playlist persiste prenda_id (UUID) como referencia remota. Cuando ms-item-catalogo emite styleradar.catalogo.prenda.retirada, la prenda no se elimina: se marca disponible = false (RF-57, RNF-11).')
 },
 {
   c: 'arena',
   t: 'Errores',
   tag: '06',
-  h: K('06 · Errores') + H('Qué puede', 'fallar') +
-     tb(['Código', 'Error de Negocio', 'Causa y Manejo'], [
-       ['400', 'DATOS_INVALIDOS', 'Nombre obligatorio (máx 100 caracteres) o estilo musical inexistente.'],
-       ['403', 'ACCESO_DENEGADO', 'El usuario intenta modificar o ver una colección privada ajena.'],
-       ['404', 'RECURSO_NO_ENCONTRADO', 'La playlist o el ID de prenda no existen en el sistema.'],
-       ['409', 'LIMITE_DESTACADAS_SUPERADO', 'SR-RF-72: Ya existen 3 playlists destacadas en el Home.'],
-       ['422', 'LIMITE_PRENDAS_ALCANZADO', 'RNF-12: El lookbook ya cuenta con el tope de 15 prendas asociadas.']
+  h: K('06 · Errores') + H('Estándar', 'RFC-7807') +
+     tb(['Código', 'Identificador de Error', 'Causa y Comportamiento'], [
+       ['400', 'SOLICITUD_INVALIDA', 'Campos requeridos ausentes, texto > 100 caracteres o UUID mal formado.'],
+       ['401', 'NO_AUTORIZADO', 'Cabecera X-User-Id ausente en endpoints protegidos de creación o mutación.'],
+       ['403', 'ACCESO_DENEGADO', 'El usuario intenta modificar o consultar una playlist privada que no le pertenece.'],
+       ['404', 'RECURSO_NO_ENCONTRADO', 'El identificador UUID de la playlist o de la prenda no existe en el sistema.'],
+       ['409', 'LIMITE_DESTACADAS_SUPERADO', 'SR-RF-72: Regla de negocio bloquea fijar más de 3 playlists activas en el Home.'],
+       ['422', 'LIMITE_PRENDAS_ALCANZADO', 'RNF-12: La playlist ya cuenta con el tope máximo de 15 prendas asociadas.']
      ]) +
-     '<p class="sm">Formato de respuesta RFC-7807 uniforme gestionado por GlobalExceptionHandler.</p>'
+     '<p class="sm">GlobalExceptionHandler centraliza las excepciones y garantiza respuestas estructuradas en ProblemDetail.</p>'
 },
 {
   c: 'graf',
@@ -322,50 +330,55 @@ var D = [
   h: K('07 · Roles') + H('Quién puede', 'qué') +
      tb(['Operación', 'Anónimo', 'Comprador', 'Admin'], [
        ['Ver públicas y destacadas', cyd(['SÍ', 'NO', 'PROPIO'], 0), cyd(['SÍ', 'NO', 'PROPIO'], 0), cyd(['SÍ', 'NO', 'PROPIO'], 0)],
-       ['Crear lookbook de estilo', cyd(['SÍ', 'NO', 'PROPIO'], 1), cyd(['SÍ', 'NO', 'PROPIO'], 0), cyd(['SÍ', 'NO', 'PROPIO'], 0)],
-       ['Editar / Borrar colección', cyd(['SÍ', 'NO', 'PROPIO'], 1), cyd(['SÍ', 'NO', 'PROPIO'], 2), cyd(['SÍ', 'NO', 'PROPIO'], 0)],
+       ['Crear playlist de moda', cyd(['SÍ', 'NO', 'PROPIO'], 1), cyd(['SÍ', 'NO', 'PROPIO'], 0), cyd(['SÍ', 'NO', 'PROPIO'], 0)],
+       ['Editar / Eliminar propia', cyd(['SÍ', 'NO', 'PROPIO'], 1), cyd(['SÍ', 'NO', 'PROPIO'], 2), cyd(['SÍ', 'NO', 'PROPIO'], 0)],
        ['Asociar / Retirar prendas', cyd(['SÍ', 'NO', 'PROPIO'], 1), cyd(['SÍ', 'NO', 'PROPIO'], 2), cyd(['SÍ', 'NO', 'PROPIO'], 0)],
-       ['Destacar lookbook en Home', cyd(['SÍ', 'NO', 'PROPIO'], 1), cyd(['SÍ', 'NO', 'PROPIO'], 1), cyd(['SÍ', 'NO', 'PROPIO'], 0)],
+       ['Destacar en Home (máx 3)', cyd(['SÍ', 'NO', 'PROPIO'], 1), cyd(['SÍ', 'NO', 'PROPIO'], 1), cyd(['SÍ', 'NO', 'PROPIO'], 0)],
        ['Dar Me Gusta o Guardar', cyd(['SÍ', 'NO', 'PROPIO'], 1), cyd(['SÍ', 'NO', 'PROPIO'], 0), cyd(['SÍ', 'NO', 'PROPIO'], 0)]
      ]).replace('color:#262626', 'color:#FBF7F0') +
-     '<p class="sm">Toca cada celda para alternar el permiso: SÍ, NO o PROPIO (solo sus propias colecciones).</p>'
+     '<p class="sm">Toca cada celda para alternar el permiso: SÍ, NO o PROPIO (solo sus propias colecciones con X-User-Id verificado).</p>'
 },
 {
   c: 'cream',
   t: 'Relaciones',
   tag: '08',
-  h: K('08 · Relaciones') + H('Con quién', 'se conecta') +
+  h: K('08 · Relaciones') + H('Integración', 'en Azure') +
      svgw('0 0 500 320',
        '<g stroke="#48119A" stroke-width="2.5" fill="none">' +
-       '<path d="M120 70 L205 135"/>' +
-       '<path d="M120 250 L205 185"/>' +
-       '<path d="M380 70 L295 135"/>' +
-       '<path d="M380 250 L295 185"/>' +
+       '<path d="M130 65 L200 135"/>' +
+       '<path d="M130 255 L200 185"/>' +
+       '<path d="M370 65 L300 135"/>' +
+       '<path d="M370 255 L300 185"/>' +
        '</g>' +
-       '<rect x="195" y="125" width="110" height="70" rx="14" fill="#48119A"/>' +
-       '<text x="250" y="160" text-anchor="middle" fill="#FBF7F0" font-size="11">MS-PLAYLIST</text>' +
-       '<text x="250" y="176" text-anchor="middle" fill="#E8DCCB" font-size="9">:8260</text>' +
+       '<rect x="185" y="120" width="130" height="75" rx="14" fill="#48119A"/>' +
+       '<text x="250" y="152" text-anchor="middle" fill="#FBF7F0" font-size="12">MS-PLAYLIST</text>' +
+       '<text x="250" y="170" text-anchor="middle" fill="#E8DCCB" font-size="10">Puerto 8260</text>' +
+       '<text x="250" y="184" text-anchor="middle" fill="#E8DCCB" font-size="8">Spring Boot 3.3</text>' +
        '<g fill="#FBF7F0" stroke="#262626" stroke-width="2">' +
-       '<rect x="15" y="40" width="115" height="50" rx="10"/>' +
-       '<rect x="15" y="230" width="115" height="50" rx="10"/>' +
-       '<rect x="370" y="40" width="115" height="50" rx="10"/>' +
-       '<rect x="370" y="230" width="115" height="50" rx="10"/>' +
+       '<rect x="15" y="35" width="130" height="55" rx="10"/>' +
+       '<rect x="15" y="225" width="130" height="55" rx="10"/>' +
+       '<rect x="355" y="35" width="130" height="55" rx="10"/>' +
+       '<rect x="355" y="225" width="130" height="55" rx="10"/>' +
        '</g>' +
-       '<g fill="#262626" text-anchor="middle" font-size="11">' +
-       '<text x="72" y="70">API Gateway :8080</text>' +
-       '<text x="72" y="260">ms-item-catalogo</text>' +
-       '<text x="427" y="70">Redis 7.x (L2)</text>' +
-       '<text x="427" y="260">RabbitMQ Events</text>' +
+       '<g fill="#262626" text-anchor="middle" font-size="10">' +
+       '<text x="80" y="58" font-weight="700">API Gateway :8080</text>' +
+       '<text x="80" y="73">HTTP + X-User-Id</text>' +
+       '<text x="80" y="248" font-weight="700">ms-item-catalogo</text>' +
+       '<text x="80" y="263">Puerto 8220</text>' +
+       '<text x="420" y="58" font-weight="700">PostgreSQL 16</text>' +
+       '<text x="420" y="73">playlist_db (V1+V2)</text>' +
+       '<text x="420" y="248" font-weight="700">RabbitMQ TLS :5671</text>' +
+       '<text x="420" y="263">styleradar.exchange</text>' +
        '</g>' +
-       '<g fill="#6B6B78" font-weight="400" text-anchor="middle" font-size="9">' +
-       '<text x="72" y="25">Enruta JWT</text>' +
-       '<text x="72" y="215">catalogo.prenda.eliminada</text>' +
-       '<text x="427" y="25">Caché Home &lt;5ms</text>' +
-       '<text x="427" y="215">playlist.destacada.*</text>' +
+       '<g fill="#6B6B78" font-weight="400" text-anchor="middle" font-size="8">' +
+       '<text x="80" y="22">Enrutamiento JWT</text>' +
+       '<text x="80" y="212">Evento prenda.retirada</text>' +
+       '<text x="420" y="22">Persistencia ACID</text>' +
+       '<text x="420" y="212">DLX Direct (styleradar.dlx)</text>' +
        '</g>',
-       'Diagrama de arquitectura distribuida de ms-playlist con Gateway, RabbitMQ y Redis'
+       'Diagrama de arquitectura distribuida oficial de ms-playlist en Azure'
      ) +
-     cd('Integración Asíncrona', 'Consumo reactivo: desvincula prendas borradas en catálogo sin acoplamiento. Publicación: notifica a analítica y frontend para invalidación de cachés locales.')
+     cd('Topología en Azure sin Redis', 'Persistencia ACID exclusiva en PostgreSQL 16. Consumo asíncrono sobre styleradar.playlist.prenda-retirada.q y emisión a styleradar.exchange mediante TLS (:5671) con certificado CA validado en Docker.')
 },
 {
   c: 'arena',
@@ -374,28 +387,28 @@ var D = [
   tab: 'Calidad',
   h: K('09 · Calidad') + H('Listo para', 'entregar') +
      '<div>' +
-     chk('Contrato OpenAPI 3.0 documentado') +
-     chk('Invariante de 15 prendas (RNF-12) probada') +
-     chk('Tope de 3 destacadas (SR-RF-72) probado') +
-     chk('Consumidor RabbitMQ prenda-eliminada verificado') +
-     chk('Caché L2 Redis con invalidación inmediata') +
-     chk('Pruebas unitarias con JUnit 5 y Mockito') +
+     chk('15 Endpoints OpenAPI documentados con contratos UUID') +
+     chk('Invariante de 15 prendas (RNF-12) y 3 destacadas (SR-RF-72)') +
+     chk('Cabecera X-User-Id obligatoria con respuesta 401 si falta') +
+     chk('Consumidor AMQP con DLX Direct (styleradar.dlx) y sin __TypeId__') +
+     chk('Migración Flyway V1 intacta y V2 incremental con columna disponible') +
+     chk('Prueba de integración SpringBootTest con Testcontainers 1.21.4') +
      '</div>' +
-     '<div class="card"><p class="lab">Cobertura JaCoCo</p><div class="bar"><i style="width:85%"></i></div><p class="sm">85 % de líneas requeridas (Fallo de compilación si es menor)</p></div>'
+     '<div class="card"><p class="lab">Cobertura JaCoCo</p><div class="bar"><i style="width:86%"></i></div><p class="sm">86 % de líneas cubiertas (Umbral mínimo exigido: 85 %)</p></div>'
 },
 {
   c: 'graf',
   t: 'Enlaces',
   tag: '10',
   tab: 'Enlaces',
-  h: K('10 · Enlaces') + H('Todo', 'en un lugar') +
+  h: K('10 · Enlaces') + H('Despliegue', 'en QA') +
      '<div class="col" style="gap:8px">' +
      [
-       ['Código del microservicio', 'github.com/StyleRadar1/ms-playlist'],
-       ['Swagger UI local (:8260)', 'http://localhost:8260/swagger-ui.html'],
-       ['Tablero Scrum en Jira', 'styleradar.atlassian.net/browse/RES-82'],
-       ['Reporte de JaCoCo', 'target/site/jacoco/index.html'],
-       ['Exchange RabbitMQ', 'styleradar.events (Topic Durable)']
+       ['Código fuente en GitHub', 'github.com/StyleRadar1/RST-Playlist-Service'],
+       ['Swagger UI en QA (Azure)', 'styleradar-ms-playlist-qa.northcentralus.azurecontainerapps.io/swagger-ui.html'],
+       ['Health Check en QA (:8260)', 'styleradar-ms-playlist-qa.northcentralus.azurecontainerapps.io/api/v1/health'],
+       ['Tablero Scrum en Jira', 'mail-team-nyjtgqcj.atlassian.net/browse/RES-118'],
+       ['Broker RabbitMQ QA (TLS)', 'styleradar-rabbitmq-qa.northcentralus.cloudapp.azure.com:5671']
      ].map(function(l) {
        return '<div class="card dk" style="flex-direction:row;justify-content:space-between;align-items:center"><span><b>' + l[0] + '</b></span><span style="font:400 12px var(--fm);color:#B9B9CA">' + l[1] + '</span></div>';
      }).join('') +

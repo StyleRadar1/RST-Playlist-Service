@@ -3,12 +3,16 @@ package edu.dosw.styleradar.playlist.application.usecase;
 import edu.dosw.styleradar.playlist.application.dto.AgregarPrendaRequest;
 import edu.dosw.styleradar.playlist.application.dto.PlaylistResponse;
 import edu.dosw.styleradar.playlist.application.dto.mapper.PlaylistDtoMapper;
+import edu.dosw.styleradar.playlist.domain.exception.PrendaNoAprobadaException;
+import edu.dosw.styleradar.playlist.domain.exception.PrendaNoEncontradaEnCatalogoException;
 import edu.dosw.styleradar.playlist.domain.exception.ResourceNotFoundException;
 import edu.dosw.styleradar.playlist.domain.model.Playlist;
 import edu.dosw.styleradar.playlist.domain.model.PrendaSnapshot;
 import edu.dosw.styleradar.playlist.domain.port.in.AsociarPrendaUseCase;
+import edu.dosw.styleradar.playlist.domain.port.out.ItemCatalogoPort;
 import edu.dosw.styleradar.playlist.domain.port.out.PlaylistEventPublisherPort;
 import edu.dosw.styleradar.playlist.domain.port.out.PlaylistRepositoryPort;
+import edu.dosw.styleradar.playlist.domain.port.out.PrendaCatalogoInfo;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,19 +27,33 @@ public class AsociarPrendaUseCaseImpl implements AsociarPrendaUseCase {
     private final PlaylistRepositoryPort repository;
     private final PlaylistEventPublisherPort eventPublisher;
     private final PlaylistDtoMapper mapper;
+    private final ItemCatalogoPort itemCatalogoPort;
 
-    public AsociarPrendaUseCaseImpl(PlaylistRepositoryPort repository, PlaylistEventPublisherPort eventPublisher, PlaylistDtoMapper mapper) {
+    public AsociarPrendaUseCaseImpl(PlaylistRepositoryPort repository,
+                                    PlaylistEventPublisherPort eventPublisher,
+                                    PlaylistDtoMapper mapper,
+                                    ItemCatalogoPort itemCatalogoPort) {
         this.repository = repository;
         this.eventPublisher = eventPublisher;
         this.mapper = mapper;
+        this.itemCatalogoPort = itemCatalogoPort;
     }
 
     @Override
-    public PlaylistResponse agregarPrenda(UUID usuarioId, UUID playlistId, AgregarPrendaRequest request) {
+    public PlaylistResponse agregarPrenda(String usuarioId, UUID playlistId, AgregarPrendaRequest request) {
         Playlist playlist = repository.findById(playlistId)
                 .orElseThrow(() -> new ResourceNotFoundException("No existe playlist con ID: " + playlistId));
         playlist.validarPropietario(usuarioId);
-        PrendaSnapshot snapshot = new PrendaSnapshot(request.prendaId(), request.nombrePrenda(), Instant.now(), true);
+
+        PrendaCatalogoInfo prenda = itemCatalogoPort.obtenerPrendaPorId(request.prendaId())
+                .orElseThrow(() -> new PrendaNoEncontradaEnCatalogoException(
+                        "La prenda " + request.prendaId() + " no existe en ms-item-catalogo"));
+        if (!prenda.aprobada()) {
+            throw new PrendaNoAprobadaException(
+                    "La prenda " + request.prendaId() + " no se encuentra en estado APROBADA");
+        }
+
+        PrendaSnapshot snapshot = new PrendaSnapshot(request.prendaId(), prenda.nombre(), Instant.now(), true);
         playlist.agregarPrenda(snapshot);
         Playlist guardada = repository.save(playlist);
         eventPublisher.publicarPrendaAsociada(guardada.getId(), request.prendaId());
@@ -43,7 +61,7 @@ public class AsociarPrendaUseCaseImpl implements AsociarPrendaUseCase {
     }
 
     @Override
-    public PlaylistResponse retirarPrenda(UUID usuarioId, UUID playlistId, UUID prendaId) {
+    public PlaylistResponse retirarPrenda(String usuarioId, UUID playlistId, UUID prendaId) {
         Playlist playlist = repository.findById(playlistId)
                 .orElseThrow(() -> new ResourceNotFoundException("No existe playlist con ID: " + playlistId));
         playlist.retirarPrenda(prendaId, usuarioId);
