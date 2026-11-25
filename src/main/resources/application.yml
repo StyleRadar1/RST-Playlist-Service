@@ -59,6 +59,7 @@ styleradar:
       prenda-retirada: styleradar.catalogo.prenda.retirada
       playlist-destacada: styleradar.playlist.destacada.actualizada
       prenda-asociada: styleradar.playlist.prenda.asociada
+      playlist-creada: styleradar.playlist.creada
 
 springdoc:
   api-docs:

@@ -74,6 +74,7 @@ class UseCasesTest {
         assertThat(resCrear.usuarioId()).isEqualTo("15");
         assertThat(resCrear.totalPrendas()).isEqualTo(1);
         assertThat(resCrear.prendas().getFirst().nombrePrenda()).isEqualTo("Chaqueta Denim");
+        verify(eventPublisher).publicarPlaylistCreada(resCrear.id());
         verify(eventPublisher).publicarPrendaAsociada(resCrear.id(), prendaId);
 
         PlaylistResponse resEditar = crearUseCase.editar(usuarioId, p.getId(),
@@ -105,6 +106,7 @@ class UseCasesTest {
                 .isInstanceOf(PrendaNoAprobadaException.class);
 
         verify(repository, never()).save(any());
+        verifyNoInteractions(eventPublisher);
     }
 
     @Test

@@ -1,9 +1,6 @@
 package edu.dosw.styleradar.playlist.infrastructure.adapter.out.messaging;
 
 import edu.dosw.styleradar.playlist.domain.port.out.PlaylistEventPublisherPort;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
 
@@ -15,15 +12,28 @@ import java.util.UUID;
 public class RabbitMQEventPublisher implements PlaylistEventPublisherPort {
 
     public static final String EXCHANGE = "styleradar.exchange";
+    public static final String ROUTING_KEY_PLAYLIST_CREADA = "styleradar.playlist.creada";
     public static final String ROUTING_KEY_PLAYLIST_DESTACADA = "styleradar.playlist.destacada.actualizada";
     public static final String ROUTING_KEY_PRENDA_ASOCIADA = "styleradar.playlist.prenda.asociada";
-
-    private static final Logger log = LoggerFactory.getLogger(RabbitMQEventPublisher.class);
 
     private final RabbitTemplate rabbitTemplate;
 
     public RabbitMQEventPublisher(RabbitTemplate rabbitTemplate) {
         this.rabbitTemplate = rabbitTemplate;
+    }
+
+    @Override
+    public void publicarPlaylistCreada(UUID playlistId) {
+        String now = Instant.now().toString();
+        Map<String, Object> payload = Map.of(
+                "eventId", UUID.randomUUID().toString(),
+                "eventType", ROUTING_KEY_PLAYLIST_CREADA,
+                "occurredAt", now,
+                "timestamp", now,
+                "producer", "ms-playlist",
+                "data", Map.of("playlistId", playlistId.toString())
+        );
+        rabbitTemplate.convertAndSend(EXCHANGE, ROUTING_KEY_PLAYLIST_CREADA, payload);
     }
 
     @Override
@@ -35,7 +45,7 @@ public class RabbitMQEventPublisher implements PlaylistEventPublisherPort {
                 "producer", "ms-playlist",
                 "data", Map.of("playlistId", playlistId.toString(), "destacada", destacada)
         );
-        enviar(ROUTING_KEY_PLAYLIST_DESTACADA, payload);
+        rabbitTemplate.convertAndSend(EXCHANGE, ROUTING_KEY_PLAYLIST_DESTACADA, payload);
     }
 
     @Override
@@ -47,14 +57,6 @@ public class RabbitMQEventPublisher implements PlaylistEventPublisherPort {
                 "producer", "ms-playlist",
                 "data", Map.of("playlistId", playlistId.toString(), "prendaId", prendaId.toString())
         );
-        enviar(ROUTING_KEY_PRENDA_ASOCIADA, payload);
-    }
-
-    private void enviar(String routingKey, Map<String, Object> payload) {
-        try {
-            rabbitTemplate.convertAndSend(EXCHANGE, routingKey, payload);
-        } catch (AmqpException e) {
-            log.warn("No se pudo publicar {}: {}", routingKey, e.getMessage());
-        }
+        rabbitTemplate.convertAndSend(EXCHANGE, ROUTING_KEY_PRENDA_ASOCIADA, payload);
     }
 }

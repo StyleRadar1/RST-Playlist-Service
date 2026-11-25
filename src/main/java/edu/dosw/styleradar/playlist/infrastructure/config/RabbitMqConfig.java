@@ -19,6 +19,11 @@ public class RabbitMqConfig {
     public static final String ROUTING_KEY_PRENDA_RETIRADA = "styleradar.catalogo.prenda.retirada";
 
     @Bean
+    public TopicExchange mainExchange() {
+        return ExchangeBuilder.topicExchange(MAIN_EXCHANGE).durable(true).build();
+    }
+
+    @Bean
     public Queue prendaRetiradaQueue() {
         return QueueBuilder.durable(QUEUE_PRENDA_RETIRADA)
                 .withArgument("x-dead-letter-exchange", DLX_EXCHANGE)
