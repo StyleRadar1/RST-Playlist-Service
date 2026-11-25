@@ -1,6 +1,9 @@
 package edu.dosw.styleradar.playlist.infrastructure.adapter.out.messaging;
 
 import edu.dosw.styleradar.playlist.domain.port.out.PlaylistEventPublisherPort;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
 
@@ -10,6 +13,8 @@ import java.util.UUID;
 
 @Component
 public class RabbitMQEventPublisher implements PlaylistEventPublisherPort {
+
+    private static final Logger log = LoggerFactory.getLogger(RabbitMQEventPublisher.class);
 
     public static final String EXCHANGE = "styleradar.exchange";
     public static final String ROUTING_KEY_PLAYLIST_CREADA = "styleradar.playlist.creada";
@@ -33,7 +38,7 @@ public class RabbitMQEventPublisher implements PlaylistEventPublisherPort {
                 "producer", "ms-playlist",
                 "data", Map.of("playlistId", playlistId.toString())
         );
-        rabbitTemplate.convertAndSend(EXCHANGE, ROUTING_KEY_PLAYLIST_CREADA, payload);
+        enviar(ROUTING_KEY_PLAYLIST_CREADA, payload);
     }
 
     @Override
@@ -45,7 +50,7 @@ public class RabbitMQEventPublisher implements PlaylistEventPublisherPort {
                 "producer", "ms-playlist",
                 "data", Map.of("playlistId", playlistId.toString(), "destacada", destacada)
         );
-        rabbitTemplate.convertAndSend(EXCHANGE, ROUTING_KEY_PLAYLIST_DESTACADA, payload);
+        enviar(ROUTING_KEY_PLAYLIST_DESTACADA, payload);
     }
 
     @Override
@@ -57,6 +62,15 @@ public class RabbitMQEventPublisher implements PlaylistEventPublisherPort {
                 "producer", "ms-playlist",
                 "data", Map.of("playlistId", playlistId.toString(), "prendaId", prendaId.toString())
         );
-        rabbitTemplate.convertAndSend(EXCHANGE, ROUTING_KEY_PRENDA_ASOCIADA, payload);
+        enviar(ROUTING_KEY_PRENDA_ASOCIADA, payload);
+    }
+
+    private void enviar(String routingKey, Map<String, Object> payload) {
+        try {
+            rabbitTemplate.convertAndSend(EXCHANGE, routingKey, payload);
+        } catch (AmqpException ex) {
+            log.warn("No se pudo publicar evento RabbitMQ en exchange={} routingKey={}: {}",
+                    EXCHANGE, routingKey, ex.getMessage());
+        }
     }
 }
