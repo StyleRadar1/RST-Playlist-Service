@@ -14,16 +14,31 @@ import java.util.UUID;
 @Component
 public class RabbitMQEventPublisher implements PlaylistEventPublisherPort {
 
+    private static final Logger log = LoggerFactory.getLogger(RabbitMQEventPublisher.class);
+
     public static final String EXCHANGE = "styleradar.exchange";
+    public static final String ROUTING_KEY_PLAYLIST_CREADA = "styleradar.playlist.creada";
     public static final String ROUTING_KEY_PLAYLIST_DESTACADA = "styleradar.playlist.destacada.actualizada";
     public static final String ROUTING_KEY_PRENDA_ASOCIADA = "styleradar.playlist.prenda.asociada";
-
-    private static final Logger log = LoggerFactory.getLogger(RabbitMQEventPublisher.class);
 
     private final RabbitTemplate rabbitTemplate;
 
     public RabbitMQEventPublisher(RabbitTemplate rabbitTemplate) {
         this.rabbitTemplate = rabbitTemplate;
+    }
+
+    @Override
+    public void publicarPlaylistCreada(UUID playlistId) {
+        String now = Instant.now().toString();
+        Map<String, Object> payload = Map.of(
+                "eventId", UUID.randomUUID().toString(),
+                "eventType", ROUTING_KEY_PLAYLIST_CREADA,
+                "occurredAt", now,
+                "timestamp", now,
+                "producer", "ms-playlist",
+                "data", Map.of("playlistId", playlistId.toString())
+        );
+        enviar(ROUTING_KEY_PLAYLIST_CREADA, payload);
     }
 
     @Override
@@ -53,8 +68,9 @@ public class RabbitMQEventPublisher implements PlaylistEventPublisherPort {
     private void enviar(String routingKey, Map<String, Object> payload) {
         try {
             rabbitTemplate.convertAndSend(EXCHANGE, routingKey, payload);
-        } catch (AmqpException e) {
-            log.warn("No se pudo publicar {}: {}", routingKey, e.getMessage());
+        } catch (AmqpException ex) {
+            log.warn("No se pudo publicar evento RabbitMQ en exchange={} routingKey={}: {}",
+                    EXCHANGE, routingKey, ex.getMessage());
         }
     }
 }
