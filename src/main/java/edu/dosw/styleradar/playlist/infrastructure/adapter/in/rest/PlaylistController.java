@@ -135,7 +135,7 @@ public class PlaylistController implements PlaylistApi {
     }
 
     @Override
-    @PostMapping("/{id}/like")
+    @PostMapping("/{id}/likes")
     public ResponseEntity<PlaylistResponse> alternarLike(
             @RequestHeader("X-User-Id") String usuarioId,
             @PathVariable UUID id) {
@@ -143,7 +143,7 @@ public class PlaylistController implements PlaylistApi {
     }
 
     @Override
-    @PostMapping("/{id}/save")
+    @PostMapping("/{id}/saves")
     public ResponseEntity<PlaylistResponse> alternarGuardado(
             @RequestHeader("X-User-Id") String usuarioId,
             @PathVariable UUID id) {
@@ -160,17 +160,23 @@ public class PlaylistController implements PlaylistApi {
     }
 
     @Override
-    @GetMapping("/me")
+    @GetMapping("/users/{userId}")
     public ResponseEntity<List<PlaylistResponse>> misPlaylists(
-            @RequestHeader("X-User-Id") String usuarioId) {
-        return ResponseEntity.ok(consultarPlaylistUseCase.obtenerPorUsuario(validarUsuarioId(usuarioId)));
+            @RequestHeader("X-User-Id") String usuarioId,
+            @PathVariable("userId") String userId) {
+        String autenticado = validarUsuarioId(usuarioId);
+        validarMismoUsuario(autenticado, userId);
+        return ResponseEntity.ok(consultarPlaylistUseCase.obtenerPorUsuario(autenticado));
     }
 
     @Override
-    @GetMapping("/me/saved")
+    @GetMapping("/users/{userId}/saved")
     public ResponseEntity<List<PlaylistResponse>> misGuardadas(
-            @RequestHeader("X-User-Id") String usuarioId) {
-        return ResponseEntity.ok(consultarPlaylistUseCase.obtenerGuardadas(validarUsuarioId(usuarioId)));
+            @RequestHeader("X-User-Id") String usuarioId,
+            @PathVariable("userId") String userId) {
+        String autenticado = validarUsuarioId(usuarioId);
+        validarMismoUsuario(autenticado, userId);
+        return ResponseEntity.ok(consultarPlaylistUseCase.obtenerGuardadas(autenticado));
     }
 
     private String validarUsuarioId(String usuarioId) {
@@ -178,6 +184,13 @@ public class PlaylistController implements PlaylistApi {
             throw new NoAutorizadoException("La cabecera X-User-Id es obligatoria y no puede estar vacía");
         }
         return usuarioId.trim();
+    }
+
+    private void validarMismoUsuario(String autenticado, String userId) {
+        if (userId == null || userId.isBlank() || !autenticado.equals(userId.trim())) {
+            throw new AccesoDenegadoPlaylistException(
+                    "No tienes permisos para consultar las playlists de otro usuario");
+        }
     }
 
     private void validarRolAdmin(String userRole, String userRoles) {

@@ -150,9 +150,27 @@ public interface PlaylistApi {
     @Operation(summary = "Eliminar playlist")
     ResponseEntity<Void> eliminar(String usuarioId, UUID id);
 
-    @Operation(summary = "Consultar playlists creadas por el usuario")
-    ResponseEntity<List<PlaylistResponse>> misPlaylists(String usuarioId);
+    @Operation(summary = "Consultar playlists creadas por un usuario")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Playlists del usuario"),
+            @ApiResponse(responseCode = "401", description = "Usuario no autenticado (USUARIO_NO_AUTENTICADO)",
+                    content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "403", description = "Acceso denegado (ACCESO_DENEGADO)",
+                    content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    ResponseEntity<List<PlaylistResponse>> misPlaylists(
+            @Parameter(description = "ID de usuario propagado por el Gateway", example = "15") String usuarioId,
+            @Parameter(description = "ID del usuario propietario", example = "15") String userId);
 
-    @Operation(summary = "Consultar playlists guardadas por el usuario")
-    ResponseEntity<List<PlaylistResponse>> misGuardadas(String usuarioId);
+    @Operation(summary = "Consultar playlists guardadas por un usuario")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Playlists guardadas del usuario"),
+            @ApiResponse(responseCode = "401", description = "Usuario no autenticado (USUARIO_NO_AUTENTICADO)",
+                    content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "403", description = "Acceso denegado (ACCESO_DENEGADO)",
+                    content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    ResponseEntity<List<PlaylistResponse>> misGuardadas(
+            @Parameter(description = "ID de usuario propagado por el Gateway", example = "15") String usuarioId,
+            @Parameter(description = "ID del usuario propietario", example = "15") String userId);
 }

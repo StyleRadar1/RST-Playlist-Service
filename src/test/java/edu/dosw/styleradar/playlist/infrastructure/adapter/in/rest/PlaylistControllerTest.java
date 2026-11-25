@@ -66,12 +66,12 @@ class PlaylistControllerTest {
 
     @Test
     void peticionProtegidaSinHeaderOBlankRetorna401ConCodigo() throws Exception {
-        mockMvc.perform(get("/playlists/me"))
+        mockMvc.perform(get("/playlists/users/{userId}", usuarioId))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value("USUARIO_NO_AUTENTICADO"))
                 .andExpect(jsonPath("$.timestamp").isNotEmpty());
 
-        mockMvc.perform(get("/playlists/me").header("X-User-Id", "   "))
+        mockMvc.perform(get("/playlists/users/{userId}", usuarioId).header("X-User-Id", "   "))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value("USUARIO_NO_AUTENTICADO"));
 
@@ -236,7 +236,11 @@ class PlaylistControllerTest {
         assertThat(controller.alternarLike(usuarioId, playlistId).getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(controller.alternarGuardado(usuarioId, playlistId).getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        mockMvc.perform(post("/playlists/{id}/save", playlistId)
+        mockMvc.perform(post("/playlists/{id}/likes", playlistId)
+                        .header("X-User-Id", usuarioId))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(post("/playlists/{id}/saves", playlistId)
                         .header("X-User-Id", usuarioId))
                 .andExpect(status().isOk());
     }
@@ -253,12 +257,26 @@ class PlaylistControllerTest {
         when(consultarPlaylistUseCase.obtenerPorUsuario(usuarioId)).thenReturn(List.of(sampleResponse));
         when(consultarPlaylistUseCase.obtenerGuardadas(usuarioId)).thenReturn(List.of(sampleResponse));
 
-        assertThat(controller.misPlaylists(usuarioId).getBody()).hasSize(1);
-        assertThat(controller.misGuardadas(usuarioId).getBody()).hasSize(1);
+        assertThat(controller.misPlaylists(usuarioId, usuarioId).getBody()).hasSize(1);
+        assertThat(controller.misGuardadas(usuarioId, usuarioId).getBody()).hasSize(1);
 
-        mockMvc.perform(get("/playlists/me/saved")
+        mockMvc.perform(get("/playlists/users/{userId}", usuarioId)
                         .header("X-User-Id", usuarioId))
                 .andExpect(status().isOk());
+
+        mockMvc.perform(get("/playlists/users/{userId}/saved", usuarioId)
+                        .header("X-User-Id", usuarioId))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/playlists/users/{userId}", "99")
+                        .header("X-User-Id", usuarioId))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("ACCESO_DENEGADO"));
+
+        mockMvc.perform(get("/playlists/users/{userId}/saved", "99")
+                        .header("X-User-Id", usuarioId))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("ACCESO_DENEGADO"));
     }
 
     @Test
