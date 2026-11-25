@@ -70,13 +70,13 @@ public class PlaylistController implements PlaylistApi {
     }
 
     @Override
-    @GetMapping("/featured")
+    @GetMapping({"/featured", "/destacadas"})
     public ResponseEntity<List<PlaylistResponse>> obtenerDestacadas() {
         return ResponseEntity.ok(consultarPlaylistUseCase.obtenerDestacadas());
     }
 
     @Override
-    @GetMapping("/popular")
+    @GetMapping({"/popular", "/populares"})
     public ResponseEntity<PageResponse<PlaylistResponse>> obtenerPopulares(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
@@ -93,7 +93,7 @@ public class PlaylistController implements PlaylistApi {
     }
 
     @Override
-    @PutMapping("/{id}/featured")
+    @PutMapping({"/{id}/featured", "/{id}/destacar"})
     public ResponseEntity<PlaylistResponse> destacar(
             @RequestHeader("X-User-Id") String usuarioId,
             @RequestHeader(value = "X-User-Role", required = false) String userRole,
@@ -105,7 +105,7 @@ public class PlaylistController implements PlaylistApi {
     }
 
     @Override
-    @DeleteMapping("/{id}/featured")
+    @DeleteMapping({"/{id}/featured", "/{id}/destacar"})
     public ResponseEntity<PlaylistResponse> quitarDestacado(
             @RequestHeader("X-User-Id") String usuarioId,
             @RequestHeader(value = "X-User-Role", required = false) String userRole,
@@ -117,7 +117,7 @@ public class PlaylistController implements PlaylistApi {
     }
 
     @Override
-    @PostMapping("/{id}/items")
+    @PostMapping({"/{id}/garments", "/{id}/prendas"})
     public ResponseEntity<PlaylistResponse> agregarPrenda(
             @RequestHeader("X-User-Id") String usuarioId,
             @PathVariable UUID id,
@@ -126,16 +126,16 @@ public class PlaylistController implements PlaylistApi {
     }
 
     @Override
-    @DeleteMapping("/{id}/items/{itemId}")
+    @DeleteMapping({"/{id}/garments/{garmentId}", "/{id}/prendas/{garmentId}"})
     public ResponseEntity<PlaylistResponse> retirarPrenda(
             @RequestHeader("X-User-Id") String usuarioId,
             @PathVariable UUID id,
-            @PathVariable("itemId") UUID prendaId) {
+            @PathVariable("garmentId") UUID prendaId) {
         return ResponseEntity.ok(asociarPrendaUseCase.retirarPrenda(validarUsuarioId(usuarioId), id, prendaId));
     }
 
     @Override
-    @PostMapping("/{id}/likes")
+    @PostMapping({"/{id}/likes", "/{id}/like"})
     public ResponseEntity<PlaylistResponse> alternarLike(
             @RequestHeader("X-User-Id") String usuarioId,
             @PathVariable UUID id) {
@@ -143,7 +143,7 @@ public class PlaylistController implements PlaylistApi {
     }
 
     @Override
-    @PostMapping("/{id}/saves")
+    @PostMapping({"/{id}/saves", "/{id}/guardar"})
     public ResponseEntity<PlaylistResponse> alternarGuardado(
             @RequestHeader("X-User-Id") String usuarioId,
             @PathVariable UUID id) {

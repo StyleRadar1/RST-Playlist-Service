@@ -112,7 +112,7 @@ class PlaylistControllerTest {
         when(asociarPrendaUseCase.agregarPrenda(eq("15"), eq(playlistId), any()))
                 .thenThrow(new PrendaNoEncontradaEnCatalogoException("Prenda no existe"));
 
-        mockMvc.perform(post("/playlists/{id}/items", playlistId)
+        mockMvc.perform(post("/playlists/{id}/garments", playlistId)
                         .header("X-User-Id", "15")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"prendaId\":\"" + prendaId + "\"}"))
@@ -120,10 +120,16 @@ class PlaylistControllerTest {
                 .andExpect(jsonPath("$.code").value("PRENDA_NO_ENCONTRADA"))
                 .andExpect(jsonPath("$.timestamp").isNotEmpty());
 
+        mockMvc.perform(post("/playlists/{id}/prendas", playlistId)
+                        .header("X-User-Id", "15")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"prendaId\":\"" + prendaId + "\"}"))
+                .andExpect(status().isNotFound());
+
         when(asociarPrendaUseCase.agregarPrenda(eq("15"), eq(playlistId), any()))
                 .thenThrow(new CatalogoNoDisponibleException("Catálogo caído"));
 
-        mockMvc.perform(post("/playlists/{id}/items", playlistId)
+        mockMvc.perform(post("/playlists/{id}/garments", playlistId)
                         .header("X-User-Id", "15")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"prendaId\":\"" + prendaId + "\"}"))
@@ -158,8 +164,8 @@ class PlaylistControllerTest {
         assertThat(controller.obtenerPublicas().getBody()).hasSize(1);
         assertThat(controller.obtenerPopulares(0, 20).getBody().content()).hasSize(1);
 
-        mockMvc.perform(get("/playlists/popular"))
-                .andExpect(status().isOk());
+        mockMvc.perform(get("/playlists/popular")).andExpect(status().isOk());
+        mockMvc.perform(get("/playlists/populares")).andExpect(status().isOk());
     }
 
     @Test
@@ -167,8 +173,8 @@ class PlaylistControllerTest {
         when(consultarPlaylistUseCase.obtenerDestacadas()).thenReturn(List.of(sampleResponse));
         assertThat(controller.obtenerDestacadas().getBody()).hasSize(1);
 
-        mockMvc.perform(get("/playlists/featured"))
-                .andExpect(status().isOk());
+        mockMvc.perform(get("/playlists/featured")).andExpect(status().isOk());
+        mockMvc.perform(get("/playlists/destacadas")).andExpect(status().isOk());
     }
 
     @Test
@@ -197,10 +203,20 @@ class PlaylistControllerTest {
                         .header("X-User-Role", "STYLERADAR_ADMIN"))
                 .andExpect(status().isOk());
 
+        mockMvc.perform(put("/playlists/{id}/destacar", playlistId)
+                        .header("X-User-Id", usuarioId)
+                        .header("X-User-Role", "STYLERADAR_ADMIN"))
+                .andExpect(status().isOk());
+
         mockMvc.perform(delete("/playlists/{id}/featured", playlistId)
                         .header("X-User-Id", usuarioId)
                         .header("X-User-Role", "   ")
                         .header("X-User-Roles", "[\"ROLE_STYLERADAR_ADMIN\"]"))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(delete("/playlists/{id}/destacar", playlistId)
+                        .header("X-User-Id", usuarioId)
+                        .header("X-User-Role", "ADMIN_STYLERADAR"))
                 .andExpect(status().isOk());
 
         mockMvc.perform(put("/playlists/{id}/featured", playlistId)
@@ -223,7 +239,11 @@ class PlaylistControllerTest {
         assertThat(controller.agregarPrenda(usuarioId, playlistId, new AgregarPrendaRequest(prendaId, "Gorra")).getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(controller.retirarPrenda(usuarioId, playlistId, prendaId).getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        mockMvc.perform(delete("/playlists/{id}/items/{itemId}", playlistId, prendaId)
+        mockMvc.perform(delete("/playlists/{id}/garments/{garmentId}", playlistId, prendaId)
+                        .header("X-User-Id", usuarioId))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(delete("/playlists/{id}/prendas/{garmentId}", playlistId, prendaId)
                         .header("X-User-Id", usuarioId))
                 .andExpect(status().isOk());
     }
@@ -236,12 +256,14 @@ class PlaylistControllerTest {
         assertThat(controller.alternarLike(usuarioId, playlistId).getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(controller.alternarGuardado(usuarioId, playlistId).getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        mockMvc.perform(post("/playlists/{id}/likes", playlistId)
-                        .header("X-User-Id", usuarioId))
+        mockMvc.perform(post("/playlists/{id}/likes", playlistId).header("X-User-Id", usuarioId))
+                .andExpect(status().isOk());
+        mockMvc.perform(post("/playlists/{id}/like", playlistId).header("X-User-Id", usuarioId))
                 .andExpect(status().isOk());
 
-        mockMvc.perform(post("/playlists/{id}/saves", playlistId)
-                        .header("X-User-Id", usuarioId))
+        mockMvc.perform(post("/playlists/{id}/saves", playlistId).header("X-User-Id", usuarioId))
+                .andExpect(status().isOk());
+        mockMvc.perform(post("/playlists/{id}/guardar", playlistId).header("X-User-Id", usuarioId))
                 .andExpect(status().isOk());
     }
 
