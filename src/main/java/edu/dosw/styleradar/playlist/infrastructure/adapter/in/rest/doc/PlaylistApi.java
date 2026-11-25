@@ -15,144 +15,177 @@ import org.springframework.http.ResponseEntity;
 import java.util.List;
 import java.util.UUID;
 
-@Tag(name = "Playlists", description = "Playlists y colecciones temáticas de prendas de vestir")
+@Tag(name = "Playlists", description = "Fashion playlists and curated garment collections")
 public interface PlaylistApi {
 
-    @Operation(summary = "Crear nueva playlist de moda (requiere al menos una prenda aprobada · SR-RF-69)")
+    @Operation(summary = "Create a new fashion playlist (requires at least one approved garment · SR-RF-69)")
     @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Playlist creada exitosamente"),
-            @ApiResponse(responseCode = "400", description = "Datos inválidos, sin prendas o descripción muy larga (DATOS_INVALIDOS / PLAYLIST_SIN_PRENDAS / DESCRIPCION_MUY_LARGA)",
+            @ApiResponse(responseCode = "201", description = "Playlist created successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid data, no garments, or description too long (DATOS_INVALIDOS / PLAYLIST_SIN_PRENDAS / DESCRIPCION_MUY_LARGA)",
                     content = @Content(mediaType = "application/problem+json",
                             schema = @Schema(implementation = ProblemDetail.class),
-                            examples = @ExampleObject(value = "{\"type\":\"about:blank\",\"title\":\"Solicitud inválida\",\"status\":400,\"detail\":\"La playlist debe crearse con al menos una prenda (SR-RF-69)\",\"instance\":\"/api/v1/playlists\",\"code\":\"PLAYLIST_SIN_PRENDAS\",\"timestamp\":\"2026-11-20T22:58:00Z\"}"))),
-            @ApiResponse(responseCode = "401", description = "Usuario no autenticado (USUARIO_NO_AUTENTICADO)",
+                            examples = @ExampleObject(value = "{\"type\":\"about:blank\",\"title\":\"Invalid request\",\"status\":400,\"detail\":\"The playlist must be created with at least one garment (SR-RF-69)\",\"instance\":\"/api/v1/playlists\",\"code\":\"PLAYLIST_SIN_PRENDAS\",\"timestamp\":\"2026-11-20T22:58:00Z\"}"))),
+            @ApiResponse(responseCode = "401", description = "Unauthenticated user (USUARIO_NO_AUTENTICADO)",
                     content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "404", description = "Prenda no existe en ms-item-catalogo (PRENDA_NO_ENCONTRADA)",
+            @ApiResponse(responseCode = "404", description = "Garment not found in ms-item-catalogo (PRENDA_NO_ENCONTRADA)",
                     content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "422", description = "Prenda no aprobada, duplicada o límite superado (PRENDA_NO_APROBADA / PRENDA_YA_EN_PLAYLIST / LIMITE_PRENDAS_PLAYLIST)",
+            @ApiResponse(responseCode = "422", description = "Garment not approved, duplicated, or limit exceeded (PRENDA_NO_APROBADA / PRENDA_YA_EN_PLAYLIST / LIMITE_PRENDAS_PLAYLIST)",
                     content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "503", description = "Servicio ms-item-catalogo no disponible (CATALOGO_NO_DISPONIBLE)",
+            @ApiResponse(responseCode = "503", description = "ms-item-catalogo service unavailable (CATALOGO_NO_DISPONIBLE)",
                     content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))
     })
     ResponseEntity<PlaylistResponse> crear(
-            @Parameter(description = "ID de usuario propagado por el Gateway", example = "15") String usuarioId,
+            @Parameter(description = "User ID forwarded by the API Gateway", example = "15") String usuarioId,
             CrearPlaylistRequest request);
 
-    @Operation(summary = "Consultar playlist por ID")
+    @Operation(summary = "Get playlist by ID")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Playlist encontrada"),
-            @ApiResponse(responseCode = "400", description = "UUID inválido (PARAMETRO_INVALIDO)",
+            @ApiResponse(responseCode = "200", description = "Playlist found"),
+            @ApiResponse(responseCode = "400", description = "Invalid UUID format (PARAMETRO_INVALIDO)",
                     content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "403", description = "Playlist privada de otro usuario (PLAYLIST_PRIVADA)",
+            @ApiResponse(responseCode = "403", description = "Private playlist owned by another user (PLAYLIST_PRIVADA)",
                     content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "404", description = "Playlist no encontrada (PLAYLIST_NO_ENCONTRADA)",
+            @ApiResponse(responseCode = "404", description = "Playlist not found (PLAYLIST_NO_ENCONTRADA)",
                     content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))
     })
     ResponseEntity<PlaylistResponse> obtenerPorId(
             UUID id,
-            @Parameter(description = "ID de usuario opcional", example = "15") String usuarioId);
+            @Parameter(description = "Optional user ID", example = "15") String usuarioId);
 
-    @Operation(summary = "Consultar playlists públicas")
+    @Operation(summary = "List public playlists")
     ResponseEntity<List<PlaylistResponse>> obtenerPublicas();
 
-    @Operation(summary = "Consultar las 3 playlists destacadas de Home (SR-RF-72)")
+    @Operation(summary = "List the 3 featured playlists for Home (SR-RF-72)")
     ResponseEntity<List<PlaylistResponse>> obtenerDestacadas();
 
-    @Operation(summary = "Consultar playlists populares paginadas")
+    @Operation(summary = "List popular playlists with pagination")
     ResponseEntity<PageResponse<PlaylistResponse>> obtenerPopulares(int page, int size);
 
-    @Operation(summary = "Editar playlist propia")
+    @Operation(summary = "Update an owned playlist")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Playlist actualizada"),
-            @ApiResponse(responseCode = "400", description = "Datos inválidos o descripción muy larga (DATOS_INVALIDOS / DESCRIPCION_MUY_LARGA)",
+            @ApiResponse(responseCode = "200", description = "Playlist updated"),
+            @ApiResponse(responseCode = "400", description = "Invalid data or description too long (DATOS_INVALIDOS / DESCRIPCION_MUY_LARGA)",
                     content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "401", description = "Usuario no autenticado (USUARIO_NO_AUTENTICADO)",
+            @ApiResponse(responseCode = "401", description = "Unauthenticated user (USUARIO_NO_AUTENTICADO)",
                     content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "403", description = "Acceso denegado (ACCESO_DENEGADO)",
+            @ApiResponse(responseCode = "403", description = "Access denied (ACCESO_DENEGADO)",
                     content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "404", description = "Playlist no encontrada (PLAYLIST_NO_ENCONTRADA)",
+            @ApiResponse(responseCode = "404", description = "Playlist not found (PLAYLIST_NO_ENCONTRADA)",
                     content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))
     })
-    ResponseEntity<PlaylistResponse> editar(String usuarioId, UUID id, EditarPlaylistRequest request);
+    ResponseEntity<PlaylistResponse> editar(
+            @Parameter(description = "User ID forwarded by the API Gateway", example = "15") String usuarioId,
+            UUID id,
+            EditarPlaylistRequest request);
 
-    @Operation(summary = "Fijar playlist como destacada (solo administrador StyleRadar, máx 3 · SR-RF-72)")
+    @Operation(summary = "Mark playlist as featured (StyleRadar admin only, max 3 · SR-RF-72)")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Playlist destacada"),
-            @ApiResponse(responseCode = "401", description = "Usuario no autenticado (USUARIO_NO_AUTENTICADO)",
+            @ApiResponse(responseCode = "200", description = "Playlist marked as featured"),
+            @ApiResponse(responseCode = "401", description = "Unauthenticated user (USUARIO_NO_AUTENTICADO)",
                     content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "403", description = "Acceso denegado: requiere rol STYLERADAR_ADMIN o ADMIN_STYLERADAR (ACCESO_DENEGADO)",
+            @ApiResponse(responseCode = "403", description = "Access denied: requires STYLERADAR_ADMIN or ADMIN_STYLERADAR role (ACCESO_DENEGADO)",
                     content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "404", description = "Playlist no encontrada (PLAYLIST_NO_ENCONTRADA)",
+            @ApiResponse(responseCode = "404", description = "Playlist not found (PLAYLIST_NO_ENCONTRADA)",
                     content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "409", description = "Límite de 3 destacadas superado (LIMITE_DESTACADAS)",
+            @ApiResponse(responseCode = "409", description = "Maximum of 3 featured playlists reached (LIMITE_DESTACADAS)",
                     content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))
     })
     ResponseEntity<PlaylistResponse> destacar(
-            @Parameter(description = "ID de usuario propagado por el Gateway", example = "15") String usuarioId,
-            @Parameter(description = "Rol principal del usuario", example = "STYLERADAR_ADMIN") String userRole,
-            @Parameter(description = "Lista de roles del usuario", example = "STYLERADAR_ADMIN") String userRoles,
+            @Parameter(description = "User ID forwarded by the API Gateway", example = "15") String usuarioId,
+            @Parameter(description = "Primary user role", example = "STYLERADAR_ADMIN") String userRole,
+            @Parameter(description = "Comma-separated user roles", example = "STYLERADAR_ADMIN") String userRoles,
             UUID id);
 
-    @Operation(summary = "Quitar playlist de destacadas (solo administrador StyleRadar)")
+    @Operation(summary = "Remove playlist from featured (StyleRadar admin only)")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Destacado removido"),
-            @ApiResponse(responseCode = "401", description = "Usuario no autenticado (USUARIO_NO_AUTENTICADO)",
+            @ApiResponse(responseCode = "200", description = "Playlist removed from featured"),
+            @ApiResponse(responseCode = "401", description = "Unauthenticated user (USUARIO_NO_AUTENTICADO)",
                     content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "403", description = "Acceso denegado: requiere rol STYLERADAR_ADMIN o ADMIN_STYLERADAR (ACCESO_DENEGADO)",
+            @ApiResponse(responseCode = "403", description = "Access denied: requires STYLERADAR_ADMIN or ADMIN_STYLERADAR role (ACCESO_DENEGADO)",
                     content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "404", description = "Playlist no encontrada (PLAYLIST_NO_ENCONTRADA)",
+            @ApiResponse(responseCode = "404", description = "Playlist not found (PLAYLIST_NO_ENCONTRADA)",
                     content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))
     })
     ResponseEntity<PlaylistResponse> quitarDestacado(
-            @Parameter(description = "ID de usuario propagado por el Gateway", example = "15") String usuarioId,
-            @Parameter(description = "Rol principal del usuario", example = "STYLERADAR_ADMIN") String userRole,
-            @Parameter(description = "Lista de roles del usuario", example = "STYLERADAR_ADMIN") String userRoles,
+            @Parameter(description = "User ID forwarded by the API Gateway", example = "15") String usuarioId,
+            @Parameter(description = "Primary user role", example = "STYLERADAR_ADMIN") String userRole,
+            @Parameter(description = "Comma-separated user roles", example = "STYLERADAR_ADMIN") String userRoles,
             UUID id);
 
-    @Operation(summary = "Asociar prenda aprobada a la playlist (máx 15 · RNF-12)")
+    @Operation(summary = "Add an approved garment to the playlist (max 15 · RNF-12)")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Prenda asociada"),
-            @ApiResponse(responseCode = "400", description = "Solicitud inválida (DATOS_INVALIDOS / PARAMETRO_INVALIDO)",
+            @ApiResponse(responseCode = "200", description = "Garment added to playlist"),
+            @ApiResponse(responseCode = "400", description = "Invalid request (DATOS_INVALIDOS / PARAMETRO_INVALIDO)",
                     content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "401", description = "Usuario no autenticado (USUARIO_NO_AUTENTICADO)",
+            @ApiResponse(responseCode = "401", description = "Unauthenticated user (USUARIO_NO_AUTENTICADO)",
                     content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "403", description = "Acceso denegado (ACCESO_DENEGADO)",
+            @ApiResponse(responseCode = "403", description = "Access denied (ACCESO_DENEGADO)",
                     content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "404", description = "Playlist o prenda no encontrada en catálogo (PLAYLIST_NO_ENCONTRADA / PRENDA_NO_ENCONTRADA)",
+            @ApiResponse(responseCode = "404", description = "Playlist or garment not found in catalog (PLAYLIST_NO_ENCONTRADA / PRENDA_NO_ENCONTRADA)",
                     content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "422", description = "Prenda no aprobada, repetida o límite alcanzado (PRENDA_NO_APROBADA / PRENDA_YA_EN_PLAYLIST / LIMITE_PRENDAS_PLAYLIST)",
+            @ApiResponse(responseCode = "422", description = "Garment not approved, duplicated, or limit reached (PRENDA_NO_APROBADA / PRENDA_YA_EN_PLAYLIST / LIMITE_PRENDAS_PLAYLIST)",
                     content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "503", description = "Servicio ms-item-catalogo no disponible (CATALOGO_NO_DISPONIBLE)",
+            @ApiResponse(responseCode = "503", description = "ms-item-catalogo service unavailable (CATALOGO_NO_DISPONIBLE)",
                     content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))
     })
-    ResponseEntity<PlaylistResponse> agregarPrenda(String usuarioId, UUID id, AgregarPrendaRequest request);
+    ResponseEntity<PlaylistResponse> agregarPrenda(
+            @Parameter(description = "User ID forwarded by the API Gateway", example = "15") String usuarioId,
+            UUID id,
+            AgregarPrendaRequest request);
 
-    @Operation(summary = "Retirar prenda de la playlist")
+    @Operation(summary = "Remove a garment from the playlist")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Prenda retirada"),
-            @ApiResponse(responseCode = "401", description = "Usuario no autenticado (USUARIO_NO_AUTENTICADO)",
+            @ApiResponse(responseCode = "200", description = "Garment removed from playlist"),
+            @ApiResponse(responseCode = "401", description = "Unauthenticated user (USUARIO_NO_AUTENTICADO)",
                     content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "403", description = "Acceso denegado (ACCESO_DENEGADO)",
+            @ApiResponse(responseCode = "403", description = "Access denied (ACCESO_DENEGADO)",
                     content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "404", description = "Playlist no encontrada (PLAYLIST_NO_ENCONTRADA)",
+            @ApiResponse(responseCode = "404", description = "Playlist not found (PLAYLIST_NO_ENCONTRADA)",
                     content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "422", description = "La prenda no pertenece a la playlist (PRENDA_NO_ESTA_EN_PLAYLIST)",
+            @ApiResponse(responseCode = "422", description = "Garment does not belong to the playlist (PRENDA_NO_ESTA_EN_PLAYLIST)",
                     content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))
     })
-    ResponseEntity<PlaylistResponse> retirarPrenda(String usuarioId, UUID id, UUID prendaId);
+    ResponseEntity<PlaylistResponse> retirarPrenda(
+            @Parameter(description = "User ID forwarded by the API Gateway", example = "15") String usuarioId,
+            UUID id,
+            UUID prendaId);
 
-    @Operation(summary = "Alternar Me Gusta en la playlist")
-    ResponseEntity<PlaylistResponse> alternarLike(String usuarioId, UUID id);
+    @Operation(summary = "Toggle like on a playlist")
+    ResponseEntity<PlaylistResponse> alternarLike(
+            @Parameter(description = "User ID forwarded by the API Gateway", example = "15") String usuarioId,
+            UUID id);
 
-    @Operation(summary = "Alternar guardado en perfil")
-    ResponseEntity<PlaylistResponse> alternarGuardado(String usuarioId, UUID id);
+    @Operation(summary = "Toggle bookmark/save on a playlist")
+    ResponseEntity<PlaylistResponse> alternarGuardado(
+            @Parameter(description = "User ID forwarded by the API Gateway", example = "15") String usuarioId,
+            UUID id);
 
-    @Operation(summary = "Eliminar playlist")
-    ResponseEntity<Void> eliminar(String usuarioId, UUID id);
+    @Operation(summary = "Delete an owned playlist")
+    ResponseEntity<Void> eliminar(
+            @Parameter(description = "User ID forwarded by the API Gateway", example = "15") String usuarioId,
+            UUID id);
 
-    @Operation(summary = "Consultar playlists creadas por el usuario")
-    ResponseEntity<List<PlaylistResponse>> misPlaylists(String usuarioId);
+    @Operation(summary = "List playlists created by a user")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "User playlists"),
+            @ApiResponse(responseCode = "401", description = "Unauthenticated user (USUARIO_NO_AUTENTICADO)",
+                    content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "403", description = "Access denied (ACCESO_DENEGADO)",
+                    content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    ResponseEntity<List<PlaylistResponse>> misPlaylists(
+            @Parameter(description = "User ID forwarded by the API Gateway", example = "15") String usuarioId,
+            @Parameter(description = "Owner user ID", example = "15") String userId);
 
-    @Operation(summary = "Consultar playlists guardadas por el usuario")
-    ResponseEntity<List<PlaylistResponse>> misGuardadas(String usuarioId);
+    @Operation(summary = "List playlists saved by a user")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "User saved playlists"),
+            @ApiResponse(responseCode = "401", description = "Unauthenticated user (USUARIO_NO_AUTENTICADO)",
+                    content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "403", description = "Access denied (ACCESO_DENEGADO)",
+                    content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    ResponseEntity<List<PlaylistResponse>> misGuardadas(
+            @Parameter(description = "User ID forwarded by the API Gateway", example = "15") String usuarioId,
+            @Parameter(description = "Owner user ID", example = "15") String userId);
 }

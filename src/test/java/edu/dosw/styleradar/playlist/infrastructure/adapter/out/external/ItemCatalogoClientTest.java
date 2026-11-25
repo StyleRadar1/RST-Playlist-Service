@@ -63,7 +63,7 @@ class ItemCatalogoClientTest {
         when(feignClient.obtenerPrenda(prendaId)).thenReturn(null);
         assertThat(client.obtenerPrendaPorId(prendaId)).isEmpty();
 
-        Request req = Request.create(Request.HttpMethod.GET, "/api/v1/prendas/" + prendaId,
+        Request req = Request.create(Request.HttpMethod.GET, "/api/v1/garments/" + prendaId,
                 Map.of(), null, StandardCharsets.UTF_8, null);
         FeignException notFound = FeignException.errorStatus(
                 "ItemCatalogoFeignClient#obtenerPrenda(UUID)",
@@ -76,7 +76,7 @@ class ItemCatalogoClientTest {
     @Test
     void lanzaCatalogoNoDisponibleEnErrorDeRed() {
         UUID prendaId = UUID.randomUUID();
-        Request req = Request.create(Request.HttpMethod.GET, "/api/v1/prendas/" + prendaId,
+        Request req = Request.create(Request.HttpMethod.GET, "/api/v1/garments/" + prendaId,
                 Map.of(), null, StandardCharsets.UTF_8, null);
         FeignException unavailable = FeignException.errorStatus(
                 "ItemCatalogoFeignClient#obtenerPrenda(UUID)",

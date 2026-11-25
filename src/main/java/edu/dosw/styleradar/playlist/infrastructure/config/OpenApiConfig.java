@@ -16,8 +16,8 @@ public class OpenApiConfig {
                 .info(new Info()
                         .title("RST-Playlist-Service")
                         .version("0.0.1")
-                        .description("Microservicio de playlists de estilo de StyleRadar. Paquete 2 Catálogo, equipo Restrepo. " +
-                                "Todas las respuestas de error siguen RFC 7807 (application/problem+json) e incluyen siempre 'code' (UPPER_SNAKE_CASE) y 'timestamp' (ISO-8601)."))
+                        .description("StyleRadar fashion playlists microservice. Package 2 Catalog, Restrepo team. " +
+                                "All error responses follow RFC 7807 (application/problem+json) and always include 'code' (UPPER_SNAKE_CASE) and 'timestamp' (ISO-8601)."))
                 .components(new Components().addSecuritySchemes("bearerAuth",
                         new SecurityScheme().type(SecurityScheme.Type.HTTP).scheme("bearer").bearerFormat("JWT")));
     }
