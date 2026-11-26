@@ -19,5 +19,7 @@ public record PlaylistResponse(
     List<PrendaResponse> prendas,
     int likes,
     int guardados,
-    int totalPrendas
+    int totalPrendas,
+    boolean liked,
+    boolean saved
 ) {}

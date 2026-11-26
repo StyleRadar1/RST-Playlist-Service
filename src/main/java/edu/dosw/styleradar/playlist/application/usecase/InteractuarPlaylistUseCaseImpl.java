@@ -28,7 +28,7 @@ public class InteractuarPlaylistUseCaseImpl implements InteractuarPlaylistUseCas
         Playlist playlist = repository.findById(playlistId)
                 .orElseThrow(() -> new ResourceNotFoundException("No existe playlist con ID: " + playlistId));
         playlist.alternarLike(usuarioId);
-        return mapper.toResponse(repository.save(playlist));
+        return mapper.toResponse(repository.save(playlist), usuarioId);
     }
 
     @Override
@@ -36,6 +36,6 @@ public class InteractuarPlaylistUseCaseImpl implements InteractuarPlaylistUseCas
         Playlist playlist = repository.findById(playlistId)
                 .orElseThrow(() -> new ResourceNotFoundException("No existe playlist con ID: " + playlistId));
         playlist.alternarGuardado(usuarioId);
-        return mapper.toResponse(repository.save(playlist));
+        return mapper.toResponse(repository.save(playlist), usuarioId);
     }
 }

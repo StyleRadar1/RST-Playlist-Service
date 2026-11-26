@@ -53,13 +53,16 @@ public interface PlaylistApi {
             @Parameter(description = "Optional user ID", example = "15") String usuarioId);
 
     @Operation(summary = "List public playlists")
-    ResponseEntity<List<PlaylistResponse>> obtenerPublicas();
+    ResponseEntity<List<PlaylistResponse>> obtenerPublicas(
+            @Parameter(description = "Optional user ID; when present, liked and saved show that user's state", example = "15") String usuarioId);
 
     @Operation(summary = "List the 3 featured playlists for Home (SR-RF-72)")
-    ResponseEntity<List<PlaylistResponse>> obtenerDestacadas();
+    ResponseEntity<List<PlaylistResponse>> obtenerDestacadas(
+            @Parameter(description = "Optional user ID; when present, liked and saved show that user's state", example = "15") String usuarioId);
 
     @Operation(summary = "List popular playlists with pagination")
-    ResponseEntity<PageResponse<PlaylistResponse>> obtenerPopulares(int page, int size);
+    ResponseEntity<PageResponse<PlaylistResponse>> obtenerPopulares(int page, int size,
+            @Parameter(description = "Optional user ID; when present, liked and saved show that user's state", example = "15") String usuarioId);
 
     @Operation(summary = "Update an owned playlist")
     @ApiResponses({
