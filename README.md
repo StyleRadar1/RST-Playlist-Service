@@ -1,14 +1,4 @@
 <!--
-  ============================================================================
-  METADATOS MAESTROS · STYLERADAR
-  Proyecto: StyleRadar — Plataforma de moda local con inventario geolocalizado
-  Asignatura / Iniciativa: DOSW 2026
-  Año: 2026
-  Servicio / Repositorio: ms-playlist (RST-Playlist-Service)
-  Squad / Equipo: Restrepo (RST) · Paquete 2: Catálogo
-  ============================================================================
--->
-<!--
   SISTEMA DE DISEÑO Y TIPOGRAFÍA OFICIAL:
   Tipografía principal: Poppins (900, 800, 700, 600, 500, 400, 300)
   Tipografía monoespaciada: JetBrains Mono

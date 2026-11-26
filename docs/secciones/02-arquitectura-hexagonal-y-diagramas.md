@@ -12,7 +12,7 @@ El servicio implementa **Arquitectura Hexagonal (Puertos y Adaptadores)** combin
 
 <div align="center">
   <img src="../evidencias/diagrama-componentes-general.png" alt="Diagrama de Componentes General de StyleRadar" width="100%" />
-  <p><sub><b>Figura 2.1:</b> [PENDIENTE: agregar archivo do../evidencias/diagrama-componentes-general.png en el repositorio]</sub></p>
+  <p><sub><b>Figura 2.1
 </div>
 
 ##### Justificación y Explicación Técnica del Diagrama de Componentes General
@@ -26,7 +26,7 @@ El servicio implementa **Arquitectura Hexagonal (Puertos y Adaptadores)** combin
 
 <div align="center">
   <img src="../evidencias/DiagramaComponentesPlaylist.png" alt="Diagrama de Componentes Específico de ms-playlist" width="100%" />
-  <p><sub><b>Figura 2.2:</b> [PENDIENTE: agregar archivo do../evidencias/DiagramaComponentesPlaylist.png en el repositorio]</sub></p>
+  <p><sub><b>Figura 2.2
 </div>
 
 ##### Justificación y Explicación Técnica del Diagrama de Componentes Específico
@@ -40,7 +40,7 @@ El servicio implementa **Arquitectura Hexagonal (Puertos y Adaptadores)** combin
 
 <div align="center">
   <img src="../evidencias/DiagramaClasesPlaylist.png" alt="Diagrama de Clases del Modelo de Dominio de ms-playlist" width="100%" />
-  <p><sub><b>Figura 2.3:</b> [PENDIENTE: agregar archivo do../evidencias/DiagramaClasesPlaylist.png en el repositorio]</sub></p>
+  <p><sub><b>Figura 2.3
 </div>
 
 ##### Justificación y Explicación Técnica del Modelo de Dominio
@@ -54,7 +54,7 @@ El servicio implementa **Arquitectura Hexagonal (Puertos y Adaptadores)** combin
 
 <div align="center">
   <img src="../evidencias/DiagramaEntidadRelacionPlaylist.png" alt="Diagrama Entidad Relación de ms-playlist" width="100%" />
-  <p><sub><b>Figura 2.4:</b> [PENDIENTE: agregar archivo do../evidencias/DiagramaEntidadRelacionPlaylist.png en el repositorio]</sub></p>
+  <p><sub><b>Figura 2.4
 </div>
 
 ##### Justificación y Explicación Técnica del Modelo de Datos
@@ -71,7 +71,7 @@ El servicio implementa **Arquitectura Hexagonal (Puertos y Adaptadores)** combin
 
 <div align="center">
   <img src="../evidencias/diagrama-despliegue-general.png" alt="Diagrama de Despliegue General de StyleRadar" width="100%" />
-  <p><sub><b>Figura 2.5:</b> [PENDIENTE: agregar archivo do../evidencias/diagrama-despliegue-general.png en el repositorio]</sub></p>
+  <p><sub><b>Figura 2.5
 </div>
 
 ##### Justificación y Explicación Técnica del Despliegue
@@ -82,8 +82,8 @@ El servicio implementa **Arquitectura Hexagonal (Puertos y Adaptadores)** combin
 #### 2.6 Diagrama de Secuencia de Flujos Críticos
 
 <div align="center">
-  <p><em>[Diagrama pendiente de enlazar desde docs/evidencias/]</em></p>
-  <p><sub><b>Figura 2.6:</b> [PENDIENTE: agregar archivo docs/uml/DiagramaSecuenciaPlaylist.png en el repositorio]</sub></p>
+  <img src="../evidencias/diagrama-secuencia-agregar-prenda-playlist.png" alt="Diagrama de Despliegue General de StyleRadar" width="100%" />
+  <p><sub><b>Figura 2.6
 </div>
 
 ##### Justificación y Explicación Técnica de los Flujos Críticos

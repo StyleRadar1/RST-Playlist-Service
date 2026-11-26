@@ -6,7 +6,7 @@
 
 `ms-playlist` aplica los lineamientos de protección de datos personales de la **Ley 1581 de 2012 (Habeas Data en Colombia)** y los controles del estándar **OWASP Top 10:2025** desde el diseño del agregado de dominio y sus adaptadores de entrada y salida.
 
-* **Documento técnico detallado de seguridad:** [Análisis de Seguridad y OWASP Top 10:2025 (`ms-playlist`)](../security/analisis-seguridad-owasp-ms-playlist.md) *(`[PENDIENTE: crear el archivo docs/security/analisis-seguridad-owasp-ms-playlist.md con la matriz extendida si el repositorio aún no lo contiene]`)*
+* **Documento técnico detallado de seguridad:** [Análisis de Seguridad y OWASP Top 10:2025 (`ms-playlist`)](../security/analisis-seguridad-owasp-ms-playlist.md) 
 
 ### Puntos de Control y Cumplimiento Normativo
 
@@ -24,7 +24,7 @@
    Desactivación de `spring.jpa.open-in-view` (`false`), validación estricta de esquema (`ddl-auto: validate`), exposición mínima de Actuator (`health, info` únicamente), supresión de cabeceras Java `__TypeId__` en mensajes salientes AMQP y cero credenciales quemadas en `application.yml`.
 
 4. **A03:2025 — Fallas en la Cadena de Suministro de Software:**
-   Gestión centralizada de dependencias mediante Maven Wrapper (`./mvnw`) y BOM de Spring Boot, acompañada de análisis estático con SpotBugs en el pipeline de CI/CD (`[PENDIENTE: confirmar si el pipeline ejecuta escaneo de CVEs / OWASP Dependency-Check o Dependabot]`).
+   Gestión centralizada de dependencias mediante Maven Wrapper (`./mvnw`) y BOM de Spring Boot, acompañada de análisis estático con SpotBugs en el pipeline de CI/CD.
 
 5. **A04:2025 — Fallas Criptográficas:**
    Transporte cifrado obligatorio en entornos cloud: conexiones JDBC a PostgreSQL parametrizadas con `DB_SSL_MODE` (`require` recomendado en QA/PROD), conexión RabbitMQ por puerto AMQPS `5671` con `RABBITMQ_SSL_ENABLED=true` y `RABBITMQ_SSL_VERIFY_HOSTNAME=true`, y comunicación HTTPS hacia `ms-item-catalogo`.

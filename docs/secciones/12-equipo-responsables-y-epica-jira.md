@@ -24,15 +24,13 @@ Desarrollado y mantenido por el **Equipo `Restrepo`** (prefijo `RST`, **Paquete 
 
 * **Repositorio GitHub:** [StyleRadar1/RST-Playlist-Service](https://github.com/StyleRadar1/RST-Playlist-Service)
 * **Organización GitHub:** [StyleRadar1](https://github.com/StyleRadar1)
-* **Épica del Microservicio en Jira:** `[PENDIENTE: clave y enlace directo de la épica de ms-playlist en el proyecto RES de Jira]`
+* **Épica del Microservicio en Jira:**
+  [Restrepo-StyleRadar (RES)](https://mail-team-nyjtgqcj.atlassian.net/jira/software/projects/RES/boards/76/timeline?selectedIssue=RES-4)
 * **Tablero Scrum del Equipo:** [Restrepo-StyleRadar (RES)](https://mail-team-nyjtgqcj.atlassian.net/jira/software/projects/RES/boards/76)
 * **Swagger UI (Local):** [http://localhost:8260/api/v1/swagger-ui.html](http://localhost:8260/api/v1/swagger-ui.html)
 * **Especificación OpenAPI JSON (Local):** [http://localhost:8260/api/v1/v3/api-docs](http://localhost:8260/api/v1/v3/api-docs)
 
-<div align="center">
-  <p><em>[Captura de Jira pendiente de adjuntar en docs/images/JiraEvidence.png]</em></p>
-  <p><sub><b>Figura 12.1:</b> [PENDIENTE: capturar tablero Scrum / épica de ms-playlist en Jira y guardarla en docs/images/JiraEvidence.png]</sub></p>
-</div>
+
 
 ### Requerimientos Funcionales Asignados
 
