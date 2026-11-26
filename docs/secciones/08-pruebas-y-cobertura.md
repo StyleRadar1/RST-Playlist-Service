@@ -27,7 +27,7 @@ El aseguramiento de calidad de `ms-playlist` combina pruebas unitarias aisladas 
 * **Resultado del Build:** `[PENDIENTE: confirmar BUILD SUCCESS tras última ejecución de ./mvnw clean verify]`
 
 <div align="center">
-  <img src="../images/JacocoEvidence.png" alt="Evidencia 03 - Reporte Consolidado de Cobertura JaCoCo" width="100%" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);" />
+  <p><em>[Captura del reporte JaCoCo pendiente de adjuntar en docs/images/JacocoEvidence.png]</em></p>
   <p><sub><b>Figura 8.1:</b> [PENDIENTE: capturar reporte target/site/jacoco/index.html y guardarlo en docs/images/JacocoEvidence.png]</sub></p>
 </div>
 

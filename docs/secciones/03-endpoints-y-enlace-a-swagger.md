@@ -8,14 +8,14 @@
 
 | Entorno | Estado | Propósito | URL Base del Servicio | Swagger OpenAPI UI | Health Check |
 | :--- | :---: | :--- | :--- | :--- | :--- |
-| **Producción (PROD)** | Desplegado | Despliegue productivo de StyleRadar desde `master` | `[PENDIENTE: URL exacta PROD de ms-playlist en Azure Container Apps]/api/v1` | `[PENDIENTE: URL Swagger UI PROD]` | `[PENDIENTE: URL /api/v1/health PROD]` |
-| **Calidad / Pruebas (QA)** | Desplegado | Pruebas integradas del Sprint desde `develop` | `[PENDIENTE: URL exacta QA de ms-playlist en Azure Container Apps]/api/v1` | `[PENDIENTE: URL Swagger UI QA]` | `[PENDIENTE: URL /api/v1/health QA]` |
+| **Producción (PROD)** | Desplegado | Despliegue productivo de StyleRadar desde `master` | `https://rst-playlist-service-prod.redwave-74d6e30f.northcentralus.azurecontainerapps.io/api/v1` | [Swagger UI PROD](https://rst-playlist-service-prod.redwave-74d6e30f.northcentralus.azurecontainerapps.io/api/v1/swagger-ui.html) | [`/api/v1/health`](https://rst-playlist-service-prod.redwave-74d6e30f.northcentralus.azurecontainerapps.io/api/v1/health) |
+| **Calidad / Pruebas (QA)** | Desplegado | Pruebas integradas del Sprint desde `develop` | `https://rst-playlist-service-qa.redwave-74d6e30f.northcentralus.azurecontainerapps.io/api/v1` | [Swagger UI QA](https://rst-playlist-service-qa.redwave-74d6e30f.northcentralus.azurecontainerapps.io/api/v1/swagger-ui.html) | [`/api/v1/health`](https://rst-playlist-service-qa.redwave-74d6e30f.northcentralus.azurecontainerapps.io/api/v1/health) |
 | **Desarrollo Local (DEV)** | Local | Entorno de desarrollo local | `http://localhost:8260/api/v1` | [Swagger UI Local](http://localhost:8260/api/v1/swagger-ui.html) | [`/api/v1/health`](http://localhost:8260/api/v1/health) |
 
 * **Especificación OpenAPI JSON (Local):** `http://localhost:8260/api/v1/v3/api-docs`
 
 <div align="center">
-  <img src="../images/SwaggerEvidence.png" alt="Evidencia 01 - Documentación Swagger OpenAPI UI Activa" width="100%" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);" />
+  <p><em>[Captura de Swagger UI pendiente de adjuntar en docs/images/SwaggerEvidence.png]</em></p>
   <p><sub><b>Figura 3.1:</b> [PENDIENTE: capturar pantalla de Swagger UI de ms-playlist y guardarla en docs/images/SwaggerEvidence.png]</sub></p>
 </div>
 

@@ -4,68 +4,48 @@
 
 ## 9. CI/CD Y PIPELINE AUTOMATIZADO
 
-Los flujos de Integración Continua y Despliegue Continuo (CI/CD) de `ms-playlist` operan sobre **GitHub Actions**, ejecutando compilación, pruebas automatizadas, verificación de cobertura JaCoCo, análisis estático con SpotBugs y construcción/despliegue de imagen Docker OCI hacia **Azure Container Apps** (`[PENDIENTE: confirmar nombres exactos de los archivos en .github/workflows/]`).
+La automatización de integración y entrega continua de `ms-playlist` se ejecuta en **GitHub Actions** mediante dos workflows oficiales en `.github/workflows/`:
 
-### Badges de Pipelines y Calidad (GitHub Actions & SonarCloud)
+* **`ci.yml` (`CI`):** Compila el proyecto con JDK 21, ejecuta pruebas unitarias y de integración, verifica cobertura y análisis estático con `mvn -B -ntp verify`, publica el reporte `jacoco-report` (`target/site/jacoco/`) y valida la construcción de la imagen Docker.
+* **`cd.yml` (`CD`):** Construye y publica la imagen OCI en **GitHub Container Registry (`ghcr.io`)**, asegura la base de datos en PostgreSQL Flexible Server (`playlist_db` / `playlist_db_prod`), despliega en **Azure Container Apps** (`styleradar-cae-prod`, región `northcentralus`), configura sondas *Startup* y *Readiness* sobre `/api/v1/health` y verifica que el servicio responda `200 OK`.
+
+### Badges de Pipelines y Calidad (GitHub Actions)
 
 <div align="center">
   <p>
-    <a href="https://github.com/StyleRadar1/RST-Playlist-Service/actions">
-      <img src="https://img.shields.io/badge/CI_MASTER-GitHub_Actions-12063A?style=for-the-badge&logo=githubactions&logoColor=white" alt="CI Master" />
+    <a href="https://github.com/StyleRadar1/RST-Playlist-Service/actions/workflows/ci.yml">
+      <img src="https://github.com/StyleRadar1/RST-Playlist-Service/actions/workflows/ci.yml/badge.svg?branch=develop" alt="CI Develop" />
     </a>
-    <a href="https://github.com/StyleRadar1/RST-Playlist-Service/actions">
-      <img src="https://img.shields.io/badge/CI_DEVELOP-GitHub_Actions-5600EF?style=for-the-badge&logo=githubactions&logoColor=white" alt="CI Develop" />
+    <a href="https://github.com/StyleRadar1/RST-Playlist-Service/actions/workflows/ci.yml">
+      <img src="https://github.com/StyleRadar1/RST-Playlist-Service/actions/workflows/ci.yml/badge.svg?branch=master" alt="CI Master" />
+    </a>
+    <a href="https://github.com/StyleRadar1/RST-Playlist-Service/actions/workflows/cd.yml">
+      <img src="https://github.com/StyleRadar1/RST-Playlist-Service/actions/workflows/cd.yml/badge.svg" alt="CD Deploy" />
+    </a>
+  </p>
+  <p>
+    <a href="https://github.com/StyleRadar1/RST-Playlist-Service/actions/workflows/ci.yml">
+      <img src="https://img.shields.io/badge/CI-ci.yml-12063A?style=for-the-badge&logo=githubactions&logoColor=white" alt="Workflow CI" />
+    </a>
+    <a href="https://github.com/StyleRadar1/RST-Playlist-Service/actions/workflows/cd.yml">
+      <img src="https://img.shields.io/badge/CD-cd.yml-5600EF?style=for-the-badge&logo=githubactions&logoColor=white" alt="Workflow CD" />
     </a>
     <a href="../secciones/08-pruebas-y-cobertura.md">
       <img src="https://img.shields.io/badge/JaCoCo-%E2%89%A5_85%25-16A34A?style=for-the-badge&logo=codecov&logoColor=white" alt="JaCoCo 85%" />
     </a>
-    <a href="https://github.com/StyleRadar1/RST-Playlist-Service/actions">
-      <img src="https://img.shields.io/badge/SonarCloud-%5BPENDIENTE_BADGE%5D-12063A?style=for-the-badge&logo=sonarqubecloud&logoColor=white" alt="SonarCloud" />
+    <a href="../secciones/08-pruebas-y-cobertura.md">
+      <img src="https://img.shields.io/badge/Registry-ghcr.io-12063A?style=for-the-badge&logo=docker&logoColor=C4B5FD" alt="GHCR Registry" />
     </a>
   </p>
 </div>
-
-*(Nota: actualizar los enlaces de los badges con el archivo exacto del workflow en `.github/workflows/` y la clave de proyecto de SonarCloud una vez confirmados `[PENDIENTE: enlaces exactos de workflow y SonarCloud]`).*
 
 ### Matriz de Pipelines por Rama Protegida
 
 | Pipeline | Rama / Entorno | Trigger de Ejecución | Quality Gate Requerido | Estado |
 | :--- | :--- | :--- | :--- | :---: |
-| **CI Pull Request (`[PENDIENTE: nombre workflow]`)** | `feature/*`, `fix/*`, `refactor/*`, `docs/*` &rarr; `develop` | `pull_request` hacia `develop` / `master` | Compilación JDK 21, `./mvnw clean verify`, JaCoCo `≥ 85%`, SpotBugs sin errores | ![PR Gate](https://img.shields.io/badge/Gate-Obligatorio-5600EF?style=flat-square) |
-| **CI/CD QA (`[PENDIENTE: nombre workflow]`)** | `develop` &rarr; **QA** (Azure Container Apps) | `push` / merge en `develop` | Pruebas + cobertura `≥ 85%` + SpotBugs + build imagen OCI + despliegue QA | ![QA](https://img.shields.io/badge/QA-Desplegado-16A34A?style=flat-square) |
-| **CI/CD Producción (`[PENDIENTE: nombre workflow]`)** | `master` &rarr; **PROD** (Azure Container Apps) | `push` / merge en `master` (con CMV aprobada) | Pruebas + cobertura `≥ 85%` + SpotBugs + build imagen OCI + despliegue PROD | ![PROD](https://img.shields.io/badge/PROD-Desplegado-16A34A?style=flat-square) |
-
-### Diagrama del Flujo Automatizado (Pipeline Stages)
-
-```mermaid
-flowchart LR
-    A["Push / Pull Request<br/>(GitHub)"] --> B["Compilar<br/>(Maven · Java 21 LTS)"]
-    B --> C["Pruebas y JaCoCo<br/>(Cobertura ≥ 85%)"]
-    C --> D["Análisis Estático<br/>(SpotBugs / Calidad)"]
-    D --> E["Imagen Docker OCI"]
-    E --> F["Despliegue Azure<br/>(QA en develop / PROD en master)"]
-
-    classDef step fill:#12063A,stroke:#5600EF,stroke-width:2px,color:#FFFFFF;
-    classDef pass fill:#DCFCE7,stroke:#16A34A,stroke-width:2px,color:#0C0C12;
-
-    class A,B,E,F step;
-    class C,D pass;
-```
-
-### Estructura de Jobs en `.github/workflows/`
-
-`[PENDIENTE: confirmar los nombres literales de los jobs en .github/workflows/*.yml]`
-
-1. **Build & Test (`./mvnw clean verify`):** Configura JDK 21, restaura caché de Maven y ejecuta pruebas unitarias y `PlaylistServiceApplicationIntegrationTest` (con Testcontainers PostgreSQL 16).
-2. **Quality & Coverage Gate (JaCoCo + SpotBugs):** Verifica que la cobertura alcance como mínimo el **85 %** y valida el análisis estático de código; cualquier incumplimiento detiene el pipeline antes de empaquetar.
-3. **Container Build & Push (Docker OCI):** Construye la imagen del servicio y la publica en el registro de contenedores del proyecto `[PENDIENTE: confirmar registry exacto en workflow, p. ej. GHCR / ACR]`.
-4. **Deploy to Azure Container Apps:** Actualiza el contenedor del entorno correspondiente (`develop` &rarr; QA, `master` &rarr; PROD) inyectando las variables de entorno y secretos configurados (`DB_*`, `RABBITMQ_*`, `ITEM_CATALOGO_URL`).
-
-<div align="center">
-  <img src="../images/pipeline-ci-cd.png" alt="Evidencia 04 - Ejecución del Pipeline CI/CD en Verde" width="100%" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);" />
-  <p><sub><b>Figura 9.1:</b> [PENDIENTE: capturar ejecución en verde del workflow en GitHub Actions y guardarla en docs/images/pipeline-ci-cd.png]</sub></p>
-</div>
-
+| **CI (`ci.yml`)** | `master`, `develop`, `feature/**` | `push`, `pull_request` (`master`, `develop`) y `workflow_dispatch` | Compilación Java 21 (`temurin`), `mvn -B -ntp verify` (pruebas, análisis estático y JaCoCo `≥ 85%`) y build Docker sin push | [![CI](https://github.com/StyleRadar1/RST-Playlist-Service/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/StyleRadar1/RST-Playlist-Service/actions/workflows/ci.yml) |
+| **CD QA (`cd.yml`)** | `develop` &rarr; **QA** (`rst-playlist-service-qa`) | `push` en `develop` o `workflow_dispatch` (`ambiente: qa`) | Imagen publicada en `ghcr.io`, BD `playlist_db`, RabbitMQ TLS `:5671`, `min-replicas 1` y verificación `/api/v1/health` | [![CD QA](https://github.com/StyleRadar1/RST-Playlist-Service/actions/workflows/cd.yml/badge.svg?branch=develop)](https://github.com/StyleRadar1/RST-Playlist-Service/actions/workflows/cd.yml) |
+| **CD Producción (`cd.yml`)** | `master` &rarr; **PROD** (`rst-playlist-service-prod`) | `push` en `master` (con CMV) o `workflow_dispatch` (`ambiente: prod`) | Imagen publicada en `ghcr.io`, BD `playlist_db_prod`, `ITEM_CATALOGO_URL` PROD, `min-replicas 1` y verificación `/api/v1/health` | [![CD PROD](https://github.com/StyleRadar1/RST-Playlist-Service/actions/workflows/cd.yml/badge.svg?branch=master)](https://github.com/StyleRadar1/RST-Playlist-Service/actions/workflows/cd.yml) |
 ---
 
 [⬅ Volver al README Principal](../../README.md)
