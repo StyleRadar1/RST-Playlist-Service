@@ -92,7 +92,7 @@ curl -i http://localhost:8260/api/v1/health
 *(También disponible el endpoint de Actuator: `GET http://localhost:8260/api/v1/actuator/health`).*
 
 <div align="center">
-  <img src="../images/DockerEvidence.png" alt="Evidencia 02 - Contenedor OCI Docker en Ejecución" width="100%" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);" />
+  <p><em>[Captura de Docker Compose pendiente de adjuntar en docs/images/DockerEvidence.png]</em></p>
   <p><sub><b>Figura 6.1:</b> [PENDIENTE: capturar salida de docker compose ps / curl /api/v1/health y guardarla en docs/images/DockerEvidence.png]</sub></p>
 </div>
 

@@ -62,7 +62,7 @@ flowchart LR
 4. **Deploy to Azure Container Apps:** Actualiza el contenedor del entorno correspondiente (`develop` &rarr; QA, `master` &rarr; PROD) inyectando las variables de entorno y secretos configurados (`DB_*`, `RABBITMQ_*`, `ITEM_CATALOGO_URL`).
 
 <div align="center">
-  <img src="../images/pipeline-ci-cd.png" alt="Evidencia 04 - Ejecución del Pipeline CI/CD en Verde" width="100%" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);" />
+  <p><em>[Captura del pipeline CI/CD pendiente de adjuntar en docs/images/pipeline-ci-cd.png]</em></p>
   <p><sub><b>Figura 9.1:</b> [PENDIENTE: capturar ejecución en verde del workflow en GitHub Actions y guardarla en docs/images/pipeline-ci-cd.png]</sub></p>
 </div>
 

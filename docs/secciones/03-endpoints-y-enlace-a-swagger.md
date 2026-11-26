@@ -15,7 +15,7 @@
 * **Especificación OpenAPI JSON (Local):** `http://localhost:8260/api/v1/v3/api-docs`
 
 <div align="center">
-  <img src="../images/SwaggerEvidence.png" alt="Evidencia 01 - Documentación Swagger OpenAPI UI Activa" width="100%" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);" />
+  <p><em>[Captura de Swagger UI pendiente de adjuntar en docs/images/SwaggerEvidence.png]</em></p>
   <p><sub><b>Figura 3.1:</b> [PENDIENTE: capturar pantalla de Swagger UI de ms-playlist y guardarla en docs/images/SwaggerEvidence.png]</sub></p>
 </div>
 

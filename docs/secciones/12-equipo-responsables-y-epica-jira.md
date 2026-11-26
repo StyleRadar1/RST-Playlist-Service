@@ -30,7 +30,7 @@ Desarrollado y mantenido por el **Equipo `Restrepo`** (prefijo `RST`, **Paquete 
 * **Especificación OpenAPI JSON (Local):** [http://localhost:8260/api/v1/v3/api-docs](http://localhost:8260/api/v1/v3/api-docs)
 
 <div align="center">
-  <img src="../images/JiraEvidence.png" alt="Evidencia 05 - Tablero Scrum y Seguimiento en Jira" width="100%" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);" />
+  <p><em>[Captura de Jira pendiente de adjuntar en docs/images/JiraEvidence.png]</em></p>
   <p><sub><b>Figura 12.1:</b> [PENDIENTE: capturar tablero Scrum / épica de ms-playlist en Jira y guardarla en docs/images/JiraEvidence.png]</sub></p>
 </div>
 
