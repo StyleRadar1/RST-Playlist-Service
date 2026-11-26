@@ -11,17 +11,17 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.Map;
 
-@Tag(name = "Estado", description = "Verificación del estado de ms-playlist")
+@Tag(name = "Health", description = "Health check for ms-playlist")
 public interface HealthApi {
 
-    @Operation(summary = "Consultar el estado del servicio",
-            description = "Indica si ms-playlist está en ejecución y responde en el puerto 8260.")
-    @ApiResponse(responseCode = "200", description = "Servicio en ejecución",
+    @Operation(summary = "Check service health status",
+            description = "Indicates whether ms-playlist is running and responding on port 8260.")
+    @ApiResponse(responseCode = "200", description = "Service is up and running",
             content = @Content(mediaType = "application/json",
                     examples = @ExampleObject(value = "{\"status\":\"UP\",\"service\":\"ms-playlist\",\"port\":8260}")))
-    @ApiResponse(responseCode = "500", description = "Error interno del servicio (ERROR_INTERNO)",
+    @ApiResponse(responseCode = "500", description = "Internal service error (ERROR_INTERNO)",
             content = @Content(mediaType = "application/problem+json",
                     schema = @Schema(implementation = ProblemDetail.class),
-                    examples = @ExampleObject(value = "{\"type\":\"about:blank\",\"title\":\"Error interno\",\"status\":500,\"detail\":\"Ocurrió un error inesperado\",\"instance\":\"/api/v1/health\",\"code\":\"ERROR_INTERNO\",\"timestamp\":\"2026-11-20T22:58:00Z\"}")))
+                    examples = @ExampleObject(value = "{\"type\":\"about:blank\",\"title\":\"Internal error\",\"status\":500,\"detail\":\"An unexpected error occurred\",\"instance\":\"/api/v1/health\",\"code\":\"ERROR_INTERNO\",\"timestamp\":\"2026-11-20T22:58:00Z\"}")))
     ResponseEntity<Map<String, Object>> health();
 }

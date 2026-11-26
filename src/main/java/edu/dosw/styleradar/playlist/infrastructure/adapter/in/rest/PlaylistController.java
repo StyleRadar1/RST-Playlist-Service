@@ -59,28 +59,30 @@ public class PlaylistController implements PlaylistApi {
     public ResponseEntity<PlaylistResponse> obtenerPorId(
             @PathVariable UUID id,
             @RequestHeader(value = "X-User-Id", required = false) String usuarioId) {
-        String usuarioNormalizado = (usuarioId == null || usuarioId.isBlank()) ? null : usuarioId.trim();
-        return ResponseEntity.ok(consultarPlaylistUseCase.obtenerPorId(id, usuarioNormalizado));
+        return ResponseEntity.ok(consultarPlaylistUseCase.obtenerPorId(id, normalizarOpcional(usuarioId)));
     }
 
     @Override
     @GetMapping
-    public ResponseEntity<List<PlaylistResponse>> obtenerPublicas() {
-        return ResponseEntity.ok(consultarPlaylistUseCase.obtenerPublicas());
+    public ResponseEntity<List<PlaylistResponse>> obtenerPublicas(
+            @RequestHeader(value = "X-User-Id", required = false) String usuarioId) {
+        return ResponseEntity.ok(consultarPlaylistUseCase.obtenerPublicas(normalizarOpcional(usuarioId)));
     }
 
     @Override
-    @GetMapping("/destacadas")
-    public ResponseEntity<List<PlaylistResponse>> obtenerDestacadas() {
-        return ResponseEntity.ok(consultarPlaylistUseCase.obtenerDestacadas());
+    @GetMapping("/featured")
+    public ResponseEntity<List<PlaylistResponse>> obtenerDestacadas(
+            @RequestHeader(value = "X-User-Id", required = false) String usuarioId) {
+        return ResponseEntity.ok(consultarPlaylistUseCase.obtenerDestacadas(normalizarOpcional(usuarioId)));
     }
 
     @Override
-    @GetMapping("/populares")
+    @GetMapping("/popular")
     public ResponseEntity<PageResponse<PlaylistResponse>> obtenerPopulares(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
-        return ResponseEntity.ok(consultarPlaylistUseCase.obtenerPopulares(page, size));
+            @RequestParam(defaultValue = "20") int size,
+            @RequestHeader(value = "X-User-Id", required = false) String usuarioId) {
+        return ResponseEntity.ok(consultarPlaylistUseCase.obtenerPopulares(page, size, normalizarOpcional(usuarioId)));
     }
 
     @Override
@@ -93,7 +95,7 @@ public class PlaylistController implements PlaylistApi {
     }
 
     @Override
-    @PutMapping("/{id}/destacar")
+    @PutMapping("/{id}/featured")
     public ResponseEntity<PlaylistResponse> destacar(
             @RequestHeader("X-User-Id") String usuarioId,
             @RequestHeader(value = "X-User-Role", required = false) String userRole,
@@ -105,7 +107,7 @@ public class PlaylistController implements PlaylistApi {
     }
 
     @Override
-    @DeleteMapping("/{id}/destacar")
+    @DeleteMapping("/{id}/featured")
     public ResponseEntity<PlaylistResponse> quitarDestacado(
             @RequestHeader("X-User-Id") String usuarioId,
             @RequestHeader(value = "X-User-Role", required = false) String userRole,
@@ -117,7 +119,7 @@ public class PlaylistController implements PlaylistApi {
     }
 
     @Override
-    @PostMapping("/{id}/prendas")
+    @PostMapping("/{id}/garments")
     public ResponseEntity<PlaylistResponse> agregarPrenda(
             @RequestHeader("X-User-Id") String usuarioId,
             @PathVariable UUID id,
@@ -126,16 +128,16 @@ public class PlaylistController implements PlaylistApi {
     }
 
     @Override
-    @DeleteMapping("/{id}/prendas/{prendaId}")
+    @DeleteMapping("/{id}/garments/{garmentId}")
     public ResponseEntity<PlaylistResponse> retirarPrenda(
             @RequestHeader("X-User-Id") String usuarioId,
             @PathVariable UUID id,
-            @PathVariable UUID prendaId) {
+            @PathVariable("garmentId") UUID prendaId) {
         return ResponseEntity.ok(asociarPrendaUseCase.retirarPrenda(validarUsuarioId(usuarioId), id, prendaId));
     }
 
     @Override
-    @PostMapping("/{id}/like")
+    @PostMapping("/{id}/likes")
     public ResponseEntity<PlaylistResponse> alternarLike(
             @RequestHeader("X-User-Id") String usuarioId,
             @PathVariable UUID id) {
@@ -143,7 +145,7 @@ public class PlaylistController implements PlaylistApi {
     }
 
     @Override
-    @PostMapping("/{id}/guardar")
+    @PostMapping("/{id}/saves")
     public ResponseEntity<PlaylistResponse> alternarGuardado(
             @RequestHeader("X-User-Id") String usuarioId,
             @PathVariable UUID id) {
@@ -160,17 +162,27 @@ public class PlaylistController implements PlaylistApi {
     }
 
     @Override
-    @GetMapping("/me")
+    @GetMapping("/users/{userId}")
     public ResponseEntity<List<PlaylistResponse>> misPlaylists(
-            @RequestHeader("X-User-Id") String usuarioId) {
-        return ResponseEntity.ok(consultarPlaylistUseCase.obtenerPorUsuario(validarUsuarioId(usuarioId)));
+            @RequestHeader("X-User-Id") String usuarioId,
+            @PathVariable("userId") String userId) {
+        String autenticado = validarUsuarioId(usuarioId);
+        validarMismoUsuario(autenticado, userId);
+        return ResponseEntity.ok(consultarPlaylistUseCase.obtenerPorUsuario(autenticado));
     }
 
     @Override
-    @GetMapping("/me/guardadas")
+    @GetMapping("/users/{userId}/saved")
     public ResponseEntity<List<PlaylistResponse>> misGuardadas(
-            @RequestHeader("X-User-Id") String usuarioId) {
-        return ResponseEntity.ok(consultarPlaylistUseCase.obtenerGuardadas(validarUsuarioId(usuarioId)));
+            @RequestHeader("X-User-Id") String usuarioId,
+            @PathVariable("userId") String userId) {
+        String autenticado = validarUsuarioId(usuarioId);
+        validarMismoUsuario(autenticado, userId);
+        return ResponseEntity.ok(consultarPlaylistUseCase.obtenerGuardadas(autenticado));
+    }
+
+    private static String normalizarOpcional(String usuarioId) {
+        return (usuarioId == null || usuarioId.isBlank()) ? null : usuarioId.trim();
     }
 
     private String validarUsuarioId(String usuarioId) {
@@ -178,6 +190,13 @@ public class PlaylistController implements PlaylistApi {
             throw new NoAutorizadoException("La cabecera X-User-Id es obligatoria y no puede estar vacía");
         }
         return usuarioId.trim();
+    }
+
+    private void validarMismoUsuario(String autenticado, String userId) {
+        if (userId == null || userId.isBlank() || !autenticado.equals(userId.trim())) {
+            throw new AccesoDenegadoPlaylistException(
+                    "No tienes permisos para consultar las playlists de otro usuario");
+        }
     }
 
     private void validarRolAdmin(String userRole, String userRoles) {

@@ -81,6 +81,7 @@ public class CrearPlaylistUseCaseImpl implements CrearPlaylistUseCase {
                 snapshots
         );
         Playlist guardada = repository.save(playlist);
+        eventPublisher.publicarPlaylistCreada(guardada.getId());
         guardada.getPrendas().forEach(prenda ->
                 eventPublisher.publicarPrendaAsociada(guardada.getId(), prenda.getPrendaId()));
         return mapper.toResponse(guardada);

@@ -258,6 +258,14 @@ public class Playlist {
     public Set<String> getLikesUsuarios() { return Collections.unmodifiableSet(likesUsuarios); }
     public Set<String> getGuardadosUsuarios() { return Collections.unmodifiableSet(guardadosUsuarios); }
 
+    public boolean tieneLikeDe(String usuarioId) {
+        return usuarioId != null && likesUsuarios.contains(usuarioId.trim());
+    }
+
+    public boolean estaGuardadaPor(String usuarioId) {
+        return usuarioId != null && guardadosUsuarios.contains(usuarioId.trim());
+    }
+
     public int getLikesCount() { return likesUsuarios.size(); }
     public int getGuardadosCount() { return guardadosUsuarios.size(); }
     public int getTotalPrendas() { return prendas.size(); }
