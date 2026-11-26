@@ -59,28 +59,30 @@ public class PlaylistController implements PlaylistApi {
     public ResponseEntity<PlaylistResponse> obtenerPorId(
             @PathVariable UUID id,
             @RequestHeader(value = "X-User-Id", required = false) String usuarioId) {
-        String usuarioNormalizado = (usuarioId == null || usuarioId.isBlank()) ? null : usuarioId.trim();
-        return ResponseEntity.ok(consultarPlaylistUseCase.obtenerPorId(id, usuarioNormalizado));
+        return ResponseEntity.ok(consultarPlaylistUseCase.obtenerPorId(id, normalizarOpcional(usuarioId)));
     }
 
     @Override
     @GetMapping
-    public ResponseEntity<List<PlaylistResponse>> obtenerPublicas() {
-        return ResponseEntity.ok(consultarPlaylistUseCase.obtenerPublicas());
+    public ResponseEntity<List<PlaylistResponse>> obtenerPublicas(
+            @RequestHeader(value = "X-User-Id", required = false) String usuarioId) {
+        return ResponseEntity.ok(consultarPlaylistUseCase.obtenerPublicas(normalizarOpcional(usuarioId)));
     }
 
     @Override
     @GetMapping("/featured")
-    public ResponseEntity<List<PlaylistResponse>> obtenerDestacadas() {
-        return ResponseEntity.ok(consultarPlaylistUseCase.obtenerDestacadas());
+    public ResponseEntity<List<PlaylistResponse>> obtenerDestacadas(
+            @RequestHeader(value = "X-User-Id", required = false) String usuarioId) {
+        return ResponseEntity.ok(consultarPlaylistUseCase.obtenerDestacadas(normalizarOpcional(usuarioId)));
     }
 
     @Override
     @GetMapping("/popular")
     public ResponseEntity<PageResponse<PlaylistResponse>> obtenerPopulares(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
-        return ResponseEntity.ok(consultarPlaylistUseCase.obtenerPopulares(page, size));
+            @RequestParam(defaultValue = "20") int size,
+            @RequestHeader(value = "X-User-Id", required = false) String usuarioId) {
+        return ResponseEntity.ok(consultarPlaylistUseCase.obtenerPopulares(page, size, normalizarOpcional(usuarioId)));
     }
 
     @Override
@@ -177,6 +179,10 @@ public class PlaylistController implements PlaylistApi {
         String autenticado = validarUsuarioId(usuarioId);
         validarMismoUsuario(autenticado, userId);
         return ResponseEntity.ok(consultarPlaylistUseCase.obtenerGuardadas(autenticado));
+    }
+
+    private static String normalizarOpcional(String usuarioId) {
+        return (usuarioId == null || usuarioId.isBlank()) ? null : usuarioId.trim();
     }
 
     private String validarUsuarioId(String usuarioId) {

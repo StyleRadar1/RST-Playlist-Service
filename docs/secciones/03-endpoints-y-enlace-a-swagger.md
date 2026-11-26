@@ -87,9 +87,13 @@ curl -X POST http://localhost:8260/api/v1/playlists \
   ],
   "likes": 0,
   "guardados": 0,
-  "totalPrendas": 1
+  "totalPrendas": 1,
+  "liked": false,
+  "saved": false
 }
 ```
+
+Cuando la petición llega con `X-User-Id` (el API Gateway lo envía si hay token, también en las consultas públicas), `liked` y `saved` indican si ese usuario ya dio Me Gusta o guardó la playlist. Sin usuario ambos salen en `false`. Aplica a las consultas, a los likes y a los guardados.
 
 #### 2. Respuesta de Error Estándar RFC 7807 (`400 Bad Request` · Playlist sin prendas)
 

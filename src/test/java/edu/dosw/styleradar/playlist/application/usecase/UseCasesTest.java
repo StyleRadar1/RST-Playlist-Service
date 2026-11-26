@@ -125,11 +125,11 @@ class UseCasesTest {
         when(repository.findDestacadas()).thenReturn(List.of(p));
 
         assertThat(consultarUseCase.obtenerPorId(playlistId, usuarioId).id()).isEqualTo(playlistId);
-        assertThat(consultarUseCase.obtenerPublicas()).hasSize(1);
-        assertThat(consultarUseCase.obtenerPopulares(0, 10).content()).hasSize(1);
+        assertThat(consultarUseCase.obtenerPublicas(null)).hasSize(1);
+        assertThat(consultarUseCase.obtenerPopulares(0, 10, null).content()).hasSize(1);
         assertThat(consultarUseCase.obtenerPorUsuario(usuarioId)).hasSize(1);
         assertThat(consultarUseCase.obtenerGuardadas(usuarioId)).hasSize(1);
-        assertThat(consultarUseCase.obtenerDestacadas()).hasSize(1);
+        assertThat(consultarUseCase.obtenerDestacadas(null)).hasSize(1);
     }
 
     @Test
@@ -195,5 +195,31 @@ class UseCasesTest {
         interactuarUseCase.alternarGuardado(usuarioId, playlistId);
 
         verify(repository, times(2)).save(p);
+    }
+
+    @Test
+    void indicaSiElUsuarioDioLikeOGuardoLaPlaylist() {
+        UUID playlistId = UUID.randomUUID();
+        Playlist p = Playlist.crear("15", "Test", null, VisibilidadPlaylist.PUBLICA, Estilo.CASUAL);
+        p.setId(playlistId);
+        when(repository.findById(playlistId)).thenReturn(Optional.of(p));
+        when(repository.save(any())).thenReturn(p);
+        when(repository.findAllPublicas()).thenReturn(List.of(p));
+
+        PlaylistResponse conLike = interactuarUseCase.alternarLike("20", playlistId);
+        PlaylistResponse guardada = interactuarUseCase.alternarGuardado("20", playlistId);
+
+        assertThat(conLike.liked()).isTrue();
+        assertThat(conLike.saved()).isFalse();
+        assertThat(guardada.liked()).isTrue();
+        assertThat(guardada.saved()).isTrue();
+        assertThat(consultarUseCase.obtenerPorId(playlistId, "20").liked()).isTrue();
+        assertThat(consultarUseCase.obtenerPublicas("21").get(0).liked()).isFalse();
+        assertThat(consultarUseCase.obtenerPublicas(null).get(0).saved()).isFalse();
+
+        PlaylistResponse sinLike = interactuarUseCase.alternarLike("20", playlistId);
+
+        assertThat(sinLike.liked()).isFalse();
+        assertThat(sinLike.likes()).isZero();
     }
 }

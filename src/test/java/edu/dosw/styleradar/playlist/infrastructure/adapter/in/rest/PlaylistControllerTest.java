@@ -60,7 +60,7 @@ class PlaylistControllerTest {
                 .build();
         sampleResponse = new PlaylistResponse(
                 playlistId, usuarioId, "Streetwear", "Desc", VisibilidadPlaylist.PUBLICA, Estilo.URBANO, false,
-                Instant.now(), List.of(), 0, 0, 0
+                Instant.now(), List.of(), 0, 0, 0, false, false
         );
     }
 
@@ -152,19 +152,39 @@ class PlaylistControllerTest {
 
     @Test
     void obtenerPublicasYPopulares() throws Exception {
-        when(consultarPlaylistUseCase.obtenerPublicas()).thenReturn(List.of(sampleResponse));
-        when(consultarPlaylistUseCase.obtenerPopulares(0, 20)).thenReturn(new PageResponse<>(List.of(sampleResponse), 0, 20, 1L, 1, true, true));
+        when(consultarPlaylistUseCase.obtenerPublicas(null)).thenReturn(List.of(sampleResponse));
+        when(consultarPlaylistUseCase.obtenerPopulares(0, 20, null)).thenReturn(new PageResponse<>(List.of(sampleResponse), 0, 20, 1L, 1, true, true));
 
-        assertThat(controller.obtenerPublicas().getBody()).hasSize(1);
-        assertThat(controller.obtenerPopulares(0, 20).getBody().content()).hasSize(1);
+        assertThat(controller.obtenerPublicas(null).getBody()).hasSize(1);
+        assertThat(controller.obtenerPopulares(0, 20, null).getBody().content()).hasSize(1);
 
         mockMvc.perform(get("/playlists/popular")).andExpect(status().isOk());
     }
 
     @Test
+    void listaConElEstadoDelUsuarioCuandoLlegaElHeader() throws Exception {
+        PlaylistResponse conEstado = new PlaylistResponse(
+                playlistId, usuarioId, "Streetwear", "Desc", VisibilidadPlaylist.PUBLICA, Estilo.URBANO, false,
+                Instant.now(), List.of(), 1, 1, 0, true, true);
+        when(consultarPlaylistUseCase.obtenerPublicas("20")).thenReturn(List.of(conEstado));
+        when(consultarPlaylistUseCase.obtenerDestacadas("20")).thenReturn(List.of(conEstado));
+        when(consultarPlaylistUseCase.obtenerPopulares(0, 20, "20"))
+                .thenReturn(new PageResponse<>(List.of(conEstado), 0, 20, 1L, 1, true, true));
+
+        mockMvc.perform(get("/playlists").header("X-User-Id", " 20 "))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].liked").value(true))
+                .andExpect(jsonPath("$[0].saved").value(true));
+        mockMvc.perform(get("/playlists/featured").header("X-User-Id", "20"))
+                .andExpect(jsonPath("$[0].liked").value(true));
+        mockMvc.perform(get("/playlists/popular").header("X-User-Id", "20"))
+                .andExpect(jsonPath("$.content[0].saved").value(true));
+    }
+
+    @Test
     void obtenerDestacadasRetornaLista() throws Exception {
-        when(consultarPlaylistUseCase.obtenerDestacadas()).thenReturn(List.of(sampleResponse));
-        assertThat(controller.obtenerDestacadas().getBody()).hasSize(1);
+        when(consultarPlaylistUseCase.obtenerDestacadas(null)).thenReturn(List.of(sampleResponse));
+        assertThat(controller.obtenerDestacadas(null).getBody()).hasSize(1);
 
         mockMvc.perform(get("/playlists/featured")).andExpect(status().isOk());
     }

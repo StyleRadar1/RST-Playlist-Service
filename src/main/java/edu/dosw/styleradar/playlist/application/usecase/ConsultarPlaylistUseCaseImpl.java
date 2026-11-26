@@ -30,20 +30,20 @@ public class ConsultarPlaylistUseCaseImpl implements ConsultarPlaylistUseCase {
         Playlist playlist = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("No existe playlist con ID: " + id));
         playlist.validarAccesoLectura(usuarioConsultaId);
-        return mapper.toResponse(playlist);
+        return mapper.toResponse(playlist, usuarioConsultaId);
     }
 
     @Override
-    public List<PlaylistResponse> obtenerPublicas() {
-        return repository.findAllPublicas().stream().map(mapper::toResponse).toList();
+    public List<PlaylistResponse> obtenerPublicas(String usuarioConsultaId) {
+        return repository.findAllPublicas().stream().map(p -> mapper.toResponse(p, usuarioConsultaId)).toList();
     }
 
     @Override
-    public PageResponse<PlaylistResponse> obtenerPopulares(int page, int size) {
+    public PageResponse<PlaylistResponse> obtenerPopulares(int page, int size, String usuarioConsultaId) {
         int sanitizedPage = Math.max(0, page);
         int sanitizedSize = (size < 1 || size > 100) ? 20 : size;
         List<PlaylistResponse> content = repository.findPopulares(sanitizedPage, sanitizedSize)
-                .stream().map(mapper::toResponse).toList();
+                .stream().map(p -> mapper.toResponse(p, usuarioConsultaId)).toList();
         long total = repository.countPublicas();
         int totalPages = (int) Math.ceil((double) total / sanitizedSize);
         return new PageResponse<>(content, sanitizedPage, sanitizedSize, total, totalPages, sanitizedPage == 0, sanitizedPage >= totalPages - 1);
@@ -51,16 +51,16 @@ public class ConsultarPlaylistUseCaseImpl implements ConsultarPlaylistUseCase {
 
     @Override
     public List<PlaylistResponse> obtenerPorUsuario(String usuarioId) {
-        return repository.findByUsuarioId(usuarioId).stream().map(mapper::toResponse).toList();
+        return repository.findByUsuarioId(usuarioId).stream().map(p -> mapper.toResponse(p, usuarioId)).toList();
     }
 
     @Override
     public List<PlaylistResponse> obtenerGuardadas(String usuarioId) {
-        return repository.findByGuardadosUsuarioId(usuarioId).stream().map(mapper::toResponse).toList();
+        return repository.findByGuardadosUsuarioId(usuarioId).stream().map(p -> mapper.toResponse(p, usuarioId)).toList();
     }
 
     @Override
-    public List<PlaylistResponse> obtenerDestacadas() {
-        return repository.findDestacadas().stream().map(mapper::toResponse).toList();
+    public List<PlaylistResponse> obtenerDestacadas(String usuarioConsultaId) {
+        return repository.findDestacadas().stream().map(p -> mapper.toResponse(p, usuarioConsultaId)).toList();
     }
 }
