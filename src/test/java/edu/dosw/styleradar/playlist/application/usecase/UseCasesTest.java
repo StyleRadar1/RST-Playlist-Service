@@ -8,6 +8,7 @@ import edu.dosw.styleradar.playlist.domain.exception.PrendaNoAprobadaException;
 import edu.dosw.styleradar.playlist.domain.exception.PrendaNoEncontradaEnCatalogoException;
 import edu.dosw.styleradar.playlist.domain.model.Estilo;
 import edu.dosw.styleradar.playlist.domain.model.Playlist;
+import edu.dosw.styleradar.playlist.domain.model.PrendaSnapshot;
 import edu.dosw.styleradar.playlist.domain.model.VisibilidadPlaylist;
 import edu.dosw.styleradar.playlist.domain.port.out.ItemCatalogoPort;
 import edu.dosw.styleradar.playlist.domain.port.out.PlaylistEventPublisherPort;
@@ -20,6 +21,8 @@ import org.mapstruct.factory.Mappers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -221,5 +224,40 @@ class UseCasesTest {
 
         assertThat(sinLike.liked()).isFalse();
         assertThat(sinLike.likes()).isZero();
+    }
+
+    @Test
+    void consultarEnriqueceImagenYPrecioDePrendasExistentesYToleraFalloCatalogo() {
+        ConsultarPlaylistUseCaseImpl consultarConCatalogo =
+                new ConsultarPlaylistUseCaseImpl(repository, mapper, itemCatalogoPort);
+
+        UUID prendaConDatos = UUID.randomUUID();
+        UUID prendaSinDatos = UUID.randomUUID();
+        UUID prendaFallo = UUID.randomUUID();
+
+        Playlist p = Playlist.crearConPrendas("15", "Chapinero", "Desc", VisibilidadPlaylist.PUBLICA, Estilo.URBANO,
+                List.of(
+                        new PrendaSnapshot(prendaConDatos, "Jean", Instant.now(), true, "https://img/jean.jpg", new BigDecimal("159000")),
+                        new PrendaSnapshot(prendaSinDatos, "Hoodie gris jaspeado", Instant.now(), true),
+                        new PrendaSnapshot(prendaFallo, "Camiseta", Instant.now(), true)
+                ));
+
+        when(repository.findByUsuarioId("15")).thenReturn(List.of(p));
+        when(itemCatalogoPort.obtenerPrendaPorId(prendaSinDatos)).thenReturn(Optional.of(
+                new PrendaCatalogoInfo(prendaSinDatos, "Hoodie gris jaspeado", true, "https://img/hoodie.jpg", new BigDecimal("129000"))));
+        when(itemCatalogoPort.obtenerPrendaPorId(prendaFallo)).thenThrow(new RuntimeException("timeout"));
+
+        List<PlaylistResponse> res = consultarConCatalogo.obtenerPorUsuario("15");
+        assertThat(res).hasSize(1);
+        List<PrendaResponse> prendas = res.getFirst().prendas();
+        assertThat(prendas.get(0).imagenUrl()).isEqualTo("https://img/jean.jpg");
+        assertThat(prendas.get(0).precio()).isEqualByComparingTo("159000");
+        assertThat(prendas.get(1).imagenUrl()).isEqualTo("https://img/hoodie.jpg");
+        assertThat(prendas.get(1).precio()).isEqualByComparingTo("129000");
+        assertThat(prendas.get(2).imagenUrl()).isNull();
+        assertThat(prendas.get(2).precio()).isNull();
+
+        verify(itemCatalogoPort, never()).obtenerPrendaPorId(prendaConDatos);
+        verify(itemCatalogoPort, times(1)).obtenerPrendaPorId(prendaSinDatos);
     }
 }

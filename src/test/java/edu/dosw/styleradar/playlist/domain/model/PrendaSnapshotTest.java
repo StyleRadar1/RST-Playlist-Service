@@ -2,6 +2,7 @@ package edu.dosw.styleradar.playlist.domain.model;
 
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -20,6 +21,22 @@ class PrendaSnapshotTest {
         assertThat(p1.getNombrePrenda()).isEqualTo("Hoodie");
         assertThat(p1.getFechaAsociacion()).isEqualTo(now);
         assertThat(p1.isDisponible()).isTrue();
+        assertThat(p1.necesitaEnriquecimiento()).isTrue();
+
+        p1.completarDatosCatalogo(" https://cdn.example/hoodie.jpg ", new BigDecimal("129000"));
+        assertThat(p1.getImagenUrl()).isEqualTo("https://cdn.example/hoodie.jpg");
+        assertThat(p1.getPrecio()).isEqualByComparingTo("129000");
+        assertThat(p1.necesitaEnriquecimiento()).isFalse();
+
+        // No sobrescribe datos existentes
+        p1.completarDatosCatalogo("https://cdn.example/otra.jpg", new BigDecimal("1"));
+        assertThat(p1.getImagenUrl()).isEqualTo("https://cdn.example/hoodie.jpg");
+        assertThat(p1.getPrecio()).isEqualByComparingTo("129000");
+
+        p1.setImagenUrl("   ");
+        assertThat(p1.getImagenUrl()).isNull();
+        p1.setPrecio(new BigDecimal("135000"));
+        assertThat(p1.getPrecio()).isEqualByComparingTo("135000");
 
         p1.marcarNoDisponible();
         assertThat(p1.isDisponible()).isFalse();

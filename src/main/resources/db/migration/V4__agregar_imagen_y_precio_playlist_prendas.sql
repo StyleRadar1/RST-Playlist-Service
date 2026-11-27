@@ -1,0 +1,2 @@
+ALTER TABLE playlist_prendas ADD COLUMN IF NOT EXISTS imagen_url VARCHAR(512);
+ALTER TABLE playlist_prendas ADD COLUMN IF NOT EXISTS precio NUMERIC(12, 2);

@@ -11,7 +11,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -52,6 +54,31 @@ class ItemCatalogoClientTest {
         when(feignClient.obtenerPrenda(prendaId))
                 .thenReturn(new PrendaCatalogoDto(prendaId, "Gorra", null, true));
         assertThat(client.obtenerPrendaPorId(prendaId).orElseThrow().aprobada()).isTrue();
+
+        when(feignClient.obtenerPrenda(prendaId))
+                .thenReturn(new PrendaCatalogoDto(
+                        prendaId,
+                        "Hoodie gris jaspeado",
+                        "APROBADA",
+                        null,
+                        List.of(" ", "https://cdn.example/hoodie.jpg"),
+                        "https://cdn.example/fallback.jpg",
+                        new BigDecimal("129000.00")));
+        PrendaCatalogoInfo conFotoYPrecio = client.obtenerPrendaPorId(prendaId).orElseThrow();
+        assertThat(conFotoYPrecio.imagenUrl()).isEqualTo("https://cdn.example/hoodie.jpg");
+        assertThat(conFotoYPrecio.precio()).isEqualByComparingTo("129000.00");
+
+        when(feignClient.obtenerPrenda(prendaId))
+                .thenReturn(new PrendaCatalogoDto(
+                        prendaId,
+                        "Camisa",
+                        "APROBADA",
+                        null,
+                        List.of(),
+                        " https://cdn.example/camisa.jpg ",
+                        new BigDecimal("95000")));
+        assertThat(client.obtenerPrendaPorId(prendaId).orElseThrow().imagenUrl())
+                .isEqualTo("https://cdn.example/camisa.jpg");
     }
 
     @Test
