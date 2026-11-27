@@ -69,7 +69,8 @@ public class CrearPlaylistUseCaseImpl implements CrearPlaylistUseCase {
                 throw new PrendaNoAprobadaException(
                         "La prenda " + prendaId + " no se encuentra en estado APROBADA");
             }
-            snapshots.add(new PrendaSnapshot(prendaId, prenda.nombre(), Instant.now(), true));
+            snapshots.add(new PrendaSnapshot(
+                    prendaId, prenda.nombre(), Instant.now(), true, prenda.imagenUrl(), prenda.precio()));
         }
 
         Playlist playlist = Playlist.crearConPrendas(

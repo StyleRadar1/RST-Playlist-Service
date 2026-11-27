@@ -33,7 +33,7 @@ public class ItemCatalogoClient implements ItemCatalogoPort {
                 return Optional.empty();
             }
             UUID id = dto.id() != null ? dto.id() : prendaId;
-            return Optional.of(new PrendaCatalogoInfo(id, dto.nombre(), dto.estaAprobada()));
+            return Optional.of(new PrendaCatalogoInfo(id, dto.nombre(), dto.estaAprobada(), dto.primeraImagen(), dto.precio()));
         } catch (FeignException.NotFound ex) {
             log.debug("Prenda {} no encontrada en ms-item-catalogo: {}", prendaId, ex.getMessage());
             return Optional.empty();

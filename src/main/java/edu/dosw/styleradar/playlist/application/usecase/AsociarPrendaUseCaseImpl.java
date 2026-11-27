@@ -53,7 +53,8 @@ public class AsociarPrendaUseCaseImpl implements AsociarPrendaUseCase {
                     "La prenda " + request.prendaId() + " no se encuentra en estado APROBADA");
         }
 
-        PrendaSnapshot snapshot = new PrendaSnapshot(request.prendaId(), prenda.nombre(), Instant.now(), true);
+        PrendaSnapshot snapshot = new PrendaSnapshot(
+                request.prendaId(), prenda.nombre(), Instant.now(), true, prenda.imagenUrl(), prenda.precio());
         playlist.agregarPrenda(snapshot);
         Playlist guardada = repository.save(playlist);
         eventPublisher.publicarPrendaAsociada(guardada.getId(), request.prendaId());
